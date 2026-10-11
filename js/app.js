@@ -31,6 +31,21 @@ const APNA_APP = {
     window.addEventListener("hashchange", () => this.handleHashChange());
   },
 
+  async syncWithBackend() {
+    try {
+      const res = await fetch('/api/products');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+          APNA_DATA.products = data.products;
+          this.renderProducts();
+        }
+      }
+    } catch (err) {
+      console.warn('Live API sync unavailable, using offline fallback catalog:', err);
+    }
+  },
+
   handleHashChange() {
     const hash = window.location.hash.replace("#", "");
     if (hash === "checkout") {
