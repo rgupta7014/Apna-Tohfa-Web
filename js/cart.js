@@ -6,7 +6,7 @@
 const APNA_CART = {
   items: [],
   appliedCoupon: null,
-  activePaymentMethod: "upi",
+  activePaymentMethod: "whatsapp",
   lastPlacedOrder: null,
 
   init() {
@@ -338,6 +338,31 @@ const APNA_CART = {
     if (btnTotal) btnTotal.textContent = `₹${grandTotal}`;
   },
 
+  orderViaWhatsAppInstant() {
+    if (this.items.length === 0) {
+      APNA_APP.showToast("Your cart is empty! Add hampers first.", "error");
+      return;
+    }
+
+    const itemsSummary = this.items.map((item, idx) => 
+      `${idx + 1}. *${item.name}* (Qty: ${item.quantity}) - ₹${item.price * item.quantity}${item.customNote ? `\n   Note: "${item.customNote}"` : ''}`
+    ).join('\n');
+
+    const total = this.getGrandTotal();
+    const subtotal = this.getSubtotal();
+    const discount = this.getDiscount();
+
+    let waMessage = `✨ *Namaste Apna Tohfa!* ✨\n\nI want to place an order for the following festive hampers:\n\n${itemsSummary}\n\n`;
+    waMessage += `💰 *Subtotal:* ₹${subtotal}\n`;
+    if (discount > 0) waMessage += `🏷️ *Coupon Discount:* -₹${discount}\n`;
+    waMessage += `📦 *Grand Total:* ₹${total}\n\n`;
+    waMessage += `Please confirm availability and share payment UPI / QR code or delivery details. Thank you!`;
+
+    const encoded = encodeURIComponent(waMessage);
+    const waUrl = `https://wa.me/${APNA_DATA.brand.whatsapp}?text=${encoded}`;
+    window.open(waUrl, '_blank');
+  },
+
   async handleCheckoutSubmit(e) {
     e.preventDefault();
     if (this.items.length === 0) {
@@ -372,7 +397,7 @@ const APNA_CART = {
 
     const orderPayload = {
       customer: { name, phone, email, address, city, state, pincode, giftMessage },
-      paymentMethod: this.activePaymentMethod,
+      paymentMethod: this.activePaymentMethod || "whatsapp",
       items: [...this.items],
       subtotal: this.getSubtotal(),
       shipping: this.getShippingFee(),
@@ -417,6 +442,38 @@ const APNA_CART = {
         estimatedDelivery: estDeliveryStr,
         datePlaced: orderDate.toLocaleDateString("en-IN")
       };
+    }
+
+    // Build WhatsApp message text with full items and recipient details
+    const itemsSummary = this.items.map((item, idx) => 
+      `${idx + 1}. *${item.name}* (Qty: ${item.quantity}) - ₹${item.price * item.quantity}`
+    ).join('\n');
+
+    const paymentLabel = this.activePaymentMethod === 'phone' 
+      ? 'Phone Helpline (+91 98765 43210)' 
+      : (this.activePaymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'WhatsApp (Direct UPI/QR)');
+
+    let waText = `🪔 *NEW ORDER: #${placedOrder.orderId}* 🪔\n\n`;
+    waText += `👤 *Customer Name:* ${name}\n`;
+    waText += `📞 *Mobile:* ${phone}\n`;
+    waText += `📍 *Delivery Address:* ${address}, ${city}, ${state} - ${pincode}\n`;
+    if (giftMessage) {
+      waText += `💌 *Gift Note:* "${giftMessage}"\n`;
+    }
+    waText += `💳 *Selected Payment:* ${paymentLabel}\n\n`;
+    waText += `🛍️ *Hampers Ordered:*\n${itemsSummary}\n\n`;
+    waText += `💰 *Subtotal:* ₹${orderPayload.subtotal}\n`;
+    if (orderPayload.discount > 0) {
+      waText += `🏷️ *Discount:* -₹${orderPayload.discount}\n`;
+    }
+    waText += `✨ *Grand Total:* ₹${orderPayload.grandTotal}\n\n`;
+    waText += `Please share payment UPI / QR code or confirmation. Thank you! 🙏`;
+
+    placedOrder.whatsappUrl = `https://wa.me/${APNA_DATA.brand.whatsapp}?text=${encodeURIComponent(waText)}`;
+
+    // Auto-open WhatsApp if WhatsApp payment was selected
+    if (this.activePaymentMethod === 'whatsapp') {
+      window.open(placedOrder.whatsappUrl, '_blank');
     }
 
     this.lastPlacedOrder = placedOrder;

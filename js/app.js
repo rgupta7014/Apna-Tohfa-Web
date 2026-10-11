@@ -522,14 +522,34 @@ const APNA_APP = {
           </div>
         </div>
 
-        <div style="background: var(--cream-100); border: 1px solid var(--cream-300); border-radius: var(--radius-sm); padding: 18px; text-align: left; margin-bottom: 24px;">
+        <div style="background: var(--cream-100); border: 1px solid var(--cream-300); border-radius: var(--radius-sm); padding: 18px; text-align: left; margin-bottom: 20px;">
           <h4 style="font-family: var(--font-serif); font-size: 1rem; color: var(--maroon-900); margin-bottom: 8px;">Delivery Details:</h4>
           <p style="font-size: 0.85rem; color: var(--dark-700); line-height: 1.5;">
             <strong>Recipient:</strong> ${orderData.customer.name} (${orderData.customer.phone})<br>
             <strong>Address:</strong> ${orderData.customer.address}, ${orderData.customer.city}, ${orderData.customer.state} - ${orderData.customer.pincode}<br>
             ${orderData.customer.giftMessage ? `<strong>Greeting Message:</strong> "${orderData.customer.giftMessage}"<br>` : ''}
-            <strong>Total Amount Paid:</strong> ₹${orderData.grandTotal} (${orderData.items.length} hamper items)
+            <strong>Total Amount:</strong> ₹${orderData.grandTotal} (${orderData.items.length} hamper items)
           </p>
+        </div>
+
+        <!-- WhatsApp & Contact Assistance Box -->
+        <div style="background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.35); border-radius: var(--radius-md); padding: 18px; margin-bottom: 24px; text-align: center;">
+          <div style="font-size: 1.15rem; font-weight: 700; color: #128C7E; margin-bottom: 6px;">
+            💬 Confirm & Pay via WhatsApp / Phone
+          </div>
+          <p style="font-size: 0.85rem; color: var(--dark-700); line-height: 1.5; margin-bottom: 14px;">
+            We process orders directly via WhatsApp & Phone helpline. Send your order summary to our WhatsApp now to receive our instant payment UPI QR code and dispatch tracking!
+          </p>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            ${orderData.whatsappUrl ? `
+              <a href="${orderData.whatsappUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp" style="background: #25D366; color: #fff; font-weight: 700; text-decoration: none; padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,211,102,0.35);">
+                <span>💬</span> Open WhatsApp to Finalize
+              </a>
+            ` : ''}
+            <a href="tel:+919876543210" class="btn btn-secondary" style="padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;">
+              <span>📞</span> Call +91 98765 43210
+            </a>
+          </div>
         </div>
 
         <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
@@ -702,9 +722,15 @@ const APNA_APP = {
     container.innerHTML = APNA_DATA.corporatePricing.map(tier => `
       <div class="pricing-tier-card ${tier.badge === 'Most Popular' ? 'featured' : ''}">
         <div class="tier-range">${tier.range}</div>
-        <div class="tier-price">₹${tier.price} <span>/box</span></div>
-        <div class="tier-saving-tag">${tier.saving}</div>
+        <div class="tier-quote-title">${tier.quote}</div>
+        <div class="tier-saving-tag">${tier.badge}</div>
+        <div class="tier-feature-tag">${tier.feature}</div>
         <div class="tier-delivery-text">${tier.delivery}</div>
+        <div style="margin-top: 16px;">
+          <a href="https://wa.me/${APNA_DATA.brand.whatsapp}?text=${encodeURIComponent(`Namaste Apna Tohfa! I would like to request a corporate quotation for ${tier.range}.`)}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-sm btn-block" style="background: #25D366; color: #fff; font-weight: 700; text-decoration: none; border: none; padding: 9px 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; font-size: 0.82rem; box-shadow: 0 3px 10px rgba(37,211,102,0.3);">
+            <span>💬</span> Get Quote on WhatsApp
+          </a>
+        </div>
       </div>
     `).join('');
   },
@@ -927,7 +953,7 @@ const APNA_APP = {
         content: `
           <p><strong>1. Data Protection:</strong> We value your trust. Apna Tohfa collects only the necessary details (Name, Contact Number, Email, Delivery Address) strictly to fulfill your orders and keep you updated.</p>
           <p><strong>2. No Third-Party Selling:</strong> We never sell, rent, or lease your personal data or your recipient's contact details to external marketing agencies.</p>
-          <p><strong>3. Payment Security:</strong> All financial transactions are processed over encrypted 256-bit SSL connections through RBI-approved payment gateways (Razorpay / Cashfree). Apna Tohfa does not store card CVVs or bank PINs.</p>
+          <p><strong>3. Order & Payment Security:</strong> All orders are confirmed directly via WhatsApp or our verified helpline (+91 98765 43210). Payments are accepted via direct UPI, QR Code, or Cash on Delivery (COD). Apna Tohfa does not collect or store credit card CVVs or bank PINs on the website.</p>
         `
       },
       terms: {
@@ -942,7 +968,7 @@ const APNA_APP = {
         title: "Cancellation & Refund Policy",
         content: `
           <p><strong>1. Order Cancellation:</strong> Orders can be cancelled free of charge within 2 hours of placement before transit packaging commences.</p>
-          <p><strong>2. Refund Timeline:</strong> Approved cancellations or refund requests are credited back to the original source (UPI, Credit/Debit Card, Net Banking) within 3-5 working days.</p>
+          <p><strong>2. Refund Timeline:</strong> Approved cancellations or refund requests are credited back to your UPI or Bank Account within 2-3 working days.</p>
         `
       }
     };

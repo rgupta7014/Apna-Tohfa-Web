@@ -351,13 +351,13 @@
           <!-- Populated from APNA_APP.renderCorporateFeatures -->
         </div>
 
-        <!-- Bulk Pricing Examples -->
+        <!-- Bulk Volume Tiers (Min. 10 Hampers) -->
         <div style="text-align: center; margin-bottom: 24px;">
           <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--gold-300); margin-bottom: 8px;">
-            Transparent Corporate Tier Pricing
+            Corporate & Bulk Volume Slabs (Min. 10 Hampers)
           </h3>
           <p style="font-size: 0.88rem; color: var(--cream-300);">
-            Pre-negotiated wholesale volume slabs with complimentary box customization & pan-India split address shipping.
+            Custom wholesale volume quotations starting from 10 hampers, with complimentary custom box branding & split-address delivery across India.
           </p>
         </div>
 
@@ -779,12 +779,10 @@
           © 2026 Apna Tohfa. All Rights Reserved. Made with ❤️ in India for Diwali celebrations.
         </div>
         <div class="payment-badges-row">
-          <span>100% Safe Payments:</span>
-          <span class="pm-pill">UPI</span>
-          <span class="pm-pill">RuPay</span>
-          <span class="pm-pill">Visa</span>
-          <span class="pm-pill">Mastercard</span>
-          <span class="pm-pill">NetBanking</span>
+          <span>Direct Orders & Payment:</span>
+          <span class="pm-pill">WhatsApp Order</span>
+          <span class="pm-pill">Phone Helpline</span>
+          <span class="pm-pill">UPI / QR</span>
           <span class="pm-pill">COD</span>
         </div>
       </div>
@@ -864,8 +862,11 @@
 
         <!-- Action Buttons -->
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button type="button" class="btn btn-primary btn-block btn-lg" id="cartDrawerCheckoutBtn" onclick="APNA_APP.openCheckoutView()">
-            Proceed to Checkout 🔒
+          <button type="button" class="btn btn-whatsapp btn-block btn-lg" onclick="APNA_CART.orderViaWhatsAppInstant()" style="background: #25D366; color: #fff; font-weight: 700; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(37,211,102,0.35);">
+            <span>💬</span> Order via WhatsApp (Instant)
+          </button>
+          <button type="button" class="btn btn-primary btn-block" id="cartDrawerCheckoutBtn" onclick="APNA_APP.openCheckoutView()">
+            Enter Delivery Details & Confirm ➔
           </button>
           <button type="button" class="btn btn-secondary btn-block btn-sm" onclick="APNA_APP.closeCartDrawer()">
             Continue Shopping 🛍️
@@ -958,40 +959,32 @@
               <!-- Payment Method Selection -->
               <div class="checkout-card">
                 <h3 class="checkout-card-title">
-                  <span>💳</span> Payment Method
+                  <span>💬</span> Order & Payment Method
                 </h3>
+                <p style="font-size: 0.82rem; color: var(--dark-500); margin-bottom: 14px;">
+                  Orders are assisted directly by our team via WhatsApp & Phone helpline (no online payment gateway required). Choose your preferred mode:
+                </p>
 
                 <div class="payment-methods-grid">
-                  <div class="payment-method-option selected" data-method="upi" onclick="APNA_APP.selectPaymentMethod('upi')">
+                  <div class="payment-method-option selected" data-method="whatsapp" onclick="APNA_APP.selectPaymentMethod('whatsapp')">
                     <div class="pm-left">
-                      <input type="radio" name="paymentMethod" value="upi" checked>
-                      <span class="pm-icon">⚡</span>
+                      <input type="radio" name="paymentMethod" value="whatsapp" checked>
+                      <span class="pm-icon" style="color: #25D366;">💬</span>
                       <div>
-                        <div class="pm-title">UPI Instant Payment (Fastest)</div>
-                        <div class="pm-subtitle">Google Pay, PhonePe, Paytm, BHIM & Any UPI App</div>
+                        <div class="pm-title">WhatsApp Order & Payment (Instant)</div>
+                        <div class="pm-subtitle">Chat directly on WhatsApp (+91 98765 43210). Pay via UPI / QR code with instant confirmation.</div>
                       </div>
                     </div>
                     <span class="badge badge-bestseller">Recommended</span>
                   </div>
 
-                  <div class="payment-method-option" data-method="card" onclick="APNA_APP.selectPaymentMethod('card')">
+                  <div class="payment-method-option" data-method="phone" onclick="APNA_APP.selectPaymentMethod('phone')">
                     <div class="pm-left">
-                      <input type="radio" name="paymentMethod" value="card">
-                      <span class="pm-icon">💳</span>
+                      <input type="radio" name="paymentMethod" value="phone">
+                      <span class="pm-icon">📞</span>
                       <div>
-                        <div class="pm-title">Credit / Debit Card</div>
-                        <div class="pm-subtitle">Visa, MasterCard, RuPay, Maestro</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="payment-method-option" data-method="netbanking" onclick="APNA_APP.selectPaymentMethod('netbanking')">
-                    <div class="pm-left">
-                      <input type="radio" name="paymentMethod" value="netbanking">
-                      <span class="pm-icon">🏛️</span>
-                      <div>
-                        <div class="pm-title">Net Banking</div>
-                        <div class="pm-subtitle">All Major Indian Banks Supported (HDFC, SBI, ICICI, etc.)</div>
+                        <div class="pm-title">Phone Helpline Assisted Order (+91 98765 43210)</div>
+                        <div class="pm-subtitle">Our executive will call your mobile number to confirm hampers and share the UPI payment QR code.</div>
                       </div>
                     </div>
                   </div>
@@ -1039,15 +1032,20 @@
                 </div>
 
                 <div style="margin-top: 24px;">
-                  <button type="submit" class="btn btn-primary btn-block btn-lg">
-                    Place Order (<span id="checkoutPlaceOrderBtnTotal">₹0</span>) 🔒
+                  <button type="submit" class="btn btn-primary btn-block btn-lg" style="background: linear-gradient(135deg, #1fa851, #25D366); border: none; font-weight: 700; box-shadow: 0 4px 14px rgba(37,211,102,0.35);">
+                    Confirm Order via WhatsApp / Helpline (<span id="checkoutPlaceOrderBtnTotal">₹0</span>) 💬
                   </button>
+                  <div style="text-align: center; margin-top: 10px;">
+                    <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" style="color: #25D366; font-size: 0.84rem; font-weight: 700; text-decoration: none;">
+                      💬 Direct Chat on WhatsApp (+91 98765 43210)
+                    </a>
+                  </div>
                 </div>
 
                 <div class="checkout-trust-seals">
                   <div class="trust-seal-item">
-                    <span class="seal-icon">🔒</span>
-                    256-Bit SSL Secured
+                    <span class="seal-icon">💬</span>
+                    WhatsApp & Phone Assisted
                   </div>
                   <div class="trust-seal-item">
                     <span class="seal-icon">🛡️</span>

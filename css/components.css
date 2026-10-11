@@ -1254,18 +1254,24 @@
   margin-bottom: 8px;
 }
 
-.tier-price {
+.tier-quote-title {
   font-family: var(--font-serif);
-  font-size: 2.2rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #fff;
-  margin-bottom: 6px;
+  margin: 6px 0 10px;
+  line-height: 1.3;
 }
 
-.tier-price span {
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: var(--dark-300);
+.tier-feature-tag {
+  font-size: 0.8rem;
+  color: var(--gold-200);
+  margin-bottom: 12px;
+  line-height: 1.45;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tier-saving-tag {

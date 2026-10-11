@@ -445,10 +445,10 @@ const APNA_DATA = {
   ],
 
   corporatePricing: [
-    { range: "25–49 Boxes", price: 549, saving: "Save 20%", badge: "Small Teams", delivery: "Free Pan-India Delivery" },
-    { range: "50–99 Boxes", price: 499, saving: "Save 28%", badge: "Most Popular", delivery: "Free Pan-India Delivery" },
-    { range: "100–249 Boxes", price: 449, saving: "Save 35%", badge: "Best Value", delivery: "Free Multi-Address Shipping" },
-    { range: "250+ Boxes", price: "399–449", saving: "Custom Volume Deal", badge: "Enterprise Tier", delivery: "Dedicated Account Manager + Free Custom Branding" }
+    { range: "10–25 Hampers", quote: "Tailored Wholesale Quote", badge: "Small Teams", delivery: "Free Pan-India Delivery", feature: "Complimentary Custom Greeting Cards" },
+    { range: "26–50 Hampers", quote: "Volume Discount Pricing", badge: "Most Popular", delivery: "Free Pan-India Delivery", feature: "Free Company Logo Ribbon Customization" },
+    { range: "51–100 Hampers", quote: "Enterprise Tier Quote", badge: "Best Value", delivery: "Free Multi-Address Shipping", feature: "Priority Diwali Dispatch & Dedicated Sampling" },
+    { range: "100+ Hampers", quote: "Bespoke Bulk Contract", badge: "Mega Corporate", delivery: "Pan-India Multi-City Split Delivery", feature: "Dedicated Account Manager + 100% Custom Boxes" }
   ],
 
   features: [
