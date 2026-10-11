@@ -163,6 +163,9 @@ const APNA_APP = {
             ${prod.badge ? `<span class="badge badge-${prod.badgeType || 'accent'}">${prod.badge}</span>` : ''}
             ${prod.discount ? `<span class="badge" style="background: rgba(15,10,9,0.75); color: #fff;">${prod.discount}</span>` : ''}
           </div>
+          ${(prod.images && prod.images.length > 1) ? `
+            <span class="product-gallery-badge">📷 ${prod.images.length} Photos</span>
+          ` : ''}
           <button class="product-quick-view-btn" onclick="APNA_APP.openProductModal('${prod.id}')">
             Quick View 👁️
           </button>
@@ -248,7 +251,14 @@ const APNA_APP = {
           <div class="modal-main-image-wrap">
             <img src="${product.image}" alt="${product.name}" class="modal-main-image" id="modalMainImg">
           </div>
-          <div style="display: flex; gap: 8px;">
+          ${(product.images && product.images.length > 1) ? `
+            <div class="modal-gallery-thumbs" id="modalGalleryThumbs">
+              ${product.images.map((img, idx) => `
+                <img src="${img}" alt="${product.name} photo ${idx + 1}" class="modal-gallery-thumb ${img === product.image ? 'active' : ''}" onclick="APNA_APP.switchModalImage('${img}', this)">
+              `).join('')}
+            </div>
+          ` : ''}
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
             <div style="flex: 1; padding: 10px; background: var(--cream-100); border-radius: var(--radius-sm); border: 1px solid var(--cream-300); text-align: center; font-size: 0.785rem; color: var(--maroon-800); font-weight: 700;">
               ✨ ${product.dispatchTime}
             </div>
@@ -359,6 +369,13 @@ const APNA_APP = {
 
     modal.classList.add("active");
     document.body.classList.add("no-scroll");
+  },
+
+  switchModalImage(imgSrc, clickedEl) {
+    const main = document.getElementById("modalMainImg");
+    if (main) main.src = imgSrc;
+    document.querySelectorAll(".modal-gallery-thumb").forEach(t => t.classList.remove("active"));
+    if (clickedEl) clickedEl.classList.add("active");
   },
 
   adjustModalQty(delta) {

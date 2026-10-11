@@ -16,6 +16,7 @@ const ADMIN = {
   orderFilter: 'all',
   orderSearch: '',
   productFilter: 'all',
+  currentProductImages: [],
 
   init() {
     if (this.token) {
@@ -664,11 +665,115 @@ const ADMIN = {
     `).join('');
   },
 
+  /* --- Hamper Images Manager --- */
+  renderProductImagePreviews() {
+    const grid = document.getElementById('prodImagePreviewGrid');
+    const countEl = document.getElementById('prodImageCount');
+    const hiddenInput = document.getElementById('prodImage');
+    if (!grid) return;
+
+    if (countEl) countEl.textContent = this.currentProductImages.length;
+    if (hiddenInput) {
+      hiddenInput.value = this.currentProductImages[0] || 'assets/images/apna-tohfa.jpg';
+    }
+
+    if (!this.currentProductImages.length) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 14px; color: var(--text-dim); font-size: 0.8rem;">
+          No images attached yet. Click the upload box above or paste a URL!
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = this.currentProductImages.map((src, idx) => `
+      <div class="image-preview-card ${idx === 0 ? 'primary' : ''}">
+        ${idx === 0 ? '<span class="image-card-badge">Cover</span>' : ''}
+        <img src="${src}" alt="Photo ${idx + 1}" onerror="this.src='assets/images/apna-tohfa.jpg'">
+        <div class="image-card-actions">
+          ${idx !== 0 ? `
+            <button type="button" class="image-action-btn" title="Make Primary Cover" onclick="ADMIN.makeProductImagePrimary(${idx})">
+              ★ Set Cover
+            </button>
+          ` : ''}
+          <button type="button" class="image-action-btn delete" title="Remove Photo" onclick="ADMIN.removeProductImage(${idx})">
+            ✕ Delete
+          </button>
+        </div>
+      </div>
+    `).join('');
+  },
+
+  handleImageFileUpload(e) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    let loaded = 0;
+    files.forEach(file => {
+      if (!file.type.startsWith('image/')) {
+        this.showToast(`Skipped non-image file: ${file.name}`, 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUrl = loadEvent.target.result;
+        this.currentProductImages.push(dataUrl);
+        loaded++;
+        if (loaded === files.length) {
+          this.renderProductImagePreviews();
+          this.showToast(`Uploaded ${files.length} photo(s) from device!`, 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = '';
+  },
+
+  addImageFromUrl() {
+    const input = document.getElementById('prodImageUrlInput');
+    if (!input) return;
+    const url = input.value.trim();
+    if (!url) {
+      this.showToast('Please enter an image URL or relative path', 'error');
+      return;
+    }
+    this.currentProductImages.push(url);
+    input.value = '';
+    this.renderProductImagePreviews();
+    this.showToast('Added image to hamper photos!', 'success');
+  },
+
+  addImagePreset(presetUrl) {
+    this.currentProductImages.push(presetUrl);
+    this.renderProductImagePreviews();
+    this.showToast('Preset photo added!', 'success');
+  },
+
+  makeProductImagePrimary(index) {
+    if (index <= 0 || index >= this.currentProductImages.length) return;
+    const picked = this.currentProductImages.splice(index, 1)[0];
+    this.currentProductImages.unshift(picked);
+    this.renderProductImagePreviews();
+    this.showToast('Cover photo updated!', 'success');
+  },
+
+  removeProductImage(index) {
+    if (this.currentProductImages.length <= 1) {
+      this.showToast('A hamper must have at least one image!', 'error');
+      return;
+    }
+    this.currentProductImages.splice(index, 1);
+    this.renderProductImagePreviews();
+  },
+
   openAddProductModal() {
     document.getElementById('productModalTitle').textContent = 'Add New Festive Hamper';
     document.getElementById('productForm').reset();
     document.getElementById('prodEditId').value = '';
-    document.getElementById('prodImage').value = 'assets/images/apna-tohfa.jpg';
+    this.currentProductImages = ['assets/images/apna-tohfa.jpg'];
+    this.renderProductImagePreviews();
     this.openModal('productModal');
   },
 
@@ -684,10 +789,18 @@ const ADMIN = {
     document.getElementById('prodOrigPrice').value = p.originalPrice || '';
     document.getElementById('prodBadge').value = p.badge || '';
     document.getElementById('prodDispatch').value = p.dispatchTime || 'Ships in 24 Hours';
-    document.getElementById('prodImage').value = p.image || '';
     document.getElementById('prodShortDesc').value = p.shortDescription || '';
     document.getElementById('prodFullDesc').value = p.fullDescription || '';
     document.getElementById('prodTags').value = (p.tags || []).join(', ');
+
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      this.currentProductImages = [...p.images];
+    } else if (p.image) {
+      this.currentProductImages = [p.image];
+    } else {
+      this.currentProductImages = ['assets/images/apna-tohfa.jpg'];
+    }
+    this.renderProductImagePreviews();
 
     this.openModal('productModal');
   },
@@ -701,11 +814,13 @@ const ADMIN = {
     const originalPrice = Number(document.getElementById('prodOrigPrice').value) || price;
     const badge = document.getElementById('prodBadge').value.trim();
     const dispatchTime = document.getElementById('prodDispatch').value.trim() || 'Ships in 24 Hours';
-    const image = document.getElementById('prodImage').value.trim();
     const shortDescription = document.getElementById('prodShortDesc').value.trim();
     const fullDescription = document.getElementById('prodFullDesc').value.trim();
     const tagsStr = document.getElementById('prodTags').value.trim();
     const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : [];
+
+    const images = this.currentProductImages.length ? this.currentProductImages : ['assets/images/apna-tohfa.jpg'];
+    const image = images[0];
 
     const payload = {
       name,
@@ -716,6 +831,7 @@ const ADMIN = {
       badgeType: category === 'luxury' ? 'royal' : category === 'corporate' ? 'corporate' : 'bestseller',
       dispatchTime,
       image,
+      images,
       shortDescription,
       fullDescription: fullDescription || shortDescription,
       tags,
