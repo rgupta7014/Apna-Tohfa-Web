@@ -526,8 +526,29 @@ ul, ol {
 /* Brand Logo */
 .brand-logo-wrap {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   text-decoration: none;
+}
+
+.brand-logo-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--gold-400);
+  box-shadow: 0 3px 10px rgba(128, 0, 32, 0.12);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.brand-logo-wrap:hover .brand-logo-img {
+  transform: scale(1.05);
+}
+
+.brand-text-col {
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-title {
@@ -535,9 +556,9 @@ ul, ol {
   align-items: center;
   gap: 8px;
   font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   color: var(--maroon-800);
   line-height: 1.1;
 }
@@ -546,12 +567,19 @@ ul, ol {
   .nav-wrapper {
     height: 64px;
   }
+  .brand-logo-wrap {
+    gap: 8px;
+  }
+  .brand-logo-img {
+    width: 38px;
+    height: 38px;
+  }
   .brand-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     letter-spacing: 1px;
   }
   .brand-tagline {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
   }
   .header-actions {
     gap: 6px;
@@ -563,8 +591,12 @@ ul, ol {
 }
 
 @media (max-width: 360px) {
+  .brand-logo-img {
+    width: 34px;
+    height: 34px;
+  }
   .brand-title {
-    font-size: 1.1rem;
+    font-size: 1.02rem;
     letter-spacing: 0.5px;
   }
   .icon-btn {
