@@ -385,41 +385,109 @@
             </div>
             <div class="panel-body">
               <form id="storeSettingsForm" onsubmit="ADMIN.saveStoreSettings(event)">
-                <div class="form-group">
-                  <label class="form-label">Top Announcement Bar Text</label>
-                  <input type="text" id="settingAnnouncement" class="form-input" required>
-                  <span style="font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 4px;">Appears at the very top of the customer storefront.</span>
+                <!-- SECTION 1: BRAND IDENTITY & LOGO -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-serif); color: var(--gold-400); font-size: 1.05rem; margin-bottom: 12px; border-bottom: 1px solid var(--admin-border); padding-bottom: 6px;">
+                    👑 1. Brand Identity & Logo
+                  </h4>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Brand Name *</label>
+                      <input type="text" id="settingBrandName" class="form-input" placeholder="APNA TOHFA" required>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Brand Tagline *</label>
+                      <input type="text" id="settingTagline" class="form-input" placeholder="Apno Ke Liye, Dil Se." required>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Brand Logo Image</label>
+                    <div style="display: flex; gap: 16px; align-items: center; background: rgba(0,0,0,0.25); border: 1px solid var(--admin-border); border-radius: var(--radius-md); padding: 14px;">
+                      <img id="settingLogoPreview" src="assets/images/logo.png" alt="Brand Logo Preview" style="width: 58px; height: 58px; border-radius: 50%; border: 2px solid var(--gold-400); object-fit: cover; flex-shrink: 0; background: #fff;">
+                      <div style="flex: 1;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                          <input type="text" id="settingLogo" class="form-input" placeholder="assets/images/logo.png" style="flex: 1;" oninput="ADMIN.updateLogoPreviewFromInput(this.value)">
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('settingLogoFile').click()">
+                            📁 Upload File
+                          </button>
+                          <input type="file" id="settingLogoFile" accept="image/*" style="display: none;" onchange="ADMIN.handleLogoUpload(event)">
+                        </div>
+                        <span style="font-size: 0.72rem; color: var(--text-dim);">Enter image URL / path, or click Upload File from your device.</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Active Coupon Pill</label>
-                    <input type="text" id="settingCouponPill" class="form-input" placeholder="DIWALI2026">
+                <!-- SECTION 2: CONTACT, HELPLINE & SUPPORT DESK -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-serif); color: var(--gold-400); font-size: 1.05rem; margin-bottom: 12px; border-bottom: 1px solid var(--admin-border); padding-bottom: 6px;">
+                    📞 2. Contact Helpline & Support Desk
+                  </h4>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Customer Care Phone *</label>
+                      <input type="text" id="settingPhone" class="form-input" placeholder="+91 98765 43210" required>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">WhatsApp Gifting Number *</label>
+                      <input type="text" id="settingWhatsapp" class="form-input" placeholder="919876543210" required>
+                      <span style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; display: block;">With country code (e.g. 919876543210 for +91)</span>
+                    </div>
                   </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Customer Support Email *</label>
+                      <input type="email" id="settingEmail" class="form-input" placeholder="namaste@apnatohfa.in" required>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Corporate Inquiries Email *</label>
+                      <input type="email" id="settingCorpEmail" class="form-input" placeholder="corporate@apnatohfa.in" required>
+                    </div>
+                  </div>
+
                   <div class="form-group">
-                    <label class="form-label">Free Shipping Minimum (₹)</label>
-                    <input type="number" id="settingFreeShipping" class="form-input" placeholder="999">
+                    <label class="form-label">Experience Studio & Office Address *</label>
+                    <input type="text" id="settingAddress" class="form-input" placeholder="Regal Pavilion, Connaught Place, New Delhi - 110001" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Operating Hours & Support Timings *</label>
+                    <input type="text" id="settingHours" class="form-input" placeholder="Mon – Sun: 9:00 AM – 9:00 PM IST" required>
                   </div>
                 </div>
 
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Helpline Phone Number</label>
-                    <input type="text" id="settingPhone" class="form-input" placeholder="+91 98765 43210">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Customer Support Email</label>
-                    <input type="email" id="settingEmail" class="form-input" placeholder="namaste@apnatohfa.in">
-                  </div>
-                </div>
+                <!-- SECTION 3: FESTIVE BANNER & SHIPPING -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-serif); color: var(--gold-400); font-size: 1.05rem; margin-bottom: 12px; border-bottom: 1px solid var(--admin-border); padding-bottom: 6px;">
+                    🪔 3. Festive Header Banner & Delivery Fees
+                  </h4>
 
-                <div class="form-group">
-                  <label class="form-label">Corporate Inquiries Email</label>
-                  <input type="email" id="settingCorpEmail" class="form-input" placeholder="corporate@apnatohfa.in">
+                  <div class="form-group">
+                    <label class="form-label">Top Announcement Bar Text *</label>
+                    <input type="text" id="settingAnnouncement" class="form-input" required>
+                    <span style="font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 4px;">Appears at the very top of the customer storefront.</span>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Active Coupon Pill</label>
+                      <input type="text" id="settingCouponPill" class="form-input" placeholder="DIWALI2026">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Free Shipping Minimum (₹)</label>
+                      <input type="number" id="settingFreeShipping" class="form-input" placeholder="999">
+                    </div>
+                  </div>
                 </div>
 
                 <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
-                  <button type="submit" class="btn btn-primary">Save Store Settings ✨</button>
+                  <button type="submit" class="btn btn-primary" style="padding: 12px 24px; font-weight: 700;">
+                    Save All Brand & Store Settings ✨
+                  </button>
                 </div>
               </form>
 

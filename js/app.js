@@ -33,26 +33,164 @@ const APNA_APP = {
 
   async syncWithBackend() {
     try {
-      const [prodRes, catRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/categories')
+      const [prodRes, catRes, setRes] = await Promise.all([
+        fetch('/api/products').then(r => r.json()).catch(() => null),
+        fetch('/api/categories').then(r => r.json()).catch(() => null),
+        fetch('/api/settings').then(r => r.json()).catch(() => null)
       ]);
-      if (prodRes.ok) {
-        const data = await prodRes.json();
-        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
-          APNA_DATA.products = data.products;
-          this.renderProducts();
-        }
+
+      if (prodRes && prodRes.success && Array.isArray(prodRes.products) && prodRes.products.length > 0) {
+        APNA_DATA.products = prodRes.products;
+        this.renderProducts();
       }
-      if (catRes.ok) {
-        const catData = await catRes.json();
-        if (catData.success && Array.isArray(catData.categories) && catData.categories.length > 0) {
-          APNA_DATA.categories = catData.categories;
-          this.renderCategories();
-        }
+
+      if (catRes && catRes.success && Array.isArray(catRes.categories) && catRes.categories.length > 0) {
+        APNA_DATA.categories = catRes.categories;
+        this.renderCategories();
+      }
+
+      if (setRes && setRes.success && setRes.settings) {
+        this.applyStoreSettings(setRes.settings);
       }
     } catch (err) {
       console.warn('Live API sync unavailable, using offline fallback catalog:', err);
+    }
+  },
+
+  applyStoreSettings(s) {
+    if (!s) return;
+
+    // Cache settings in APNA_DATA for cart/other modules
+    APNA_DATA.settings = s;
+
+    // 1. Update APNA_DATA.brand in memory
+    if (s.brandName) APNA_DATA.brand.name = s.brandName;
+    if (s.tagline) APNA_DATA.brand.tagline = s.tagline;
+    if (s.logo) APNA_DATA.brand.logo = s.logo;
+    if (s.phone) {
+      APNA_DATA.brand.phone = s.phone;
+      APNA_DATA.brand.phoneDisplay = s.phone;
+    }
+    if (s.whatsapp) {
+      APNA_DATA.brand.whatsapp = s.whatsapp.replace(/\D/g, '');
+    }
+    if (s.email) APNA_DATA.brand.email = s.email;
+    if (s.corporateEmail) APNA_DATA.brand.corporateEmail = s.corporateEmail;
+    if (s.address) APNA_DATA.brand.address = s.address;
+    if (s.hours) APNA_DATA.brand.hours = s.hours;
+
+    const brand = APNA_DATA.brand;
+
+    // 2. Document Title
+    if (s.brandName) {
+      document.title = `${s.brandName} | Premium Diwali Gift Hampers & Corporate Gifting | ${s.tagline || brand.tagline}`;
+    }
+
+    // 3. Top Announcement Bar
+    const annContainer = document.getElementById("announcementTextContainer");
+    if (annContainer && s.announcementText) {
+      const couponCode = s.activeCouponPill || 'DIWALI2026';
+      annContainer.innerHTML = `
+        <span>🪔 <strong>${s.announcementText}</strong></span>
+        <span>•</span>
+        <span>Use Code <span class="coupon-pill" id="headerCouponPill" onclick="APNA_CART.applyCouponCode('${couponCode}')" title="Click to apply" style="cursor: pointer;">${couponCode}</span> for 10% Off</span>
+        <span>•</span>
+        <span id="headerShippingPill">Free Pan-India Delivery on ₹${s.freeShippingThreshold || 999}+</span>
+      `;
+    }
+    const hPhoneDisp = document.getElementById("headerPhoneDisplay");
+    if (hPhoneDisp && s.phone) hPhoneDisp.textContent = s.phone;
+    const hPhoneLink = document.getElementById("headerPhoneLink");
+    if (hPhoneLink && s.phone) hPhoneLink.href = `tel:${s.phone.replace(/\s+/g, '')}`;
+
+    // 4. Header & Mobile Nav Brand (Logo, Title, Tagline)
+    if (s.logo) {
+      const siteLogo = document.getElementById("siteBrandLogo");
+      if (siteLogo) siteLogo.src = s.logo;
+      const mobLogo = document.getElementById("mobileBrandLogo");
+      if (mobLogo) mobLogo.src = s.logo;
+      const footLogo = document.getElementById("footerBrandLogo");
+      if (footLogo) footLogo.src = s.logo;
+    }
+    if (s.brandName) {
+      const bTitle = document.getElementById("brandTitleDisplay");
+      if (bTitle) bTitle.textContent = s.brandName;
+      const mobBTitle = document.getElementById("mobileBrandTitleDisplay");
+      if (mobBTitle) mobBTitle.textContent = s.brandName;
+      const footBTitle = document.getElementById("footerBrandTitleDisplay");
+      if (footBTitle) footBTitle.textContent = s.brandName;
+      const contactTitle = document.getElementById("contactSupportBrandTitle");
+      if (contactTitle) contactTitle.textContent = s.brandName;
+      const copyBrand = document.getElementById("footerCopyrightBrand");
+      if (copyBrand) copyBrand.textContent = s.brandName;
+    }
+    if (s.tagline) {
+      const bTag = document.getElementById("brandTaglineDisplay");
+      if (bTag) bTag.textContent = `"${s.tagline}"`;
+      const mobBTag = document.getElementById("mobileBrandTaglineDisplay");
+      if (mobBTag) mobBTag.textContent = `"${s.tagline}"`;
+      const footBTag = document.getElementById("footerBrandTaglineDisplay");
+      if (footBTag) footBTag.textContent = `"${s.tagline}"`;
+    }
+
+    // 5. Mobile Nav Footer Helpline
+    const mobPhone = document.getElementById("mobileNavPhone");
+    if (mobPhone && s.phone) {
+      mobPhone.textContent = `📞 ${s.phone}`;
+      mobPhone.href = `tel:${s.phone.replace(/\s+/g, '')}`;
+    }
+
+    // 6. Support Desk Section
+    const cPhoneDisp = document.getElementById("contactPhoneDisplay");
+    if (cPhoneDisp && s.phone) cPhoneDisp.textContent = s.phone;
+    const cPhoneLink = document.getElementById("contactPhoneLink");
+    if (cPhoneLink && s.phone) cPhoneLink.href = `tel:${s.phone.replace(/\s+/g, '')}`;
+
+    const cleanWa = brand.whatsapp;
+    const waInquiryMsg = encodeURIComponent(`Hi ${brand.name}! I would like to inquire about Diwali gift hampers.`);
+    const cWaLink = document.getElementById("contactWhatsappLink");
+    if (cWaLink && cleanWa) cWaLink.href = `https://wa.me/${cleanWa}?text=${waInquiryMsg}`;
+    const cWaDisp = document.getElementById("contactWhatsappDisplay");
+    if (cWaDisp && (s.phone || cleanWa)) cWaDisp.textContent = s.phone || `+${cleanWa}`;
+
+    const cEmailDisp = document.getElementById("contactEmailDisplay");
+    if (cEmailDisp && s.email) cEmailDisp.textContent = s.email;
+    const cEmailLink = document.getElementById("contactEmailLink");
+    if (cEmailLink && s.email) cEmailLink.href = `mailto:${s.email}`;
+
+    const cCorpDisp = document.getElementById("contactCorpEmailDisplay");
+    if (cCorpDisp && s.corporateEmail) cCorpDisp.textContent = s.corporateEmail;
+    const cCorpLink = document.getElementById("contactCorpEmailLink");
+    if (cCorpLink && s.corporateEmail) cCorpLink.href = `mailto:${s.corporateEmail}`;
+
+    const cAddrDisp = document.getElementById("contactAddressDisplay");
+    if (cAddrDisp && s.address) {
+      cAddrDisp.innerHTML = `${s.address}<br><span style="font-size: 0.8rem; color: var(--dark-500);">Fulfillment Hubs: Delhi NCR, Mumbai, Bengaluru</span>`;
+    }
+
+    const cHoursDisp = document.getElementById("contactHoursDisplay");
+    if (cHoursDisp && s.hours) {
+      cHoursDisp.innerHTML = `${s.hours}<br><span style="font-size: 0.8rem; color: var(--success-600); font-weight: 700;">🟢 Extended 24/7 Dispatch Desk Active</span>`;
+    }
+
+    // 7. Floating WhatsApp & Footer WhatsApp
+    const floatWa = document.getElementById("floatingWhatsappBtn");
+    if (floatWa && cleanWa) {
+      floatWa.href = `https://wa.me/${cleanWa}?text=${waInquiryMsg}`;
+    }
+    const footWa = document.getElementById("footerWhatsappBtn");
+    if (footWa && cleanWa) {
+      footWa.href = `https://wa.me/${cleanWa}`;
+    }
+
+    // 8. Checkout Modal Direct WhatsApp
+    const coWaLink = document.getElementById("checkoutDirectWhatsappLink");
+    if (coWaLink && cleanWa) {
+      coWaLink.href = `https://wa.me/${cleanWa}?text=${waInquiryMsg}`;
+    }
+    const coWaDisp = document.getElementById("checkoutDirectWhatsappDisplay");
+    if (coWaDisp && (s.phone || cleanWa)) {
+      coWaDisp.textContent = s.phone || `+${cleanWa}`;
     }
   },
 
@@ -582,27 +720,6 @@ const APNA_APP = {
 
     modal.classList.add("active");
     document.body.classList.add("no-scroll");
-  },
-
-  async syncWithBackend() {
-    try {
-      const [prodRes, setRes] = await Promise.all([
-        fetch('/api/products').then(r => r.json()).catch(() => null),
-        fetch('/api/settings').then(r => r.json()).catch(() => null)
-      ]);
-      if (prodRes && prodRes.success && Array.isArray(prodRes.products) && prodRes.products.length > 0) {
-        APNA_DATA.products = prodRes.products;
-        this.renderProducts();
-      }
-      if (setRes && setRes.success && setRes.settings) {
-        const s = setRes.settings;
-        if (s.phone) APNA_DATA.brand.phone = s.phone;
-        if (s.email) APNA_DATA.brand.email = s.email;
-        if (s.corporateEmail) APNA_DATA.brand.corporateEmail = s.corporateEmail;
-      }
-    } catch (e) {
-      console.log("Using static data fallback");
-    }
   },
 
   openTrackingModal(orderId = "AT-2026-8492") {

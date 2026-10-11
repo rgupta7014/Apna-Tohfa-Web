@@ -107,7 +107,9 @@ const APNA_CART = {
   getShippingFee() {
     const subtotal = this.getSubtotal();
     if (subtotal === 0) return 0;
-    return subtotal >= 999 ? 0 : 99; // Free shipping over ₹999
+    const threshold = (APNA_DATA.settings && APNA_DATA.settings.freeShippingThreshold) || 999;
+    const fee = (APNA_DATA.settings && APNA_DATA.settings.standardShippingFee) || 99;
+    return subtotal >= threshold ? 0 : fee;
   },
 
   getDiscount() {
@@ -274,9 +276,9 @@ const APNA_CART = {
 
     if (grandTotalEl) grandTotalEl.textContent = `₹${grandTotal}`;
 
-    // Free shipping threshold (₹999)
+    // Free shipping threshold
     if (freeShippingProgress && freeShippingText) {
-      const threshold = 999;
+      const threshold = (APNA_DATA.settings && APNA_DATA.settings.freeShippingThreshold) || 999;
       if (subtotal >= threshold) {
         freeShippingProgress.style.width = "100%";
         freeShippingText.innerHTML = `<span>🎉 <strong>Congratulations!</strong> Free Pan-India Delivery unlocked!</span>`;

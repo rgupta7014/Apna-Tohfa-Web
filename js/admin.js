@@ -1094,18 +1094,54 @@ const ADMIN = {
   },
 
   // --- SETTINGS ---
+  updateLogoPreviewFromInput(val) {
+    const preview = document.getElementById('settingLogoPreview');
+    if (preview) {
+      preview.src = val || 'assets/images/logo.png';
+    }
+  },
+
+  handleLogoUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.showToast('Please select a valid image file', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
+      const dataUrl = loadEvent.target.result;
+      const logoInput = document.getElementById('settingLogo');
+      const preview = document.getElementById('settingLogoPreview');
+      if (logoInput) logoInput.value = dataUrl;
+      if (preview) preview.src = dataUrl;
+      this.showToast('Logo image loaded! Click Save to apply.', 'info');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  },
+
   async fetchSettings() {
     try {
       const data = await this.fetchWithAuth('/api/settings');
       if (data.success && data.settings) {
         this.settings = data.settings;
         const s = this.settings;
+        if (document.getElementById('settingBrandName')) document.getElementById('settingBrandName').value = s.brandName || 'APNA TOHFA';
+        if (document.getElementById('settingTagline')) document.getElementById('settingTagline').value = s.tagline || 'Apno Ke Liye, Dil Se.';
+        if (document.getElementById('settingLogo')) document.getElementById('settingLogo').value = s.logo || 'assets/images/logo.png';
+        if (document.getElementById('settingLogoPreview')) document.getElementById('settingLogoPreview').src = s.logo || 'assets/images/logo.png';
+        if (document.getElementById('settingPhone')) document.getElementById('settingPhone').value = s.phone || '+91 98765 43210';
+        if (document.getElementById('settingWhatsapp')) document.getElementById('settingWhatsapp').value = s.whatsapp || '919876543210';
+        if (document.getElementById('settingEmail')) document.getElementById('settingEmail').value = s.email || 'namaste@apnatohfa.in';
+        if (document.getElementById('settingCorpEmail')) document.getElementById('settingCorpEmail').value = s.corporateEmail || 'corporate@apnatohfa.in';
+        if (document.getElementById('settingAddress')) document.getElementById('settingAddress').value = s.address || 'Regal Pavilion, Connaught Place, New Delhi - 110001';
+        if (document.getElementById('settingHours')) document.getElementById('settingHours').value = s.hours || 'Mon – Sun: 9:00 AM – 9:00 PM IST';
         if (document.getElementById('settingAnnouncement')) document.getElementById('settingAnnouncement').value = s.announcementText || '';
         if (document.getElementById('settingCouponPill')) document.getElementById('settingCouponPill').value = s.activeCouponPill || 'DIWALI2026';
         if (document.getElementById('settingFreeShipping')) document.getElementById('settingFreeShipping').value = s.freeShippingThreshold || 999;
-        if (document.getElementById('settingPhone')) document.getElementById('settingPhone').value = s.phone || '+91 98765 43210';
-        if (document.getElementById('settingEmail')) document.getElementById('settingEmail').value = s.email || 'namaste@apnatohfa.in';
-        if (document.getElementById('settingCorpEmail')) document.getElementById('settingCorpEmail').value = s.corporateEmail || 'corporate@apnatohfa.in';
       }
     } catch (e) {
       console.error('Error fetching settings:', e);
@@ -1115,12 +1151,18 @@ const ADMIN = {
   async saveStoreSettings(e) {
     e.preventDefault();
     const payload = {
+      brandName: document.getElementById('settingBrandName').value.trim() || 'APNA TOHFA',
+      tagline: document.getElementById('settingTagline').value.trim() || 'Apno Ke Liye, Dil Se.',
+      logo: document.getElementById('settingLogo').value.trim() || 'assets/images/logo.png',
+      phone: document.getElementById('settingPhone').value.trim(),
+      whatsapp: document.getElementById('settingWhatsapp').value.trim().replace(/\D/g, ''),
+      email: document.getElementById('settingEmail').value.trim(),
+      corporateEmail: document.getElementById('settingCorpEmail').value.trim(),
+      address: document.getElementById('settingAddress').value.trim(),
+      hours: document.getElementById('settingHours').value.trim(),
       announcementText: document.getElementById('settingAnnouncement').value.trim(),
       activeCouponPill: document.getElementById('settingCouponPill').value.trim(),
-      freeShippingThreshold: Number(document.getElementById('settingFreeShipping').value) || 999,
-      phone: document.getElementById('settingPhone').value.trim(),
-      email: document.getElementById('settingEmail').value.trim(),
-      corporateEmail: document.getElementById('settingCorpEmail').value.trim()
+      freeShippingThreshold: Number(document.getElementById('settingFreeShipping').value) || 999
     };
 
     try {
@@ -1129,7 +1171,13 @@ const ADMIN = {
         body: payload
       });
       if (data.success) {
-        this.showToast('Store settings saved successfully!', 'success');
+        this.showToast('All brand & store settings updated successfully!', 'success');
+        this.settings = { ...this.settings, ...payload };
+        // Update admin sidebar live
+        const sbTitle = document.querySelector('.sidebar-brand-title');
+        if (sbTitle) sbTitle.textContent = payload.brandName;
+        const sbLogo = document.querySelector('.sidebar-brand img');
+        if (sbLogo) sbLogo.src = payload.logo;
       } else {
         this.showToast(data.message || 'Failed to update settings', 'error');
       }

@@ -29,11 +29,13 @@ function getDefaultSeed() {
     settings: {
       brandName: 'APNA TOHFA',
       tagline: 'Apno Ke Liye, Dil Se.',
+      logo: 'assets/images/logo.png',
       phone: '+91 98765 43210',
       email: 'namaste@apnatohfa.in',
       corporateEmail: 'corporate@apnatohfa.in',
       whatsapp: '919876543210',
       address: 'Regal Pavilion, Connaught Place, New Delhi - 110001',
+      hours: 'Mon - Sun: 9:00 AM - 9:00 PM IST',
       announcementText: '🪔 Diwali 2026 Festive Dispatch Active • Use Code DIWALI2026 for 10% Off • Free Pan-India Delivery on ₹999+',
       activeCouponPill: 'DIWALI2026',
       freeShippingThreshold: 999,
