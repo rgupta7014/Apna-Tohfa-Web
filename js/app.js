@@ -33,12 +33,22 @@ const APNA_APP = {
 
   async syncWithBackend() {
     try {
-      const res = await fetch('/api/products');
-      if (res.ok) {
-        const data = await res.json();
+      const [prodRes, catRes] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/categories')
+      ]);
+      if (prodRes.ok) {
+        const data = await prodRes.json();
         if (data.success && Array.isArray(data.products) && data.products.length > 0) {
           APNA_DATA.products = data.products;
           this.renderProducts();
+        }
+      }
+      if (catRes.ok) {
+        const catData = await catRes.json();
+        if (catData.success && Array.isArray(catData.categories) && catData.categories.length > 0) {
+          APNA_DATA.categories = catData.categories;
+          this.renderCategories();
         }
       }
     } catch (err) {

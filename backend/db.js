@@ -40,6 +40,12 @@ function getDefaultSeed() {
       standardShippingFee: 99
     },
     categories: [
+      { id: 'small-basket', title: 'Small Basket', subtitle: 'Artisanal woven mini basket with gourmet treats', priceTag: 'Starting from ₹349', minPrice: 349, badge: 'Compact Hamper', icon: '🧺' },
+      { id: 'medium-basket', title: 'Medium Basket', subtitle: 'Classic festive wicker basket with sweets & nuts', priceTag: 'Starting from ₹699', minPrice: 699, badge: 'Family Favorite', icon: '🧺' },
+      { id: 'large-basket', title: 'Large Basket', subtitle: 'Grand celebration basket with regal brass keepsakes', priceTag: 'Starting from ₹1,299', minPrice: 1299, badge: 'Grand Hamper', icon: '🧺' },
+      { id: 'small-basket-jar', title: 'Small Basket Jar', subtitle: 'Mini woven basket with airtight dry fruit jars', priceTag: 'Starting from ₹449', minPrice: 449, badge: 'Jar Duo', icon: '🫙' },
+      { id: 'medium-jar-basket', title: 'Medium Jar Basket', subtitle: 'Handcrafted basket with 4 premium glass jars', priceTag: 'Starting from ₹899', minPrice: 899, badge: 'Gourmet Jars', icon: '🫙' },
+      { id: 'large-jar-basket', title: 'Large Jar Basket', subtitle: 'Luxury regal basket featuring 6 hexagonal dry fruit jars', priceTag: 'Starting from ₹1,599', minPrice: 1599, badge: 'Royal Jar Suite', icon: '🫙' },
       { id: 'budget', title: 'Budget Hampers', subtitle: 'Thoughtful & pocket-friendly festive joy', priceTag: 'Starting from ₹299', minPrice: 299, badge: 'Festive Value', icon: '✨' },
       { id: 'premium', title: 'Premium Hampers', subtitle: 'Curated dry fruits & gourmet mithai', priceTag: 'Starting from ₹799', minPrice: 799, badge: 'Bestseller Tier', icon: '🪔' },
       { id: 'luxury', title: 'Luxury Hampers', subtitle: 'Velvet boxes, brass keepsakes & gold foils', priceTag: 'Starting from ₹1,199', minPrice: 1199, badge: 'Royal Collection', icon: '👑' },

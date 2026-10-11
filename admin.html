@@ -289,6 +289,12 @@
           <div class="filter-bar">
             <div class="filter-pills" id="productCategoryFilters">
               <button type="button" class="filter-pill active" onclick="ADMIN.filterProducts('all')">All Hampers</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('small-basket')">Small Basket</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('medium-basket')">Medium Basket</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('large-basket')">Large Basket</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('small-basket-jar')">Small Basket Jar</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('medium-jar-basket')">Medium Jar Basket</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('large-jar-basket')">Large Jar Basket</button>
               <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('budget')">Budget (Under ₹500)</button>
               <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('premium')">Premium</button>
               <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('luxury')">Luxury</button>
@@ -485,6 +491,12 @@
             <div class="form-group">
               <label class="form-label">Category *</label>
               <select id="prodCategory" class="form-select" required>
+                <option value="small-basket">Small Basket</option>
+                <option value="medium-basket">Medium Basket</option>
+                <option value="large-basket">Large Basket</option>
+                <option value="small-basket-jar">Small Basket Jar</option>
+                <option value="medium-jar-basket">Medium Jar Basket</option>
+                <option value="large-jar-basket">Large Jar Basket</option>
                 <option value="budget">Budget Hampers (Under ₹500)</option>
                 <option value="premium">Premium Hampers</option>
                 <option value="luxury">Luxury Hampers</option>
