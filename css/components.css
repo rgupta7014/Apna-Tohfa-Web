@@ -233,6 +233,16 @@
   gap: 10px;
 }
 
+@media (max-width: 480px) {
+  .product-card-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .product-card-body {
+    padding: 16px 14px;
+  }
+}
+
 /* --- Product Details Modal --- */
 .modal-backdrop {
   position: fixed;
@@ -266,6 +276,23 @@
   position: relative;
   transform: translateY(20px) scale(0.98);
   transition: all var(--transition-smooth);
+}
+
+@media (max-width: 600px) {
+  .modal-backdrop {
+    padding: 10px 8px;
+  }
+  .modal-container {
+    max-height: 94vh;
+    border-radius: var(--radius-md);
+  }
+  .modal-close-btn {
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
 }
 
 .modal-backdrop.active .modal-container {
@@ -590,6 +617,20 @@
   box-shadow: var(--shadow-xl);
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .cart-drawer {
+    width: 100vw;
+    max-width: 100vw;
+  }
+  .cart-drawer-header,
+  .cart-free-shipping-bar,
+  .cart-items-list,
+  .cart-drawer-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 }
 
 .cart-drawer-backdrop.active .cart-drawer {
@@ -958,6 +999,19 @@
   text-align: center;
 }
 
+@media (max-width: 600px) {
+  .checkout-view {
+    padding: 16px 8px !important;
+  }
+  .checkout-card {
+    padding: 18px 12px;
+  }
+  .checkout-trust-seals {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
 .trust-seal-item {
   font-size: 0.72rem;
   color: var(--dark-500);
@@ -1109,9 +1163,10 @@
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
   .corporate-features-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
@@ -1162,9 +1217,10 @@
   }
 }
 
-@media (max-width: 550px) {
+@media (max-width: 600px) {
   .pricing-tiers-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
@@ -1240,9 +1296,13 @@
   margin: 0 auto;
 }
 
+.corporate-inquiry-box .btn {
+  max-width: 100%;
+}
+
 @media (max-width: 600px) {
   .corporate-inquiry-box {
-    padding: 24px 18px;
+    padding: 22px 14px;
   }
 }
 
@@ -1881,12 +1941,28 @@
   color: var(--dark-500);
 }
 
+@media (max-width: 600px) {
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+  }
+}
+
 .payment-badges-row {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 0.8rem;
   color: var(--dark-300);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .payment-badges-row {
+    justify-content: center;
+    gap: 6px;
+  }
 }
 
 .pm-pill {
@@ -1894,4 +1970,5 @@
   padding: 4px 10px;
   border-radius: var(--radius-xs);
   border: 1px solid var(--dark-700);
+  display: inline-block;
 }
