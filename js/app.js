@@ -89,14 +89,19 @@ const APNA_APP = {
     // 3. Top Announcement Bar
     const annContainer = document.getElementById("announcementTextContainer");
     if (annContainer && s.announcementText) {
-      const couponCode = s.activeCouponPill || 'DIWALI2026';
-      annContainer.innerHTML = `
-        <span>🪔 <strong>${s.announcementText}</strong></span>
-        <span>•</span>
-        <span>Use Code <span class="coupon-pill" id="headerCouponPill" onclick="APNA_CART.applyCouponCode('${couponCode}')" title="Click to apply" style="cursor: pointer;">${couponCode}</span> for 10% Off</span>
-        <span>•</span>
-        <span id="headerShippingPill">Free Pan-India Delivery on ₹${s.freeShippingThreshold || 999}+</span>
-      `;
+      const parts = [`<span><strong>${s.announcementText}</strong></span>`];
+      if (s.activeCouponPill && s.activeCouponPill.trim()) {
+        const couponCode = s.activeCouponPill.trim();
+        parts.push(`<span>Use Code <span class="coupon-pill" id="headerCouponPill" onclick="APNA_CART.applyCouponCode('${couponCode}')" title="Click to apply" style="cursor: pointer;">${couponCode}</span></span>`);
+      }
+      if (s.freeShippingThreshold) {
+        parts.push(`<span id="headerShippingPill">Free Pan-India Delivery on ₹${s.freeShippingThreshold}+</span>`);
+      }
+      annContainer.innerHTML = parts.join(' <span>•</span> ');
+    }
+    const heroShip = document.getElementById("heroFreeShippingDisplay");
+    if (heroShip && s.freeShippingThreshold) {
+      heroShip.textContent = `Free on orders over ₹${s.freeShippingThreshold}`;
     }
     const hPhoneDisp = document.getElementById("headerPhoneDisplay");
     if (hPhoneDisp && s.phone) hPhoneDisp.textContent = s.phone;
@@ -131,6 +136,11 @@ const APNA_APP = {
       if (mobBTag) mobBTag.textContent = `"${s.tagline}"`;
       const footBTag = document.getElementById("footerBrandTaglineDisplay");
       if (footBTag) footBTag.textContent = `"${s.tagline}"`;
+      const heroTag = document.getElementById("heroTitleDisplay");
+      if (heroTag) {
+        const highlightPart = s.tagline.replace(/^Apno Ke\s*/i, '');
+        heroTag.innerHTML = `Apno Ke <span class="festive-highlight">${highlightPart || s.tagline}</span>`;
+      }
     }
 
     // 5. Mobile Nav Footer Helpline
@@ -165,12 +175,12 @@ const APNA_APP = {
 
     const cAddrDisp = document.getElementById("contactAddressDisplay");
     if (cAddrDisp && s.address) {
-      cAddrDisp.innerHTML = `${s.address}<br><span style="font-size: 0.8rem; color: var(--dark-500);">Fulfillment Hubs: Delhi NCR, Mumbai, Bengaluru</span>`;
+      cAddrDisp.textContent = s.address;
     }
 
     const cHoursDisp = document.getElementById("contactHoursDisplay");
     if (cHoursDisp && s.hours) {
-      cHoursDisp.innerHTML = `${s.hours}<br><span style="font-size: 0.8rem; color: var(--success-600); font-weight: 700;">🟢 Extended 24/7 Dispatch Desk Active</span>`;
+      cHoursDisp.textContent = s.hours;
     }
 
     // 7. Floating WhatsApp & Footer WhatsApp
@@ -281,10 +291,26 @@ const APNA_APP = {
 
     // Filter
     if (this.currentCategoryFilter !== "all") {
-      if (this.currentCategoryFilter === "under500") {
+      const cat = this.currentCategoryFilter.toLowerCase();
+      if (cat === "under500") {
         list = list.filter(p => p.price <= 500);
+      } else if (cat === "budget") {
+        list = list.filter(p => p.category === "budget" || p.price <= 500 || (p.tags && p.tags.some(t => t.toLowerCase().includes("budget"))));
+      } else if (cat === "premium") {
+        list = list.filter(p => p.category === "premium" || (p.price > 500 && p.price <= 1000) || (p.tags && p.tags.some(t => t.toLowerCase().includes("premium"))));
+      } else if (cat === "luxury") {
+        list = list.filter(p => p.category === "luxury" || p.price > 1000 || (p.tags && p.tags.some(t => t.toLowerCase().includes("luxury"))));
+      } else if (cat === "corporate") {
+        list = list.filter(p => p.category === "corporate" || p.corporateAvailable || (p.tags && p.tags.some(t => t.toLowerCase().includes("corporate"))));
       } else {
-        list = list.filter(p => p.category === this.currentCategoryFilter);
+        const catNormalized = cat.replace(/-/g, ' ');
+        const matches = list.filter(p => {
+          if (p.category && p.category.toLowerCase() === cat) return true;
+          if (p.category && p.category.toLowerCase().replace(/-/g, ' ') === catNormalized) return true;
+          if (p.tags && p.tags.some(t => t.toLowerCase().includes(catNormalized) || catNormalized.includes(t.toLowerCase()))) return true;
+          return false;
+        });
+        list = matches.length > 0 ? matches : list;
       }
     }
 
@@ -717,8 +743,8 @@ const APNA_APP = {
                 <span>💬</span> Open WhatsApp to Finalize
               </a>
             ` : ''}
-            <a href="tel:+919876543210" class="btn btn-secondary" style="padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;">
-              <span>📞</span> Call +91 98765 43210
+            <a href="tel:${(APNA_DATA.brand.phone || '+91 9950263957').replace(/\s+/g, '')}" class="btn btn-secondary" style="padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;">
+              <span>📞</span> Call ${APNA_DATA.brand.phone || '+91 9950263957'}
             </a>
           </div>
         </div>
@@ -1094,7 +1120,7 @@ const APNA_APP = {
         title: "Return & Replacement Policy",
         content: `
           <p><strong>1. Perishable Festive Goods:</strong> Due to the handcrafted, artisanal, and perishable nature of our sweets, dry fruits, and customized packaging, returns are not accepted once delivered in good condition.</p>
-          <p><strong>2. Damage or Defect Guarantee:</strong> If your hamper arrives damaged or missing an item, notify us within 24 hours of delivery via WhatsApp at +91 98765 43210 or email namaste@apnatohfa.in with an unboxing photo or video.</p>
+          <p><strong>2. Damage or Defect Guarantee:</strong> If your hamper arrives damaged or missing an item, notify us within 24 hours of delivery via WhatsApp at ${APNA_DATA.brand.phone || '+91 9950263957'} or email ${APNA_DATA.brand.email || 'apnatohfa26@gmail.com'} with an unboxing photo or video.</p>
           <p><strong>3. Instant Resolution:</strong> We will process an immediate free replacement or issue a full refund to your original payment method within 2-3 business days.</p>
         `
       },
@@ -1103,7 +1129,7 @@ const APNA_APP = {
         content: `
           <p><strong>1. Data Protection:</strong> We value your trust. Apna Tohfa collects only the necessary details (Name, Contact Number, Email, Delivery Address) strictly to fulfill your orders and keep you updated.</p>
           <p><strong>2. No Third-Party Selling:</strong> We never sell, rent, or lease your personal data or your recipient's contact details to external marketing agencies.</p>
-          <p><strong>3. Order & Payment Security:</strong> All orders are confirmed directly via WhatsApp or our verified helpline (+91 98765 43210). Payments are accepted via direct UPI, QR Code, or Cash on Delivery (COD). Apna Tohfa does not collect or store credit card CVVs or bank PINs on the website.</p>
+          <p><strong>3. Order & Payment Security:</strong> All orders are confirmed directly via WhatsApp or our verified helpline (${APNA_DATA.brand.phone || '+91 9950263957'}). Payments are accepted via direct UPI, QR Code, or Cash on Delivery (COD). Apna Tohfa does not collect or store credit card CVVs or bank PINs on the website.</p>
         `
       },
       terms: {

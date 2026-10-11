@@ -6,14 +6,16 @@
 const APNA_DATA = {
   brand: {
     name: "APNA TOHFA",
-    tagline: "Apno Ke Liye, Dil Se.",
-    phone: "+91 98765 43210",
-    phoneDisplay: "+91 98765 43210",
-    email: "namaste@apnatohfa.in",
-    corporateEmail: "corporate@apnatohfa.in",
-    whatsapp: "919876543210",
-    address: "Regal Pavilion, Connaught Place, New Delhi - 110001",
-    hours: "Mon - Sun: 9:00 AM - 9:00 PM IST (Diwali 24/7 Dispatch Desk)"
+    tagline: "Apno Ke Naam",
+    phone: "+91 9950263957",
+    phoneDisplay: "+91 9950263957",
+    email: "apnatohfa26@gmail.com",
+    corporateEmail: "apnatohfa26@gmail.com",
+    whatsapp: "919950263957",
+    address: "Malviya Nagar, Jaipur, Rajasthan - 302017",
+    hours: "Mon – Sun: 9:00 AM – 9:00 PM IST",
+    instagram: "https://instagram.com/apnatohfa.official",
+    instagramHandle: "@apnatohfa.official"
   },
 
   categories: [

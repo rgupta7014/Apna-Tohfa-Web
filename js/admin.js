@@ -61,9 +61,7 @@ const ADMIN = {
   },
 
   fillDemoCredentials() {
-    document.getElementById('loginEmail').value = 'admin@apnatohfa.in';
-    document.getElementById('loginPassword').value = 'apnaAdmin@2026';
-    this.showToast('Demo admin credentials populated!', 'info');
+    // Deprecated for production security
   },
 
   async handleLogin(e) {
@@ -514,10 +512,10 @@ const ADMIN = {
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #111;">
         <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #300812; padding-bottom: 16px; margin-bottom: 20px;">
           <div>
-            <h1 style="margin: 0; color: #300812; font-size: 24px; font-weight: bold;">APNA TOHFA 🪔</h1>
-            <p style="margin: 4px 0 0; font-size: 12px; color: #666;">Apno Ke Liye, Dil Se. | Premium Diwali Hampers</p>
-            <p style="margin: 4px 0 0; font-size: 11px; color: #777;">Regal Pavilion, Connaught Place, New Delhi - 110001</p>
-            <p style="margin: 2px 0 0; font-size: 11px; color: #777;">GSTIN: 07AAACA0000A1Z5 | Helpline: +91 98765 43210</p>
+            <h1 style="margin: 0; color: #300812; font-size: 24px; font-weight: bold;">${this.settings?.brandName || 'APNA TOHFA'} 🪔</h1>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #666;">${this.settings?.tagline || 'Apno Ke Naam'} | Premium Diwali Hampers</p>
+            <p style="margin: 4px 0 0; font-size: 11px; color: #777;">${this.settings?.address || 'Malviya Nagar, Jaipur, Rajasthan - 302017'}</p>
+            <p style="margin: 2px 0 0; font-size: 11px; color: #777;">Helpline: ${this.settings?.phone || '+91 9950263957'} | Email: ${this.settings?.email || 'apnatohfa26@gmail.com'}</p>
           </div>
           <div style="text-align: right;">
             <h2 style="margin: 0; font-size: 18px; color: #300812;">PACKING SLIP & TAX INVOICE</h2>
@@ -1130,20 +1128,20 @@ const ADMIN = {
         this.settings = data.settings;
         const s = this.settings;
         if (document.getElementById('settingBrandName')) document.getElementById('settingBrandName').value = s.brandName || 'APNA TOHFA';
-        if (document.getElementById('settingTagline')) document.getElementById('settingTagline').value = s.tagline || 'Apno Ke Liye, Dil Se.';
+        if (document.getElementById('settingTagline')) document.getElementById('settingTagline').value = s.tagline || 'Apno Ke Naam';
         if (document.getElementById('settingLogo')) document.getElementById('settingLogo').value = s.logo || 'assets/images/logo.png';
         if (document.getElementById('settingLogoPreview')) document.getElementById('settingLogoPreview').src = s.logo || 'assets/images/logo.png';
-        if (document.getElementById('settingPhone')) document.getElementById('settingPhone').value = s.phone || '+91 98765 43210';
-        if (document.getElementById('settingWhatsapp')) document.getElementById('settingWhatsapp').value = s.whatsapp || '919876543210';
-        if (document.getElementById('settingEmail')) document.getElementById('settingEmail').value = s.email || 'namaste@apnatohfa.in';
-        if (document.getElementById('settingCorpEmail')) document.getElementById('settingCorpEmail').value = s.corporateEmail || 'corporate@apnatohfa.in';
-        if (document.getElementById('settingAddress')) document.getElementById('settingAddress').value = s.address || 'Regal Pavilion, Connaught Place, New Delhi - 110001';
+        if (document.getElementById('settingPhone')) document.getElementById('settingPhone').value = s.phone || '+91 9950263957';
+        if (document.getElementById('settingWhatsapp')) document.getElementById('settingWhatsapp').value = s.whatsapp || '919950263957';
+        if (document.getElementById('settingEmail')) document.getElementById('settingEmail').value = s.email || 'apnatohfa26@gmail.com';
+        if (document.getElementById('settingCorpEmail')) document.getElementById('settingCorpEmail').value = s.corporateEmail || 'apnatohfa26@gmail.com';
+        if (document.getElementById('settingAddress')) document.getElementById('settingAddress').value = s.address || 'Malviya Nagar, Jaipur, Rajasthan - 302017';
         if (document.getElementById('settingHours')) document.getElementById('settingHours').value = s.hours || 'Mon – Sun: 9:00 AM – 9:00 PM IST';
-        if (document.getElementById('settingInstagram')) document.getElementById('settingInstagram').value = s.instagram || 'https://instagram.com';
-        if (document.getElementById('settingInstagramHandle')) document.getElementById('settingInstagramHandle').value = s.instagramHandle || '@apnatohfa';
-        if (document.getElementById('settingAnnouncement')) document.getElementById('settingAnnouncement').value = s.announcementText || '';
-        if (document.getElementById('settingCouponPill')) document.getElementById('settingCouponPill').value = s.activeCouponPill || 'DIWALI2026';
-        if (document.getElementById('settingFreeShipping')) document.getElementById('settingFreeShipping').value = s.freeShippingThreshold || 999;
+        if (document.getElementById('settingInstagram')) document.getElementById('settingInstagram').value = s.instagram || 'https://instagram.com/apnatohfa.official';
+        if (document.getElementById('settingInstagramHandle')) document.getElementById('settingInstagramHandle').value = s.instagramHandle || '@apnatohfa.official';
+        if (document.getElementById('settingAnnouncement')) document.getElementById('settingAnnouncement').value = s.announcementText || '🪔 Diwali 2026 Festivel';
+        if (document.getElementById('settingCouponPill')) document.getElementById('settingCouponPill').value = s.activeCouponPill || '';
+        if (document.getElementById('settingFreeShipping')) document.getElementById('settingFreeShipping').value = s.freeShippingThreshold || 5000;
       }
     } catch (e) {
       console.error('Error fetching settings:', e);
@@ -1154,19 +1152,19 @@ const ADMIN = {
     e.preventDefault();
     const payload = {
       brandName: document.getElementById('settingBrandName').value.trim() || 'APNA TOHFA',
-      tagline: document.getElementById('settingTagline').value.trim() || 'Apno Ke Liye, Dil Se.',
+      tagline: document.getElementById('settingTagline').value.trim() || 'Apno Ke Naam',
       logo: document.getElementById('settingLogo').value.trim() || 'assets/images/logo.png',
-      phone: document.getElementById('settingPhone').value.trim(),
-      whatsapp: document.getElementById('settingWhatsapp').value.trim().replace(/\D/g, ''),
-      email: document.getElementById('settingEmail').value.trim(),
-      corporateEmail: document.getElementById('settingCorpEmail').value.trim(),
-      address: document.getElementById('settingAddress').value.trim(),
-      hours: document.getElementById('settingHours').value.trim(),
-      instagram: document.getElementById('settingInstagram') ? document.getElementById('settingInstagram').value.trim() : 'https://instagram.com',
-      instagramHandle: document.getElementById('settingInstagramHandle') ? document.getElementById('settingInstagramHandle').value.trim() : '@apnatohfa',
-      announcementText: document.getElementById('settingAnnouncement').value.trim(),
+      phone: document.getElementById('settingPhone').value.trim() || '+91 9950263957',
+      whatsapp: document.getElementById('settingWhatsapp').value.trim().replace(/\D/g, '') || '919950263957',
+      email: document.getElementById('settingEmail').value.trim() || 'apnatohfa26@gmail.com',
+      corporateEmail: document.getElementById('settingCorpEmail').value.trim() || 'apnatohfa26@gmail.com',
+      address: document.getElementById('settingAddress').value.trim() || 'Malviya Nagar, Jaipur, Rajasthan - 302017',
+      hours: document.getElementById('settingHours').value.trim() || 'Mon – Sun: 9:00 AM – 9:00 PM IST',
+      instagram: document.getElementById('settingInstagram') ? document.getElementById('settingInstagram').value.trim() : 'https://instagram.com/apnatohfa.official',
+      instagramHandle: document.getElementById('settingInstagramHandle') ? document.getElementById('settingInstagramHandle').value.trim() : '@apnatohfa.official',
+      announcementText: document.getElementById('settingAnnouncement').value.trim() || '🪔 Diwali 2026 Festivel',
       activeCouponPill: document.getElementById('settingCouponPill').value.trim(),
-      freeShippingThreshold: Number(document.getElementById('settingFreeShipping').value) || 999
+      freeShippingThreshold: Number(document.getElementById('settingFreeShipping').value) || 5000
     };
 
     try {

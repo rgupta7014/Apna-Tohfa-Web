@@ -175,7 +175,7 @@ const APNA_CART = {
     }
 
     if (!APNA_DATA.coupons[cleanCode]) {
-      APNA_APP.showToast("Invalid coupon code. Try DIWALI2026", "error");
+      APNA_APP.showToast("Invalid coupon code. Please enter a valid coupon", "error");
       return;
     }
 
@@ -452,7 +452,7 @@ const APNA_CART = {
     ).join('\n');
 
     const paymentLabel = this.activePaymentMethod === 'phone' 
-      ? 'Phone Helpline (+91 98765 43210)' 
+      ? `Phone Helpline (${APNA_DATA.brand.phone || '+91 9950263957'})` 
       : (this.activePaymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'WhatsApp (Direct UPI/QR)');
 
     let waText = `🪔 *NEW ORDER: #${placedOrder.orderId}* 🪔\n\n`;

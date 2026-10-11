@@ -21,15 +21,13 @@
   <aside class="announcement-bar" aria-label="Festive Announcement">
     <div class="container announcement-content">
       <div class="announcement-text" id="announcementTextContainer">
-        <span>🪔 <strong>Diwali 2026 Festive Dispatch Active</strong></span>
+        <span><strong>🪔 Diwali 2026 Festivel</strong></span>
         <span>•</span>
-        <span>Use Code <span class="coupon-pill" id="headerCouponPill" onclick="APNA_CART.applyCouponCode('DIWALI2026')" title="Click to apply" style="cursor: pointer;">DIWALI2026</span> for 10% Off</span>
-        <span>•</span>
-        <span id="headerShippingPill">Free Pan-India Delivery on ₹999+</span>
+        <span id="headerShippingPill">Free Pan-India Delivery on ₹5000+</span>
       </div>
       <div class="announcement-quick">
-        <a href="tel:+919876543210" id="headerPhoneLink" aria-label="Call Customer Care">
-          <span>📞</span> <span id="headerPhoneDisplay">+91 98765 43210</span>
+        <a href="tel:+919950263957" id="headerPhoneLink" aria-label="Call Customer Care">
+          <span>📞</span> <span id="headerPhoneDisplay">+91 9950263957</span>
         </a>
         <a href="javascript:void(0)" onclick="APNA_APP.openTrackingModal()" aria-label="Track Order Status">
           <span>📦</span> Track Order
@@ -48,7 +46,7 @@
           <div class="brand-title">
             <span id="brandTitleDisplay">APNA TOHFA</span>
           </div>
-          <span class="brand-tagline" id="brandTaglineDisplay">"Apno Ke Liye, Dil Se."</span>
+          <span class="brand-tagline" id="brandTaglineDisplay">"Apno Ke Naam"</span>
         </div>
       </a>
 
@@ -123,7 +121,7 @@
             <div class="brand-title" id="mobileBrandTitleDisplay" style="font-size: 1.2rem;">
               APNA TOHFA
             </div>
-            <span class="brand-tagline" id="mobileBrandTaglineDisplay" style="font-size: 0.65rem;">"Apno Ke Liye, Dil Se."</span>
+            <span class="brand-tagline" id="mobileBrandTaglineDisplay" style="font-size: 0.65rem;">"Apno Ke Naam"</span>
           </div>
         </div>
         <button type="button" class="icon-btn" onclick="APNA_APP.toggleMobileNav()" aria-label="Close menu">✕</button>
@@ -149,7 +147,7 @@
       </div>
       <div class="mobile-nav-footer">
         <p style="font-size: 0.8rem; color: var(--dark-500); margin-bottom: 8px;">Festive Helpline:</p>
-        <a href="tel:+919876543210" id="mobileNavPhone" style="font-weight: 700; color: var(--maroon-800); display: block; margin-bottom: 12px;">📞 +91 98765 43210</a>
+        <a href="tel:+919950263957" id="mobileNavPhone" style="font-weight: 700; color: var(--maroon-800); display: block; margin-bottom: 12px;">📞 +91 9950263957</a>
         <button class="btn btn-primary btn-block btn-sm" onclick="APNA_APP.toggleMobileNav(); APNA_APP.openCartDrawer();">
           View Shopping Cart 🛒
         </button>
@@ -170,8 +168,8 @@
               <span class="hero-pill-text">Diwali 2026 Collection • Starting from ₹299</span>
             </div>
 
-            <h1 class="hero-title">
-              Apno Ke Liye, <span class="festive-highlight">Dil Se.</span>
+            <h1 class="hero-title" id="heroTitleDisplay">
+              Apno Ke <span class="festive-highlight">Naam.</span>
             </h1>
 
             <p class="hero-subtitle">
@@ -197,7 +195,7 @@
                 <div class="trust-item-icon">🚚</div>
                 <div class="trust-item-text">
                   Pan-India Delivery
-                  <span>Free on orders over ₹999</span>
+                  <span id="heroFreeShippingDisplay">Free on orders over ₹5000</span>
                 </div>
               </div>
               <div class="trust-item">
@@ -379,22 +377,22 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="corpCompanyName">Company / Organization Name *</label>
-                <input type="text" id="corpCompanyName" name="companyName" class="form-control corp-form-control" placeholder="e.g. Infosys / Tech Mahindra / Startup Inc." required>
+                <input type="text" id="corpCompanyName" name="companyName" class="form-control corp-form-control" placeholder="Enter company / organization name" required>
               </div>
 
               <div class="form-group">
                 <label for="corpContactPerson">Contact Person Name *</label>
-                <input type="text" id="corpContactPerson" name="contactPerson" class="form-control corp-form-control" placeholder="e.g. Rahul Verma" required>
+                <input type="text" id="corpContactPerson" name="contactPerson" class="form-control corp-form-control" placeholder="Enter contact person name" required>
               </div>
 
               <div class="form-group">
                 <label for="corpPhone">Mobile / WhatsApp Number *</label>
-                <input type="tel" id="corpPhone" name="phone" class="form-control corp-form-control" placeholder="e.g. 9876543210" required>
+                <input type="tel" id="corpPhone" name="phone" class="form-control corp-form-control" placeholder="Enter 10-digit mobile number" required>
               </div>
 
               <div class="form-group">
                 <label for="corpEmail">Official Work Email *</label>
-                <input type="email" id="corpEmail" name="email" class="form-control corp-form-control" placeholder="e.g. rahul@company.com" required>
+                <input type="email" id="corpEmail" name="email" class="form-control corp-form-control" placeholder="Enter official work email" required>
               </div>
 
               <div class="form-group">
@@ -422,12 +420,12 @@
 
               <div class="form-group">
                 <label for="corpDeliveryCity">Delivery City / Locations *</label>
-                <input type="text" id="corpDeliveryCity" name="city" class="form-control corp-form-control" placeholder="e.g. Mumbai, Bengaluru, or Multi-City Home Dispatch" required>
+                <input type="text" id="corpDeliveryCity" name="city" class="form-control corp-form-control" placeholder="Enter delivery city or destination hubs" required>
               </div>
 
               <div class="form-group">
                 <label for="corpCustomizationReq">Customization Requirements</label>
-                <input type="text" id="corpCustomizationReq" name="requirements" class="form-control corp-form-control" placeholder="e.g. Company Logo on Box, Custom Greeting Card, Vegan Sweets">
+                <input type="text" id="corpCustomizationReq" name="requirements" class="form-control corp-form-control" placeholder="Specify logo branding, custom greeting card, or special preferences">
               </div>
 
               <div class="form-group full">
@@ -441,7 +439,7 @@
                 Submit Inquiry & Get Quote 🚀
               </button>
               <div style="margin-top: 12px; font-size: 0.8rem; color: var(--gold-400);">
-                🔒 100% Privacy. Instant WhatsApp assistance on +91 98765 43210.
+                🔒 100% Privacy. Instant WhatsApp assistance on <span class="brand-phone-display">+91 9950263957</span>.
               </div>
             </div>
           </form>
@@ -606,7 +604,7 @@
               <div>
                 <div class="contact-method-title">Customer Care Phone</div>
                 <div class="contact-method-value">
-                  <a href="tel:+919876543210" id="contactPhoneLink"><span id="contactPhoneDisplay">+91 98765 43210</span></a>
+                  <a href="tel:+919950263957" id="contactPhoneLink"><span id="contactPhoneDisplay">+91 9950263957</span></a>
                 </div>
               </div>
             </div>
@@ -616,7 +614,7 @@
               <div>
                 <div class="contact-method-title">WhatsApp Gifting Concierge</div>
                 <div class="contact-method-value">
-                  <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" id="contactWhatsappLink"><span id="contactWhatsappDisplay">+91 98765 43210</span> (Instant Chat)</a>
+                  <a href="https://wa.me/919950263957" target="_blank" rel="noopener noreferrer" id="contactWhatsappLink"><span id="contactWhatsappDisplay">+91 9950263957</span> (Instant Chat)</a>
                 </div>
               </div>
             </div>
@@ -626,8 +624,8 @@
               <div>
                 <div class="contact-method-title">Email Enquiries</div>
                 <div class="contact-method-value">
-                  <a href="mailto:namaste@apnatohfa.in" id="contactEmailLink"><span id="contactEmailDisplay">namaste@apnatohfa.in</span></a><br>
-                  <a href="mailto:corporate@apnatohfa.in" id="contactCorpEmailLink" style="font-size: 0.85rem; color: var(--gold-800);"><span id="contactCorpEmailDisplay">corporate@apnatohfa.in</span> (B2B Bulk)</a>
+                  <a href="mailto:apnatohfa26@gmail.com" id="contactEmailLink"><span id="contactEmailDisplay">apnatohfa26@gmail.com</span></a><br>
+                  <a href="mailto:apnatohfa26@gmail.com" id="contactCorpEmailLink" style="font-size: 0.85rem; color: var(--gold-800);"><span id="contactCorpEmailDisplay">apnatohfa26@gmail.com</span> (B2B Bulk)</a>
                 </div>
               </div>
             </div>
@@ -637,8 +635,8 @@
               <div>
                 <div class="contact-method-title">Experience Studio & Office</div>
                 <div class="contact-method-value">
-                  <span id="contactAddressDisplay">Regal Pavilion, Connaught Place, New Delhi - 110001</span><br>
-                  <span style="font-size: 0.8rem; color: var(--dark-500);">Fulfillment Hubs: Delhi NCR, Mumbai, Bengaluru</span>
+                  <span id="contactAddressDisplay">Malviya Nagar, Jaipur, Rajasthan - 302017</span><br>
+                  <span style="font-size: 0.8rem; color: var(--dark-500);">Fulfillment Hubs: Jaipur, Delhi NCR, Mumbai</span>
                 </div>
               </div>
             </div>
@@ -668,15 +666,15 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label for="contactName">Your Name *</label>
-                  <input type="text" id="contactName" class="form-control" placeholder="e.g. Sumanth Sharma" required>
+                  <input type="text" id="contactName" class="form-control" placeholder="Enter your full name" required>
                 </div>
                 <div class="form-group">
                   <label for="contactPhone">Phone Number *</label>
-                  <input type="tel" id="contactPhone" class="form-control" placeholder="e.g. 9876543210" required>
+                  <input type="tel" id="contactPhone" class="form-control" placeholder="Enter 10-digit mobile number" required>
                 </div>
                 <div class="form-group full">
                   <label for="contactEmail">Email Address *</label>
-                  <input type="email" id="contactEmail" class="form-control" placeholder="e.g. sumanth@gmail.com" required>
+                  <input type="email" id="contactEmail" class="form-control" placeholder="Enter your email address" required>
                 </div>
                 <div class="form-group full">
                   <label for="contactSubject">Subject / Query Type</label>
@@ -707,7 +705,7 @@
   </main>
 
   <!-- FLOATING WHATSAPP BUTTON -->
-  <a href="https://wa.me/919876543210?text=Hi%20Apna%20Tohfa!%20I%20would%20like%20to%20inquire%20about%20Diwali%20gift%20hampers." target="_blank" rel="noopener noreferrer" class="floating-whatsapp" id="floatingWhatsappBtn" aria-label="Chat on WhatsApp">
+  <a href="https://wa.me/919950263957?text=Hi%20Apna%20Tohfa!%20I%20would%20like%20to%20inquire%20about%20Diwali%20gift%20hampers." target="_blank" rel="noopener noreferrer" class="floating-whatsapp" id="floatingWhatsappBtn" aria-label="Chat on WhatsApp">
     <div class="whatsapp-pulse"></div>
     <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.976.58 1.99.924 3.149.924l.001-.001c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.765-5.769-5.765zm0 10.373c-1.008 0-1.994-.287-2.85-.828l-.204-.129-1.378.362.368-1.344-.141-.225c-.595-.945-.909-2.02-.908-3.109.001-3.176 2.585-5.76 5.762-5.76 3.178 0 5.762 2.584 5.762 5.76 0 3.176-2.584 5.761-5.762 5.761z"/></svg>
     <span>Chat on WhatsApp</span>
@@ -723,17 +721,17 @@
             <img src="assets/images/logo.png" alt="Apna Tohfa Logo" id="footerBrandLogo" style="width: 50px; height: 50px; border-radius: 50%; border: 1.5px solid var(--gold-400); object-fit: cover; background: #fff;">
             <div>
               <div class="footer-brand-title" id="footerBrandTitleDisplay" style="margin-bottom: 2px;">APNA TOHFA</div>
-              <div class="footer-brand-tagline" id="footerBrandTaglineDisplay">"Apno Ke Liye, Dil Se."</div>
+              <div class="footer-brand-tagline" id="footerBrandTaglineDisplay">"Apno Ke Naam"</div>
             </div>
           </div>
           <p class="footer-brand-desc" id="footerBrandDesc">
             India's premier Diwali gift hamper and corporate gifting destination. Bringing pure festive joy, authentic sweets, dry fruits, and handcrafted brass lamps to families and workplaces across India.
           </p>
           <div style="display: flex; gap: 12px;">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="icon-btn" id="footerInstagramBtn" style="background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.15);" aria-label="Instagram">
+            <a href="https://instagram.com/apnatohfa.official" target="_blank" rel="noopener noreferrer" class="icon-btn" id="footerInstagramBtn" style="background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.15);" aria-label="Instagram">
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
-            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" class="icon-btn" id="footerWhatsappBtn" style="background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.15);" aria-label="WhatsApp">
+            <a href="https://wa.me/919950263957" target="_blank" rel="noopener noreferrer" class="icon-btn" id="footerWhatsappBtn" style="background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.15);" aria-label="WhatsApp">
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.976.58 1.99.924 3.149.924l.001-.001c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.765-5.769-5.765zm0 10.373c-1.008 0-1.994-.287-2.85-.828l-.204-.129-1.378.362.368-1.344-.141-.225c-.595-.945-.909-2.02-.908-3.109.001-3.176 2.585-5.76 5.762-5.76 3.178 0 5.762 2.584 5.762 5.76 0 3.176-2.584 5.761-5.762 5.761z"/></svg>
             </a>
           </div>
@@ -843,7 +841,7 @@
       <div class="cart-drawer-footer">
         <!-- Coupon Row -->
         <div class="coupon-row">
-          <input type="text" id="cartCouponInput" class="coupon-input" placeholder="Promo code (e.g. DIWALI2026)">
+          <input type="text" id="cartCouponInput" class="coupon-input" placeholder="Enter coupon code">
           <button type="button" class="btn btn-secondary btn-sm" onclick="APNA_CART.applyCouponCode(document.getElementById('cartCouponInput').value)">
             Apply
           </button>
@@ -908,7 +906,7 @@
                 <div class="form-grid">
                   <div class="form-group full">
                     <label for="coFullName">Recipient Full Name *</label>
-                    <input type="text" id="coFullName" name="fullName" class="form-control" placeholder="e.g. Ramesh Chandra / Sharma Family" required>
+                    <input type="text" id="coFullName" name="fullName" class="form-control" placeholder="Enter recipient full name" required>
                   </div>
 
                   <div class="form-group">
@@ -928,7 +926,7 @@
 
                   <div class="form-group">
                     <label for="coCity">City / District *</label>
-                    <input type="text" id="coCity" name="city" class="form-control" placeholder="e.g. New Delhi, Mumbai, Bengaluru" required>
+                    <input type="text" id="coCity" name="city" class="form-control" placeholder="Enter city / district" required>
                   </div>
 
                   <div class="form-group">
@@ -981,7 +979,7 @@
                       <span class="pm-icon" style="color: #25D366;">💬</span>
                       <div>
                         <div class="pm-title">WhatsApp Order & Payment (Instant)</div>
-                        <div class="pm-subtitle">Chat directly on WhatsApp (+91 98765 43210). Pay via UPI / QR code with instant confirmation.</div>
+                        <div class="pm-subtitle">Chat directly on WhatsApp (<span class="brand-phone-display">+91 9950263957</span>). Pay via UPI / QR code with instant confirmation.</div>
                       </div>
                     </div>
                     <span class="badge badge-bestseller">Recommended</span>
@@ -992,7 +990,7 @@
                       <input type="radio" name="paymentMethod" value="phone">
                       <span class="pm-icon">📞</span>
                       <div>
-                        <div class="pm-title">Phone Helpline Assisted Order (+91 98765 43210)</div>
+                        <div class="pm-title">Phone Helpline Assisted Order (<span class="brand-phone-display">+91 9950263957</span>)</div>
                         <div class="pm-subtitle">Our executive will call your mobile number to confirm hampers and share the UPI payment QR code.</div>
                       </div>
                     </div>
@@ -1045,8 +1043,8 @@
                     Confirm Order via WhatsApp / Helpline (<span id="checkoutPlaceOrderBtnTotal">₹0</span>) 💬
                   </button>
                   <div style="text-align: center; margin-top: 10px;">
-                    <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" id="checkoutDirectWhatsappLink" style="color: #25D366; font-size: 0.84rem; font-weight: 700; text-decoration: none;">
-                      💬 Direct Chat on WhatsApp (<span id="checkoutDirectWhatsappDisplay">+91 98765 43210</span>)
+                    <a href="https://wa.me/919950263957" target="_blank" rel="noopener noreferrer" id="checkoutDirectWhatsappLink" style="color: #25D366; font-size: 0.84rem; font-weight: 700; text-decoration: none;">
+                      💬 Direct Chat on WhatsApp (<span id="checkoutDirectWhatsappDisplay">+91 9950263957</span>)
                     </a>
                   </div>
                 </div>
