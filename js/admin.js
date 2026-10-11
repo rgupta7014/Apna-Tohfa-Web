@@ -1139,6 +1139,8 @@ const ADMIN = {
         if (document.getElementById('settingCorpEmail')) document.getElementById('settingCorpEmail').value = s.corporateEmail || 'corporate@apnatohfa.in';
         if (document.getElementById('settingAddress')) document.getElementById('settingAddress').value = s.address || 'Regal Pavilion, Connaught Place, New Delhi - 110001';
         if (document.getElementById('settingHours')) document.getElementById('settingHours').value = s.hours || 'Mon – Sun: 9:00 AM – 9:00 PM IST';
+        if (document.getElementById('settingInstagram')) document.getElementById('settingInstagram').value = s.instagram || 'https://instagram.com';
+        if (document.getElementById('settingInstagramHandle')) document.getElementById('settingInstagramHandle').value = s.instagramHandle || '@apnatohfa';
         if (document.getElementById('settingAnnouncement')) document.getElementById('settingAnnouncement').value = s.announcementText || '';
         if (document.getElementById('settingCouponPill')) document.getElementById('settingCouponPill').value = s.activeCouponPill || 'DIWALI2026';
         if (document.getElementById('settingFreeShipping')) document.getElementById('settingFreeShipping').value = s.freeShippingThreshold || 999;
@@ -1160,6 +1162,8 @@ const ADMIN = {
       corporateEmail: document.getElementById('settingCorpEmail').value.trim(),
       address: document.getElementById('settingAddress').value.trim(),
       hours: document.getElementById('settingHours').value.trim(),
+      instagram: document.getElementById('settingInstagram') ? document.getElementById('settingInstagram').value.trim() : 'https://instagram.com',
+      instagramHandle: document.getElementById('settingInstagramHandle') ? document.getElementById('settingInstagramHandle').value.trim() : '@apnatohfa',
       announcementText: document.getElementById('settingAnnouncement').value.trim(),
       activeCouponPill: document.getElementById('settingCouponPill').value.trim(),
       freeShippingThreshold: Number(document.getElementById('settingFreeShipping').value) || 999

@@ -192,6 +192,22 @@ const APNA_APP = {
     if (coWaDisp && (s.phone || cleanWa)) {
       coWaDisp.textContent = s.phone || `+${cleanWa}`;
     }
+
+    // 9. Social & Instagram Links
+    const instaUrl = s.instagram || 'https://instagram.com';
+    const instaHandle = s.instagramHandle || '@apnatohfa';
+
+    const footInsta = document.getElementById("footerInstagramBtn");
+    if (footInsta) footInsta.href = instaUrl;
+
+    const socInstaBtn = document.getElementById("socialInstagramBtn");
+    if (socInstaBtn) socInstaBtn.href = instaUrl;
+
+    const socInstaText = document.getElementById("socialInstagramBtnText");
+    if (socInstaText) socInstaText.textContent = `Follow us on Instagram ${instaHandle}`;
+
+    const socInstaTag = document.getElementById("socialInstagramTag");
+    if (socInstaTag) socInstaTag.textContent = instaHandle;
   },
 
   handleHashChange() {

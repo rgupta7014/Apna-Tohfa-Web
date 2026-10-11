@@ -36,6 +36,8 @@ function getDefaultSeed() {
       whatsapp: '919876543210',
       address: 'Regal Pavilion, Connaught Place, New Delhi - 110001',
       hours: 'Mon - Sun: 9:00 AM - 9:00 PM IST',
+      instagram: 'https://instagram.com',
+      instagramHandle: '@apnatohfa',
       announcementText: '🪔 Diwali 2026 Festive Dispatch Active • Use Code DIWALI2026 for 10% Off • Free Pan-India Delivery on ₹999+',
       activeCouponPill: 'DIWALI2026',
       freeShippingThreshold: 999,
