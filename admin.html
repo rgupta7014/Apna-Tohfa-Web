@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APNA TOHFA | Executive Admin & Logistics Portal</title>
+  <meta name="description" content="Executive Admin & Logistics Management for Apna Tohfa Diwali Gifting Platform.">
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪔</text></svg>">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Admin Styles -->
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ADMIN LOGIN OVERLAY (Shows when not authenticated) -->
+  <div class="login-screen" id="adminLoginScreen">
+    <div class="login-card">
+      <div class="login-diya">🪔</div>
+      <h1 class="login-title">APNA TOHFA</h1>
+      <p class="login-sub">Executive Admin & Dispatch Control Center</p>
+      
+      <form id="adminLoginForm" onsubmit="ADMIN.handleLogin(event)">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Admin Email</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="admin@apnatohfa.in" required value="admin@apnatohfa.in">
+        </div>
+        
+        <div class="form-group" style="text-align: left; margin-bottom: 24px;">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••••••" required value="apnaAdmin@2026">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem;">
+          Access Admin Desk 🔐
+        </button>
+      </form>
+
+      <div class="login-credentials-hint">
+        <div style="font-weight: 700; color: var(--gold-400); margin-bottom: 4px;">👑 Default Demo Credentials:</div>
+        <div>Email: <code>admin@apnatohfa.in</code></div>
+        <div>Password: <code>apnaAdmin@2026</code></div>
+        <button type="button" class="btn btn-secondary btn-sm" style="margin-top: 8px; width: 100%;" onclick="ADMIN.fillDemoCredentials()">
+          Auto-Fill Credentials ⚡
+        </button>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <a href="/" style="font-size: 0.8rem; color: var(--text-dim); text-decoration: none;">← Back to Customer Storefront</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN MAIN APP LAYOUT -->
+  <div class="admin-layout" id="adminMainLayout" style="display: none;">
+    
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo-icon">🪔</div>
+        <div>
+          <div class="sidebar-brand-title">APNA TOHFA</div>
+          <div class="sidebar-brand-sub">Admin Control Desk</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Core Management</div>
+        <button type="button" class="sidebar-item active" onclick="ADMIN.switchTab('dashboard')">
+          <span class="sidebar-item-icon">📊</span>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('orders')">
+          <span class="sidebar-item-icon">📦</span>
+          <span>Orders</span>
+          <span class="sidebar-badge" id="sidebarOrderCount">0</span>
+        </button>
+        <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('products')">
+          <span class="sidebar-item-icon">🪔</span>
+          <span>Hamper Catalog</span>
+          <span class="sidebar-badge" id="sidebarProductCount" style="background: rgba(255,255,255,0.15); color: #fff;">0</span>
+        </button>
+
+        <div class="nav-section-title">B2B & Marketing</div>
+        <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('corporate')">
+          <span class="sidebar-item-icon">🏢</span>
+          <span>Corporate Leads</span>
+          <span class="sidebar-badge" id="sidebarCorpCount" style="background: #3b82f6; color: #fff;">0</span>
+        </button>
+        <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('coupons')">
+          <span class="sidebar-item-icon">🎟️</span>
+          <span>Coupons & Offers</span>
+        </button>
+
+        <div class="nav-section-title">Store Configuration</div>
+        <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('settings')">
+          <span class="sidebar-item-icon">⚙️</span>
+          <span>Store Settings</span>
+        </button>
+
+        <div style="margin-top: 16px; padding: 0 10px;">
+          <a href="/" target="_blank" class="btn btn-storefront btn-sm" style="width: 100%; text-decoration: none;">
+            <span>🛍️ View Storefront</span> <span>↗</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-user-pill">
+          <div class="admin-avatar">👑</div>
+          <div class="admin-user-info">
+            <span class="admin-name" id="sidebarAdminName">Chief Admin</span>
+            <span class="admin-role">Super Admin</span>
+          </div>
+        </div>
+        <button type="button" class="logout-btn" onclick="ADMIN.logout()" title="Logout Admin" aria-label="Logout">
+          🚪
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN BODY -->
+    <main class="admin-main">
+      
+      <!-- TOPBAR -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn" onclick="ADMIN.toggleSidebar()" aria-label="Toggle Navigation">
+            ☰
+          </button>
+          <div>
+            <h2 class="page-title" id="pageTitleDisplay">Dashboard Overview</h2>
+            <div class="page-sub" id="pageSubDisplay">Real-time festive orders & logistics tracking</div>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.refreshCurrentData()" title="Reload Data">
+            🔄 Refresh
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.openAddProductModal()">
+            + Add Hamper
+          </button>
+        </div>
+      </header>
+
+      <!-- PAGE WRAPPER -->
+      <div class="page-container">
+
+        <!-- TAB 1: DASHBOARD OVERVIEW -->
+        <section id="tab-dashboard" class="tab-content active">
+          <!-- KPI Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Total Festive Revenue</span>
+                <div class="kpi-icon-wrap">💰</div>
+              </div>
+              <div class="kpi-value" id="kpiRevenue">₹0</div>
+              <div class="kpi-trend"><span>✨</span> <span>Calculated from all confirmed orders</span></div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Total Orders Placed</span>
+                <div class="kpi-icon-wrap">📦</div>
+              </div>
+              <div class="kpi-value" id="kpiOrdersCount">0</div>
+              <div class="kpi-trend"><span>🚚</span> <span id="kpiShippedText">0 orders dispatched</span></div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Pending Dispatches</span>
+                <div class="kpi-icon-wrap">⏳</div>
+              </div>
+              <div class="kpi-value" id="kpiPendingCount" style="color: var(--warning);">0</div>
+              <div class="kpi-trend"><span>⚡</span> <span>Require packaging & courier dispatch</span></div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Corporate Bulk Leads</span>
+                <div class="kpi-icon-wrap">🏢</div>
+              </div>
+              <div class="kpi-value" id="kpiCorpCount" style="color: #60a5fa;">0</div>
+              <div class="kpi-trend"><span>💼</span> <span>B2B quotes awaiting proposal</span></div>
+            </div>
+          </div>
+
+          <!-- 2 Columns: Recent Orders & Top Hampers -->
+          <div class="dash-columns">
+            <!-- Recent Orders -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3 class="panel-title">Recent Customer Orders</h3>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.switchTab('orders')">
+                  View All Orders →
+                </button>
+              </div>
+              <div class="panel-body" style="padding: 0;">
+                <div class="table-responsive">
+                  <table class="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dashRecentOrdersBody">
+                      <tr><td colspan="6" style="text-align: center; padding: 20px;">Loading orders...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Selling Hampers -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3 class="panel-title">Top Selling Hampers</h3>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.switchTab('products')">
+                  Catalog →
+                </button>
+              </div>
+              <div class="panel-body">
+                <div id="dashTopHampersList" style="display: flex; flex-direction: column; gap: 14px;">
+                  <div class="text-dim">Loading top sellers...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: ORDERS MANAGEMENT -->
+        <section id="tab-orders" class="tab-content">
+          <div class="filter-bar">
+            <div class="filter-pills" id="orderStatusFilters">
+              <button type="button" class="filter-pill active" onclick="ADMIN.filterOrders('all')">All Orders</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterOrders('confirmed')">Confirmed</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterOrders('packed')">Packed</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterOrders('shipped')">Shipped</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterOrders('delivered')">Delivered</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterOrders('cancelled')">Cancelled</button>
+            </div>
+
+            <div class="search-input-wrap">
+              <span class="search-input-icon">🔍</span>
+              <input type="text" id="orderSearchInput" placeholder="Search Order ID, name, city..." oninput="ADMIN.handleOrderSearch(this.value)">
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Placed On</th>
+                      <th>Customer Details</th>
+                      <th>Destination</th>
+                      <th>Total (₹)</th>
+                      <th>Payment</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTableBody">
+                    <tr><td colspan="8" style="text-align: center; padding: 30px;">Loading festive orders...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: PRODUCTS CATALOG -->
+        <section id="tab-products" class="tab-content">
+          <div class="filter-bar">
+            <div class="filter-pills" id="productCategoryFilters">
+              <button type="button" class="filter-pill active" onclick="ADMIN.filterProducts('all')">All Hampers</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('budget')">Budget (Under ₹500)</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('premium')">Premium</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('luxury')">Luxury</button>
+              <button type="button" class="filter-pill" onclick="ADMIN.filterProducts('corporate')">Corporate</button>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.openAddProductModal()">
+              + Add New Hamper
+            </button>
+          </div>
+
+          <div class="products-admin-grid" id="productsAdminGrid">
+            <!-- Injected via JavaScript -->
+          </div>
+        </section>
+
+        <!-- TAB 4: CORPORATE LEADS -->
+        <section id="tab-corporate" class="tab-content">
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">Corporate Bulk Gifting Inquiries</h3>
+              <div style="font-size: 0.8rem; color: var(--gold-400);">B2B Client Relationship Desk</div>
+            </div>
+            <div class="panel-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Company Name</th>
+                      <th>Contact Person</th>
+                      <th>Phone & Email</th>
+                      <th>Hamper Volume</th>
+                      <th>Estimated Budget</th>
+                      <th>Status</th>
+                      <th>Quick Connect</th>
+                    </tr>
+                  </thead>
+                  <tbody id="corporateLeadsBody">
+                    <tr><td colspan="8" style="text-align: center; padding: 30px;">Loading corporate inquiries...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: COUPONS & OFFERS -->
+        <section id="tab-coupons" class="tab-content">
+          <div class="filter-bar">
+            <div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--gold-400);">Festive Promo Codes & Discounts</h3>
+              <p style="font-size: 0.8rem; color: var(--text-dim);">Create coupon codes that apply directly at checkout</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.openAddCouponModal()">
+              + Create New Coupon
+            </button>
+          </div>
+
+          <div class="panel">
+            <div class="panel-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Promo Code</th>
+                      <th>Offer Type</th>
+                      <th>Min Spend</th>
+                      <th>Used Count</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="couponsTableBody">
+                    <tr><td colspan="6" style="text-align: center; padding: 30px;">Loading discount coupons...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 6: STORE SETTINGS -->
+        <section id="tab-settings" class="tab-content">
+          <div class="panel" style="max-width: 800px; margin: 0 auto;">
+            <div class="panel-header">
+              <h3 class="panel-title">Store Configuration & Festive Banner</h3>
+            </div>
+            <div class="panel-body">
+              <form id="storeSettingsForm" onsubmit="ADMIN.saveStoreSettings(event)">
+                <div class="form-group">
+                  <label class="form-label">Top Announcement Bar Text</label>
+                  <input type="text" id="settingAnnouncement" class="form-input" required>
+                  <span style="font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 4px;">Appears at the very top of the customer storefront.</span>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Active Coupon Pill</label>
+                    <input type="text" id="settingCouponPill" class="form-input" placeholder="DIWALI2026">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Free Shipping Minimum (₹)</label>
+                    <input type="number" id="settingFreeShipping" class="form-input" placeholder="999">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Helpline Phone Number</label>
+                    <input type="text" id="settingPhone" class="form-input" placeholder="+91 98765 43210">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Customer Support Email</label>
+                    <input type="email" id="settingEmail" class="form-input" placeholder="namaste@apnatohfa.in">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Corporate Inquiries Email</label>
+                  <input type="email" id="settingCorpEmail" class="form-input" placeholder="corporate@apnatohfa.in">
+                </div>
+
+                <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+                  <button type="submit" class="btn btn-primary">Save Store Settings ✨</button>
+                </div>
+              </form>
+
+              <hr style="border: 0; border-top: 1px solid var(--admin-border); margin: 32px 0;">
+
+              <div>
+                <h4 style="font-family: var(--font-serif); color: var(--gold-400); margin-bottom: 8px;">Database Maintenance & Backups</h4>
+                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 16px;">Export persistent store data as JSON or reset back to initial seed data.</p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.exportBackup()">
+                    💾 Export Database Backup (JSON)
+                  </button>
+                  <button type="button" class="btn btn-danger btn-sm" onclick="ADMIN.resetDatabase()">
+                    ⚠️ Reset Store to Initial Diwali Seed
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: ORDER DETAILS & STATUS UPDATE -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-box" style="max-width: 720px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="orderModalTitle">Order #AT-2026-XXXX</h3>
+          <span style="font-size: 0.75rem; color: var(--text-dim);" id="orderModalDate">Placed on ...</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="ADMIN.closeModal('orderModal')">✕</button>
+      </div>
+
+      <div class="modal-body" id="orderModalBody">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.printOrderSlip()">
+          🖨️ Print Packing Slip / GST Invoice
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.closeModal('orderModal')">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT HAMPER PRODUCT -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-box" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="productModalTitle">Add New Festive Hamper</h3>
+        <button type="button" class="modal-close-btn" onclick="ADMIN.closeModal('productModal')">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="productForm" onsubmit="ADMIN.saveProduct(event)">
+          <input type="hidden" id="prodEditId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Hamper Name *</label>
+              <input type="text" id="prodName" class="form-input" placeholder="e.g. Anand Utsav Box" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select id="prodCategory" class="form-select" required>
+                <option value="budget">Budget Hampers (Under ₹500)</option>
+                <option value="premium">Premium Hampers</option>
+                <option value="luxury">Luxury Hampers</option>
+                <option value="corporate">Corporate Gifting</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Selling Price (₹) *</label>
+              <input type="number" id="prodPrice" class="form-input" placeholder="499" required min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Original Price (₹)</label>
+              <input type="number" id="prodOrigPrice" class="form-input" placeholder="799" min="1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Badge Text (Optional)</label>
+              <input type="text" id="prodBadge" class="form-input" placeholder="e.g. Bestseller, 40% OFF">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dispatch Timeline</label>
+              <input type="text" id="prodDispatch" class="form-input" placeholder="Ships in 24 Hours">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Image Path or URL *</label>
+            <input type="text" id="prodImage" class="form-input" placeholder="assets/images/apna-tohfa.jpg" required>
+            <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 4px;">
+              Quick Presets: 
+              <a href="javascript:void(0)" onclick="document.getElementById('prodImage').value='assets/images/apna-tohfa.jpg'" style="color: var(--gold-300);">Apna Tohfa</a> • 
+              <a href="javascript:void(0)" onclick="document.getElementById('prodImage').value='assets/images/shubh-aarambh.jpg'" style="color: var(--gold-300);">Shubh Aarambh</a> • 
+              <a href="javascript:void(0)" onclick="document.getElementById('prodImage').value='assets/images/khushi-special.jpg'" style="color: var(--gold-300);">Khushi Special</a> • 
+              <a href="javascript:void(0)" onclick="document.getElementById('prodImage').value='assets/images/shahi-tohfa.jpg'" style="color: var(--gold-300);">Shahi Tohfa</a> • 
+              <a href="javascript:void(0)" onclick="document.getElementById('prodImage').value='assets/images/royal-celebration.jpg'" style="color: var(--gold-300);">Royal Celebration</a>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Short Description *</label>
+            <textarea id="prodShortDesc" class="form-textarea" rows="2" placeholder="Brief 1-2 sentence highlight for customer cards" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Full Description</label>
+            <textarea id="prodFullDesc" class="form-textarea" rows="3" placeholder="Elaborate details for hamper modal..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tags (Comma-separated)</label>
+            <input type="text" id="prodTags" class="form-input" placeholder="Dry Fruits, Kaju Katli, Diya, Bestseller">
+          </div>
+
+          <div class="modal-footer" style="padding: 16px 0 0; margin-top: 20px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.closeModal('productModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm">Save Hamper ✨</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD PROMO COUPON -->
+  <div class="modal-overlay" id="couponModal">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Promo Code</h3>
+        <button type="button" class="modal-close-btn" onclick="ADMIN.closeModal('couponModal')">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="couponForm" onsubmit="ADMIN.saveCoupon(event)">
+          <div class="form-group">
+            <label class="form-label">Coupon Code *</label>
+            <input type="text" id="couponCode" class="form-input" placeholder="e.g. DIWALI15" required style="text-transform: uppercase;">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Discount Percentage (%)</label>
+              <input type="number" id="couponPercent" class="form-input" placeholder="15" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label">OR Flat Discount (₹)</label>
+              <input type="number" id="couponFlat" class="form-input" placeholder="0" min="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Minimum Order Value (₹)</label>
+            <input type="number" id="couponMinSpend" class="form-input" placeholder="0" min="0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description Label</label>
+            <input type="text" id="couponLabel" class="form-input" placeholder="15% Festive Gifting Discount">
+          </div>
+
+          <div class="modal-footer" style="padding: 16px 0 0; margin-top: 20px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.closeModal('couponModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm">Create Coupon 🎉</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINTABLE INVOICE CONTAINER (Hidden until print) -->
+  <div id="printableInvoice" style="display: none;"></div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="admin-toast-container" id="adminToastContainer"></div>
+
+  <!-- Admin Application Script -->
+  <script src="js/admin.js"></script>
+</body>
+</html>

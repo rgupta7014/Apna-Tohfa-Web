@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APNA TOHFA | Premium Diwali Gift Hampers & Corporate Gifting | Apno Ke Liye, Dil Se.</title>
+  <meta name="description" content="Celebrate Diwali with APNA TOHFA. Thoughtfully curated premium Diwali gift hampers, authentic sweets, dry fruits, handcrafted brass diyas and custom corporate gifting across India.">
+  <meta name="keywords" content="Diwali gift hampers, Diwali gifts India, corporate Diwali gifting, premium hampers, Apna Tohfa, dry fruits hamper, Diwali sweets">
+  
+  <!-- Favicon / Theme -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪔</text></svg>">
+  <meta name="theme-color" content="#3b0912">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="announcement-bar" aria-label="Festive Announcement">
+    <div class="container announcement-content">
+      <div class="announcement-text">
+        <span>🪔 <strong>Diwali 2026 Festive Dispatch Active</strong></span>
+        <span>•</span>
+        <span>Use Code <span class="coupon-pill" onclick="APNA_CART.applyCouponCode('DIWALI2026')" title="Click to apply" style="cursor: pointer;">DIWALI2026</span> for 10% Off</span>
+        <span>•</span>
+        <span>Free Pan-India Delivery on ₹999+</span>
+      </div>
+      <div class="announcement-quick">
+        <a href="tel:+919876543210" aria-label="Call Customer Care">
+          <span>📞</span> +91 98765 43210
+        </a>
+        <a href="javascript:void(0)" onclick="APNA_APP.openTrackingModal()" aria-label="Track Order Status">
+          <span>📦</span> Track Order
+        </a>
+        <a href="/admin" style="color: var(--gold-300); font-weight: 700;" aria-label="Store Admin Portal">
+          <span>👑</span> Admin Desk
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-wrapper">
+      <!-- Logo -->
+      <a href="#" class="brand-logo-wrap" aria-label="Apna Tohfa Home">
+        <div class="brand-title">
+          <span>APNA TOHFA</span>
+          <span class="brand-diya-flame">🪔</span>
+        </div>
+        <span class="brand-tagline">"Apno Ke Liye, Dil Se."</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="#" class="nav-link active">Home</a>
+        <a href="#shop-section" class="nav-link" onclick="APNA_APP.scrollToSection('shop-section')">Shop Hampers</a>
+        <a href="#corporate-section" class="nav-link" onclick="APNA_APP.scrollToSection('corporate-section')">
+          Corporate Gifting <span class="nav-corporate-badge">Bulk</span>
+        </a>
+        <a href="#about-section" class="nav-link" onclick="APNA_APP.scrollToSection('about-section')">About Us</a>
+        <a href="#contact-section" class="nav-link" onclick="APNA_APP.scrollToSection('contact-section')">Contact</a>
+      </nav>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <!-- Search Trigger -->
+        <button type="button" class="icon-btn search-btn" onclick="APNA_APP.openSearchModal()" aria-label="Search hampers" title="Search hampers">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+
+        <!-- Cart Trigger -->
+        <button type="button" class="icon-btn cart-btn" onclick="APNA_APP.openCartDrawer()" aria-label="View shopping cart" title="View Cart">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <span class="cart-count" id="headerCartCount" style="display: none;">0</span>
+        </button>
+
+        <!-- Mobile Hamburger Menu Button -->
+        <button type="button" class="icon-btn hamburger-btn" onclick="APNA_APP.toggleMobileNav()" aria-label="Toggle mobile menu" title="Menu">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav Drawer -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop">
+    <div class="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation Menu">
+      <div class="mobile-nav-header">
+        <div class="brand-title" style="font-size: 1.25rem;">
+          APNA TOHFA 🪔
+        </div>
+        <button type="button" class="icon-btn" onclick="APNA_APP.toggleMobileNav()" aria-label="Close menu">✕</button>
+      </div>
+      <div class="mobile-nav-links">
+        <a href="#" class="mobile-nav-link" onclick="APNA_APP.toggleMobileNav()">Home <span>→</span></a>
+        <a href="#shop-section" class="mobile-nav-link" onclick="APNA_APP.toggleMobileNav(); APNA_APP.scrollToSection('shop-section');">Shop Hampers <span>→</span></a>
+        <a href="#corporate-section" class="mobile-nav-link" onclick="APNA_APP.toggleMobileNav(); APNA_APP.scrollToSection('corporate-section');">Corporate Gifting <span class="badge badge-bestseller">Bulk</span></a>
+        <a href="#why-section" class="mobile-nav-link" onclick="APNA_APP.toggleMobileNav(); APNA_APP.scrollToSection('why-section');">Why Apna Tohfa <span>→</span></a>
+        <a href="#about-section" class="mobile-nav-link" onclick="APNA_APP.toggleMobileNav(); APNA_APP.scrollToSection('about-section');">About Us <span>→</span></a>
+        <a href="#contact-section" class="mobile-nav-link" onclick="APNA_APP.toggleMobileNav(); APNA_APP.scrollToSection('contact-section');">Contact Us <span>→</span></a>
+        <a href="javascript:void(0)" class="mobile-nav-link" onclick="APNA_APP.toggleMobileNav(); APNA_APP.openTrackingModal();">Track Order <span>📦</span></a>
+      </div>
+      <div class="mobile-nav-footer">
+        <p style="font-size: 0.8rem; color: var(--dark-500); margin-bottom: 8px;">Festive Helpline:</p>
+        <a href="tel:+919876543210" style="font-weight: 700; color: var(--maroon-800); display: block; margin-bottom: 12px;">📞 +91 98765 43210</a>
+        <button class="btn btn-primary btn-block btn-sm" onclick="APNA_APP.toggleMobileNav(); APNA_APP.openCartDrawer();">
+          View Shopping Cart 🛒
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main id="mainContent">
+
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="hero-section">
+      <div class="container">
+        <div class="hero-grid">
+          <!-- Hero Text -->
+          <div class="hero-content">
+            <div class="hero-pill">
+              <span class="hero-pill-badge">✨ Festive Edition</span>
+              <span class="hero-pill-text">Diwali 2026 Collection • Starting from ₹299</span>
+            </div>
+
+            <h1 class="hero-title">
+              Apno Ke Liye, <span class="festive-highlight">Dil Se.</span>
+            </h1>
+
+            <p class="hero-subtitle">
+              Premium Diwali Gift Hampers, Curated with Love.
+            </p>
+
+            <p class="hero-description">
+              Celebrate Diwali with thoughtfully curated hampers made for your loved ones, employees and clients. Handcrafted brass diyas, authentic artisanal sweets, California dry fruits, and regal packaging.
+            </p>
+
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" onclick="APNA_APP.scrollToSection('shop-section')">
+                Shop Hampers 🎁
+              </button>
+              <button class="btn btn-gold btn-lg" onclick="APNA_APP.scrollToSection('corporate-section')">
+                Corporate Gifting 🏢
+              </button>
+            </div>
+
+            <!-- Trust Bar Under Hero -->
+            <div class="hero-trust-bar">
+              <div class="trust-item">
+                <div class="trust-item-icon">🚚</div>
+                <div class="trust-item-text">
+                  Pan-India Delivery
+                  <span>Free on orders over ₹999</span>
+                </div>
+              </div>
+              <div class="trust-item">
+                <div class="trust-item-icon">🪔</div>
+                <div class="trust-item-text">
+                  100% Handcrafted
+                  <span>Artisanal sweets & pure diyas</span>
+                </div>
+              </div>
+              <div class="trust-item">
+                <div class="trust-item-icon">⭐</div>
+                <div class="trust-item-text">
+                  4.9/5 Rating
+                  <span>12,000+ Happy Customers</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Hamper Visual -->
+          <div class="hero-media-wrapper">
+            <div class="hero-media-frame">
+              <img src="assets/images/hero-hamper.jpg" alt="APNA TOHFA Luxury Diwali Gift Hamper with sweets, brass diyas and dry fruits" class="hero-main-img">
+            </div>
+
+            <!-- Floating Interactive Chips -->
+            <div class="floating-chip top-left">
+              <span class="chip-icon">🪔</span>
+              <div class="chip-label">
+                Pure Brass Diya
+                <span>Artisan Handcrafted</span>
+              </div>
+            </div>
+
+            <div class="floating-chip bottom-right">
+              <span class="chip-icon">✨</span>
+              <div class="chip-label">
+                Rigid Keepsake Box
+                <span>Gold Foil Embossing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOP BY CATEGORY SECTION -->
+    <section class="section-spacing category-section" id="categories-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">🪔</span> Curated For Every Heart
+          </div>
+          <h2 class="section-title">Shop by Category</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            Explore our specially tailored festive tiers, from affordable personal tokens to royal executive trunks.
+          </p>
+        </div>
+
+        <div class="category-grid" id="categoriesGrid">
+          <!-- Dynamically populated from APNA_DATA.categories -->
+        </div>
+      </div>
+    </section>
+
+    <!-- OUR DIWALI HAMPERS (PRODUCT SECTION) -->
+    <section class="section-spacing product-section" id="shop-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">✨</span> Festive Best-Sellers
+          </div>
+          <h2 class="section-title">Our Diwali Hampers</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            Each hamper is assembled with pure love, containing traditional delicacies, glowing terracotta & brass lamps, and heartfelt wishes.
+          </p>
+        </div>
+
+        <!-- Filter & Sorting Controls -->
+        <div class="product-controls-bar">
+          <div class="filter-pills">
+            <button type="button" class="filter-pill active" data-category="all" onclick="APNA_APP.filterByCategory('all')">
+              All Hampers
+            </button>
+            <button type="button" class="filter-pill" data-category="budget" onclick="APNA_APP.filterByCategory('budget')">
+              Budget (₹299–₹499)
+            </button>
+            <button type="button" class="filter-pill" data-category="premium" onclick="APNA_APP.filterByCategory('premium')">
+              Premium (₹799)
+            </button>
+            <button type="button" class="filter-pill" data-category="luxury" onclick="APNA_APP.filterByCategory('luxury')">
+              Luxury (₹1,199+)
+            </button>
+            <button type="button" class="filter-pill" data-category="corporate" onclick="APNA_APP.filterByCategory('corporate')">
+              Corporate Gifting
+            </button>
+            <button type="button" class="filter-pill" data-category="under500" onclick="APNA_APP.filterByCategory('under500')">
+              Under ₹500
+            </button>
+          </div>
+
+          <div class="sort-select-wrapper">
+            <label for="productSortSelect">Sort by:</label>
+            <select id="productSortSelect" class="sort-select" onchange="APNA_APP.handleSortChange(event)">
+              <option value="featured">Featured Collection</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="rating">Highest Rated</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="product-grid" id="productGridContainer">
+          <!-- Dynamically populated from APNA_DATA.products -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CORPORATE GIFTING SECTION -->
+    <section class="section-spacing corporate-section" id="corporate-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">🏢</span> B2B & Bulk Orders
+          </div>
+          <h2 class="section-title">Make Your Business Gifting Memorable</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            Express heartfelt gratitude to your hardworking employees, cherished clients, and valued business partners with bespoke corporate hampers customized with your company branding.
+          </p>
+        </div>
+
+        <!-- Corporate Features Grid -->
+        <div class="corporate-features-grid" id="corporateFeaturesGrid">
+          <!-- Populated from APNA_APP.renderCorporateFeatures -->
+        </div>
+
+        <!-- Bulk Pricing Examples -->
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--gold-300); margin-bottom: 8px;">
+            Transparent Corporate Tier Pricing
+          </h3>
+          <p style="font-size: 0.88rem; color: var(--cream-300);">
+            Pre-negotiated wholesale volume slabs with complimentary box customization & pan-India split address shipping.
+          </p>
+        </div>
+
+        <div class="pricing-tiers-grid" id="corporatePricingGrid">
+          <!-- Populated from APNA_APP.renderPricingTiers -->
+        </div>
+
+        <!-- Corporate Inquiry Form Box -->
+        <div class="corporate-inquiry-box">
+          <h3 class="corporate-form-title">Request Corporate Quote & Sample</h3>
+          <p class="corporate-form-subtitle">Fill out your gifting requirements below. Our dedicated enterprise desk will get back with a tailored digital mockup and volume quote within 2 hours.</p>
+
+          <form id="corporateInquiryForm" onsubmit="APNA_APP.handleCorporateInquirySubmit(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="corpCompanyName">Company / Organization Name *</label>
+                <input type="text" id="corpCompanyName" name="companyName" class="form-control corp-form-control" placeholder="e.g. Infosys / Tech Mahindra / Startup Inc." required>
+              </div>
+
+              <div class="form-group">
+                <label for="corpContactPerson">Contact Person Name *</label>
+                <input type="text" id="corpContactPerson" name="contactPerson" class="form-control corp-form-control" placeholder="e.g. Rahul Verma" required>
+              </div>
+
+              <div class="form-group">
+                <label for="corpPhone">Mobile / WhatsApp Number *</label>
+                <input type="tel" id="corpPhone" name="phone" class="form-control corp-form-control" placeholder="e.g. 9876543210" required>
+              </div>
+
+              <div class="form-group">
+                <label for="corpEmail">Official Work Email *</label>
+                <input type="email" id="corpEmail" name="email" class="form-control corp-form-control" placeholder="e.g. rahul@company.com" required>
+              </div>
+
+              <div class="form-group">
+                <label for="corpHampersCount">Number of Hampers Required *</label>
+                <select id="corpHampersCount" name="hampersCount" class="form-control corp-form-control" required>
+                  <option value="">Select Quantity Range</option>
+                  <option value="25-49">25 – 49 Boxes (₹549/box)</option>
+                  <option value="50-99">50 – 99 Boxes (₹499/box)</option>
+                  <option value="100-249">100 – 249 Boxes (₹449/box)</option>
+                  <option value="250-500">250 – 500 Boxes (₹399–₹449/box)</option>
+                  <option value="500+">500+ Boxes (Custom Enterprise Quote)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="corpBudget">Budget per Hamper *</label>
+                <select id="corpBudget" name="budget" class="form-control corp-form-control" required>
+                  <option value="₹300 - ₹500">₹300 – ₹500 (Budget Friendly)</option>
+                  <option value="₹500 - ₹800" selected>₹500 – ₹800 (Executive Choice)</option>
+                  <option value="₹800 - ₹1,200">₹800 – ₹1,200 (Premium Client)</option>
+                  <option value="₹1,200 - ₹2,000+">₹1,200 – ₹2,000+ (VIP Luxury)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="corpDeliveryCity">Delivery City / Locations *</label>
+                <input type="text" id="corpDeliveryCity" name="city" class="form-control corp-form-control" placeholder="e.g. Mumbai, Bengaluru, or Multi-City Home Dispatch" required>
+              </div>
+
+              <div class="form-group">
+                <label for="corpCustomizationReq">Customization Requirements</label>
+                <input type="text" id="corpCustomizationReq" name="requirements" class="form-control corp-form-control" placeholder="e.g. Company Logo on Box, Custom Greeting Card, Vegan Sweets">
+              </div>
+
+              <div class="form-group full">
+                <label for="corpMessage">Additional Notes or Timeline</label>
+                <textarea id="corpMessage" name="message" class="form-control corp-form-control" rows="3" placeholder="Tell us about your team, preferred delivery dates, or any special requests..."></textarea>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px; text-align: center;">
+              <button type="submit" class="btn btn-gold btn-lg" style="min-width: 260px;">
+                Submit Inquiry & Get Quote 🚀
+              </button>
+              <div style="margin-top: 12px; font-size: 0.8rem; color: var(--gold-400);">
+                🔒 100% Privacy. Instant WhatsApp assistance on +91 98765 43210.
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY APNA TOHFA SECTION -->
+    <section class="section-spacing why-section" id="why-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">💝</span> The Apna Tohfa Promise
+          </div>
+          <h2 class="section-title">Why Choose Apna Tohfa</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            We understand that a gift is an extension of your warmth and honor. Here is why India trusts us with their most precious festive moments.
+          </p>
+        </div>
+
+        <div class="why-grid" id="whyGridContainer">
+          <!-- Populated from APNA_APP.renderWhyFeatures -->
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section class="section-spacing how-section" id="how-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">⚡</span> Effortless Festive Gifting
+          </div>
+          <h2 class="section-title">How It Works</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            Three simple, seamless steps to send unforgettable festive joy anywhere across India.
+          </p>
+        </div>
+
+        <div class="how-steps-grid" id="howStepsContainer">
+          <!-- Populated from APNA_APP.renderHowItWorks -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOMER REVIEWS SECTION -->
+    <section class="section-spacing reviews-section" id="reviews-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">⭐</span> Customer Love
+          </div>
+          <h2 class="section-title">Stories of Festive Joy</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            Real feedback from families, HR managers, and corporate leaders who celebrated with Apna Tohfa.
+          </p>
+        </div>
+
+        <div class="reviews-grid" id="reviewsGridContainer">
+          <!-- Populated from APNA_APP.renderReviews -->
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTAGRAM / SOCIAL SECTION -->
+    <section class="section-spacing social-section" id="social-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">📸</span> #ApnaTohfaMoments
+          </div>
+          <h2 class="section-title">Celebrate. Gift. Spread Happiness.</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            Glimpses of festive unboxing, golden ribbons, handcrafted brass lamps, and cheerful smiles. Tag <strong>@apnatohfa</strong> to get featured.
+          </p>
+        </div>
+
+        <div class="social-grid" id="socialGridContainer">
+          <!-- Populated from APNA_APP.renderInstagramFeed -->
+        </div>
+
+        <div style="text-align: center;">
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+            <span>📷</span> Follow us on Instagram @apnatohfa.in
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT US SECTION -->
+    <section class="section-spacing about-section" id="about-section">
+      <div class="container">
+        <div class="about-banner text-center">
+          <div class="about-quote-mark">“</div>
+          <div class="section-tag" style="background: rgba(201,152,49,0.2); color: var(--gold-400); border-color: var(--gold-500); margin-bottom: 20px;">
+            Our Brand Story
+          </div>
+          
+          <blockquote class="about-quote">
+            "At Apna Tohfa, we believe a gift is more than a box. It is a feeling, a gesture and a way of saying 'you matter'. Our Diwali hampers are thoughtfully curated to make every celebration more special."
+          </blockquote>
+
+          <div class="about-promise-grid">
+            <div class="promise-item">
+              <div class="promise-item-title">
+                <span>🪔</span> Authentic Heritage
+              </div>
+              <p class="promise-item-desc">
+                Partnering directly with traditional brass artisans in Moradabad and potters in Rajasthan to create sustainable keepsakes.
+              </p>
+            </div>
+
+            <div class="promise-item">
+              <div class="promise-item-title">
+                <span>🍬</span> Gourmet Purity
+              </div>
+              <p class="promise-item-desc">
+                Pure cow desi ghee sweets, hand-selected dry fruits from Kashmir, and zero artificial preservatives.
+              </p>
+            </div>
+
+            <div class="promise-item">
+              <div class="promise-item-title">
+                <span>🎁</span> Made With Love
+              </div>
+              <p class="promise-item-desc">
+                Every hamper is hand-assembled, inspected for quality, and tied with silk ribbons by our passionate local packaging team.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="section-spacing contact-section" id="contact-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">
+            <span class="diya-icon">📞</span> We're Here For You
+          </div>
+          <h2 class="section-title">Get In Touch</h2>
+          <div class="festive-divider"><span>✦ ✦ ✦</span></div>
+          <p class="section-desc">
+            Have questions about custom orders, corporate catalogs, or festive deliveries? Our team is available 7 days a week.
+          </p>
+        </div>
+
+        <div class="contact-grid">
+          <!-- Contact Info Card -->
+          <div class="contact-info-card">
+            <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: var(--maroon-900);">
+              Apna Tohfa Support Desk
+            </h3>
+
+            <div class="contact-method">
+              <div class="contact-method-icon">📞</div>
+              <div>
+                <div class="contact-method-title">Customer Care Phone</div>
+                <div class="contact-method-value">
+                  <a href="tel:+919876543210">+91 98765 43210</a> / +91 11 4567 8900
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="contact-method-icon">💬</div>
+              <div>
+                <div class="contact-method-title">WhatsApp Gifting Concierge</div>
+                <div class="contact-method-value">
+                  <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">+91 98765 43210 (Instant Chat)</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="contact-method-icon">✉️</div>
+              <div>
+                <div class="contact-method-title">Email Enquiries</div>
+                <div class="contact-method-value">
+                  <a href="mailto:namaste@apnatohfa.in">namaste@apnatohfa.in</a><br>
+                  <a href="mailto:corporate@apnatohfa.in" style="font-size: 0.85rem; color: var(--gold-800);">corporate@apnatohfa.in (B2B Bulk)</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="contact-method-icon">📍</div>
+              <div>
+                <div class="contact-method-title">Experience Studio & Office</div>
+                <div class="contact-method-value">
+                  Regal Pavilion, Connaught Place, New Delhi - 110001<br>
+                  <span style="font-size: 0.8rem; color: var(--dark-500);">Fulfillment Hubs: Delhi NCR, Mumbai, Bengaluru</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="contact-method-icon">⏰</div>
+              <div>
+                <div class="contact-method-title">Diwali Operating Hours</div>
+                <div class="contact-method-value">
+                  Mon – Sun: 9:00 AM – 9:00 PM IST<br>
+                  <span style="font-size: 0.8rem; color: var(--success-600); font-weight: 700;">🟢 Extended 24/7 Dispatch Desk Active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Form Card -->
+          <div class="contact-form-card">
+            <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: var(--maroon-900); margin-bottom: 6px;">
+              Send Us a Message
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--dark-500); margin-bottom: 20px;">
+              Fill in your query and we'll reply within a few hours.
+            </p>
+
+            <form onsubmit="APNA_APP.handleContactSubmit(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="contactName">Your Name *</label>
+                  <input type="text" id="contactName" class="form-control" placeholder="e.g. Sumanth Sharma" required>
+                </div>
+                <div class="form-group">
+                  <label for="contactPhone">Phone Number *</label>
+                  <input type="tel" id="contactPhone" class="form-control" placeholder="e.g. 9876543210" required>
+                </div>
+                <div class="form-group full">
+                  <label for="contactEmail">Email Address *</label>
+                  <input type="email" id="contactEmail" class="form-control" placeholder="e.g. sumanth@gmail.com" required>
+                </div>
+                <div class="form-group full">
+                  <label for="contactSubject">Subject / Query Type</label>
+                  <select id="contactSubject" class="form-control">
+                    <option value="General Query">General Enquiry</option>
+                    <option value="Order Status">Order Status & Tracking</option>
+                    <option value="Corporate Order">Corporate Bulk Order</option>
+                    <option value="Custom Hamper">Custom Hamper Request</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label for="contactMsg">Message *</label>
+                  <textarea id="contactMsg" class="form-control" rows="4" placeholder="How can we assist you with your Diwali celebrations?" required></textarea>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-primary btn-block">
+                  Send Message ✉️
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FLOATING WHATSAPP BUTTON -->
+  <a href="https://wa.me/919876543210?text=Hi%20Apna%20Tohfa!%20I%20would%20like%20to%20inquire%20about%20Diwali%20gift%20hampers." target="_blank" rel="noopener noreferrer" class="floating-whatsapp" aria-label="Chat on WhatsApp">
+    <div class="whatsapp-pulse"></div>
+    <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.976.58 1.99.924 3.149.924l.001-.001c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.765-5.769-5.765zm0 10.373c-1.008 0-1.994-.287-2.85-.828l-.204-.129-1.378.362.368-1.344-.141-.225c-.595-.945-.909-2.02-.908-3.109.001-3.176 2.585-5.76 5.762-5.76 3.178 0 5.762 2.584 5.762 5.76 0 3.176-2.584 5.761-5.762 5.761z"/></svg>
+    <span>Chat on WhatsApp</span>
+  </a>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid">
+        <!-- Brand Col -->
+        <div>
+          <div class="footer-brand-title">APNA TOHFA 🪔</div>
+          <div class="footer-brand-tagline">"Apno Ke Liye, Dil Se."</div>
+          <p class="footer-brand-desc">
+            India's premier Diwali gift hamper and corporate gifting destination. Bringing pure festive joy, authentic sweets, dry fruits, and handcrafted brass lamps to families and workplaces across India.
+          </p>
+          <div style="display: flex; gap: 12px;">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="icon-btn" style="background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.15);" aria-label="Instagram">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" class="icon-btn" style="background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.15);" aria-label="WhatsApp">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.976.58 1.99.924 3.149.924l.001-.001c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.765-5.769-5.765zm0 10.373c-1.008 0-1.994-.287-2.85-.828l-.204-.129-1.378.362.368-1.344-.141-.225c-.595-.945-.909-2.02-.908-3.109.001-3.176 2.585-5.76 5.762-5.76 3.178 0 5.762 2.584 5.762 5.76 0 3.176-2.584 5.761-5.762 5.761z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Links Col 1 -->
+        <div>
+          <h4 class="footer-col-title">Festive Collections</h4>
+          <div class="footer-links">
+            <a href="#shop-section" onclick="APNA_APP.filterByCategory('all')">All Diwali Hampers</a>
+            <a href="#shop-section" onclick="APNA_APP.filterByCategory('budget')">Budget Hampers (From ₹299)</a>
+            <a href="#shop-section" onclick="APNA_APP.filterByCategory('premium')">Premium Hampers (From ₹799)</a>
+            <a href="#shop-section" onclick="APNA_APP.filterByCategory('luxury')">Royal Luxury Hampers (From ₹1,199)</a>
+            <a href="#corporate-section" onclick="APNA_APP.scrollToSection('corporate-section')">Corporate Bulk Gifting</a>
+          </div>
+        </div>
+
+        <!-- Links Col 2 (Policies & Support) -->
+        <div>
+          <h4 class="footer-col-title">Customer Care & Policies</h4>
+          <div class="footer-links">
+            <a href="javascript:void(0)" onclick="APNA_APP.openPolicyModal('shipping')">Shipping Policy</a>
+            <a href="javascript:void(0)" onclick="APNA_APP.openPolicyModal('return')">Return Policy</a>
+            <a href="javascript:void(0)" onclick="APNA_APP.openPolicyModal('refund')">Refund Policy</a>
+            <a href="javascript:void(0)" onclick="APNA_APP.openPolicyModal('privacy')">Privacy Policy</a>
+            <a href="javascript:void(0)" onclick="APNA_APP.openPolicyModal('terms')">Terms & Conditions</a>
+            <a href="javascript:void(0)" onclick="APNA_APP.openTrackingModal()">Track Order Status</a>
+            <a href="/admin" style="color: var(--gold-600); font-weight: 700;">Admin Management Portal 🔐</a>
+          </div>
+        </div>
+
+        <!-- Newsletter Col -->
+        <div>
+          <h4 class="footer-col-title">Festive VIP Club</h4>
+          <p style="font-size: 0.85rem; color: var(--dark-300); margin-bottom: 12px;">
+            Subscribe to receive exclusive early-bird Diwali discount codes, corporate gifting catalogs, and festive recipes.
+          </p>
+          <form onsubmit="event.preventDefault(); APNA_APP.showToast('✨ Thank you for subscribing to Apna Tohfa Festive Club!', 'success'); this.reset();">
+            <div class="newsletter-input-wrap">
+              <input type="email" class="newsletter-input" placeholder="Enter your email address" required>
+              <button type="submit" class="btn btn-gold btn-sm">Join</button>
+            </div>
+          </form>
+          <div style="font-size: 0.75rem; color: var(--dark-500);">
+            ✨ Zero spam. Unsubscribe anytime with 1-click.
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <div>
+          © 2026 Apna Tohfa. All Rights Reserved. Made with ❤️ in India for Diwali celebrations.
+        </div>
+        <div class="payment-badges-row">
+          <span>100% Safe Payments:</span>
+          <span class="pm-pill">UPI</span>
+          <span class="pm-pill">RuPay</span>
+          <span class="pm-pill">Visa</span>
+          <span class="pm-pill">Mastercard</span>
+          <span class="pm-pill">NetBanking</span>
+          <span class="pm-pill">COD</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- MODALS & DRAWERS -->
+  <!-- ========================================================================= -->
+
+  <!-- PRODUCT DETAILS MODAL -->
+  <div class="modal-backdrop" id="productDetailsModal" role="dialog" aria-modal="true" aria-label="Product Details">
+    <div class="modal-container">
+      <button type="button" class="modal-close-btn" onclick="APNA_APP.closeAllModals()" aria-label="Close modal">✕</button>
+      <div id="productModalContent">
+        <!-- Dynamically injected by APNA_APP.openProductModal -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CART DRAWER -->
+  <div class="cart-drawer-backdrop" id="cartDrawerBackdrop" role="dialog" aria-modal="true" aria-label="Your Cart Drawer">
+    <div class="cart-drawer">
+      <!-- Header -->
+      <div class="cart-drawer-header">
+        <h3 class="cart-drawer-title">
+          <span>🎁</span> Your Diwali Hamper Box
+        </h3>
+        <button type="button" class="icon-btn" onclick="APNA_APP.closeCartDrawer()" aria-label="Close cart">✕</button>
+      </div>
+
+      <!-- Free Shipping Bar -->
+      <div class="cart-free-shipping-bar">
+        <div class="shipping-progress-text" id="freeShippingText">
+          <span>Add <strong>₹999</strong> more for <strong>FREE Delivery</strong></span>
+          <span>0%</span>
+        </div>
+        <div class="shipping-progress-track">
+          <div class="shipping-progress-fill" id="freeShippingProgressFill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Items List -->
+      <div class="cart-items-list" id="cartDrawerItemsList">
+        <!-- Injected by APNA_CART.renderDrawer -->
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="cart-drawer-footer">
+        <!-- Coupon Row -->
+        <div class="coupon-row">
+          <input type="text" id="cartCouponInput" class="coupon-input" placeholder="Promo code (e.g. DIWALI2026)">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="APNA_CART.applyCouponCode(document.getElementById('cartCouponInput').value)">
+            Apply
+          </button>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="cart-breakdown">
+          <div class="breakdown-line">
+            <span>Subtotal</span>
+            <span id="cartSubtotalDisplay" style="font-weight: 700;">₹0</span>
+          </div>
+          <div class="breakdown-line">
+            <span>Festive Delivery</span>
+            <span id="cartShippingDisplay" style="font-weight: 700; color: var(--success-600);">FREE</span>
+          </div>
+          <div class="breakdown-line" id="cartDiscountRow" style="display: none; color: var(--success-600);">
+            <span>Coupon Discount</span>
+            <span id="cartDiscountDisplay" style="font-weight: 700;">-₹0</span>
+          </div>
+          <div class="breakdown-line total">
+            <span>Grand Total</span>
+            <span id="cartGrandTotalDisplay">₹0</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button type="button" class="btn btn-primary btn-block btn-lg" id="cartDrawerCheckoutBtn" onclick="APNA_APP.openCheckoutView()">
+            Proceed to Checkout 🔒
+          </button>
+          <button type="button" class="btn btn-secondary btn-block btn-sm" onclick="APNA_APP.closeCartDrawer()">
+            Continue Shopping 🛍️
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL / VIEW -->
+  <div class="modal-backdrop" id="checkoutModal" role="dialog" aria-modal="true" aria-label="Secure Checkout">
+    <div class="modal-container" style="max-width: 1040px;">
+      <button type="button" class="modal-close-btn" onclick="APNA_APP.closeCheckoutView()" aria-label="Close checkout">✕</button>
+      
+      <div class="checkout-view" style="padding: 24px;">
+        <div class="section-header text-center" style="margin-bottom: 24px;">
+          <h2 class="section-title" style="font-size: 1.85rem;">Secure Diwali Checkout</h2>
+          <p class="section-desc" style="font-size: 0.95rem;">Enter recipient delivery details to dispatch your festive hampers.</p>
+        </div>
+
+        <form id="checkoutForm" onsubmit="APNA_CART.handleCheckoutSubmit(event)">
+          <div class="checkout-grid">
+            <!-- Left: Delivery & Billing Form -->
+            <div>
+              <div class="checkout-card">
+                <h3 class="checkout-card-title">
+                  <span>📍</span> Delivery Information
+                </h3>
+
+                <div class="form-grid">
+                  <div class="form-group full">
+                    <label for="coFullName">Recipient Full Name *</label>
+                    <input type="text" id="coFullName" name="fullName" class="form-control" placeholder="e.g. Ramesh Chandra / Sharma Family" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="coMobile">Mobile Number *</label>
+                    <input type="tel" id="coMobile" name="mobile" class="form-control" placeholder="10-digit mobile number" maxlength="10" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="coEmail">Email Address *</label>
+                    <input type="email" id="coEmail" name="email" class="form-control" placeholder="For order tracking updates" required>
+                  </div>
+
+                  <div class="form-group full">
+                    <label for="coAddress">Street Address / House No. *</label>
+                    <input type="text" id="coAddress" name="address" class="form-control" placeholder="House/Flat No, Apartment, Street name" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="coCity">City / District *</label>
+                    <input type="text" id="coCity" name="city" class="form-control" placeholder="e.g. New Delhi, Mumbai, Bengaluru" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="coState">State / UT *</label>
+                    <select id="coState" name="state" class="form-control" required>
+                      <option value="">Select State</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Rajasthan">Rajasthan</option>
+                      <option value="Tamil Nadu">Tamil Nadu</option>
+                      <option value="Telangana">Telangana</option>
+                      <option value="West Bengal">West Bengal</option>
+                      <option value="Haryana">Haryana</option>
+                      <option value="Punjab">Punjab</option>
+                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                      <option value="Kerala">Kerala</option>
+                      <option value="Bihar">Bihar</option>
+                      <option value="Other">Other State / UT</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="coPincode">Postal Pincode *</label>
+                    <input type="text" id="coPincode" name="pincode" class="form-control" placeholder="6-digit Indian Pincode" maxlength="6" required>
+                  </div>
+
+                  <div class="form-group full">
+                    <label for="coGiftMessage">Complimentary Festive Card Message (Optional)</label>
+                    <textarea id="coGiftMessage" name="giftMessage" class="form-control" rows="2" placeholder="Wishing you and your family a joyous, prosperous and sparkling Deepavali! - From..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Method Selection -->
+              <div class="checkout-card">
+                <h3 class="checkout-card-title">
+                  <span>💳</span> Payment Method
+                </h3>
+
+                <div class="payment-methods-grid">
+                  <div class="payment-method-option selected" data-method="upi" onclick="APNA_APP.selectPaymentMethod('upi')">
+                    <div class="pm-left">
+                      <input type="radio" name="paymentMethod" value="upi" checked>
+                      <span class="pm-icon">⚡</span>
+                      <div>
+                        <div class="pm-title">UPI Instant Payment (Fastest)</div>
+                        <div class="pm-subtitle">Google Pay, PhonePe, Paytm, BHIM & Any UPI App</div>
+                      </div>
+                    </div>
+                    <span class="badge badge-bestseller">Recommended</span>
+                  </div>
+
+                  <div class="payment-method-option" data-method="card" onclick="APNA_APP.selectPaymentMethod('card')">
+                    <div class="pm-left">
+                      <input type="radio" name="paymentMethod" value="card">
+                      <span class="pm-icon">💳</span>
+                      <div>
+                        <div class="pm-title">Credit / Debit Card</div>
+                        <div class="pm-subtitle">Visa, MasterCard, RuPay, Maestro</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="payment-method-option" data-method="netbanking" onclick="APNA_APP.selectPaymentMethod('netbanking')">
+                    <div class="pm-left">
+                      <input type="radio" name="paymentMethod" value="netbanking">
+                      <span class="pm-icon">🏛️</span>
+                      <div>
+                        <div class="pm-title">Net Banking</div>
+                        <div class="pm-subtitle">All Major Indian Banks Supported (HDFC, SBI, ICICI, etc.)</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="payment-method-option" data-method="cod" onclick="APNA_APP.selectPaymentMethod('cod')">
+                    <div class="pm-left">
+                      <input type="radio" name="paymentMethod" value="cod">
+                      <span class="pm-icon">💵</span>
+                      <div>
+                        <div class="pm-title">Cash on Delivery (COD)</div>
+                        <div class="pm-subtitle">Pay cash or UPI upon delivery at your doorstep</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div>
+              <div class="order-summary-box">
+                <h3 class="summary-title">Order Summary</h3>
+
+                <div class="summary-items" id="checkoutSummaryItems">
+                  <!-- Populated from APNA_CART.renderCheckoutSummary -->
+                </div>
+
+                <div class="cart-breakdown" style="margin-top: 14px;">
+                  <div class="breakdown-line">
+                    <span>Subtotal</span>
+                    <span id="checkoutSubtotal" style="font-weight: 700;">₹0</span>
+                  </div>
+                  <div class="breakdown-line">
+                    <span>Festive Shipping</span>
+                    <span id="checkoutShipping" style="font-weight: 700; color: var(--success-600);">FREE</span>
+                  </div>
+                  <div class="breakdown-line" id="checkoutDiscountRow" style="display: none; color: var(--success-600);">
+                    <span>Discount</span>
+                    <span id="checkoutDiscount" style="font-weight: 700;">-₹0</span>
+                  </div>
+                  <div class="breakdown-line total">
+                    <span>Grand Total</span>
+                    <span id="checkoutGrandTotal">₹0</span>
+                  </div>
+                </div>
+
+                <div style="margin-top: 24px;">
+                  <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    Place Order (<span id="checkoutPlaceOrderBtnTotal">₹0</span>) 🔒
+                  </button>
+                </div>
+
+                <div class="checkout-trust-seals">
+                  <div class="trust-seal-item">
+                    <span class="seal-icon">🔒</span>
+                    256-Bit SSL Secured
+                  </div>
+                  <div class="trust-seal-item">
+                    <span class="seal-icon">🛡️</span>
+                    Zero Damage Guarantee
+                  </div>
+                  <div class="trust-seal-item">
+                    <span class="seal-icon">🪔</span>
+                    100% Festive Fresh
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER CONFIRMATION MODAL -->
+  <div class="modal-backdrop" id="orderConfirmationModal" role="dialog" aria-modal="true" aria-label="Order Confirmation">
+    <div class="modal-container" style="max-width: 720px;">
+      <button type="button" class="modal-close-btn" onclick="APNA_APP.closeAllModals()" aria-label="Close modal">✕</button>
+      <div id="orderConfirmationDetails">
+        <!-- Dynamically injected on order placement -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER TRACKING MODAL -->
+  <div class="modal-backdrop" id="trackingModal" role="dialog" aria-modal="true" aria-label="Track Order Status">
+    <div class="modal-container" style="max-width: 600px; padding: 32px 24px;">
+      <button type="button" class="modal-close-btn" onclick="APNA_APP.closeAllModals()" aria-label="Close tracking">✕</button>
+      
+      <div class="text-center" style="margin-bottom: 18px;">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">📦</div>
+        <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--maroon-900);">
+          Festive Hamper Tracker
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--dark-500);">
+          Track live dispatch status across 27,000+ Indian pincodes
+        </p>
+      </div>
+
+      <!-- Quick Lookup Form -->
+      <form onsubmit="event.preventDefault(); APNA_APP.trackOrderById(document.getElementById('trackingInputOrderId').value);" style="margin-bottom: 20px; display: flex; gap: 8px;">
+        <input type="text" id="trackingInputOrderId" class="form-input" placeholder="Enter Order ID (e.g. AT-2026-8492)" style="flex: 1; padding: 10px 14px; border: 1px solid var(--cream-400); border-radius: var(--radius-sm); font-size: 0.9rem;" value="AT-2026-8492">
+        <button type="submit" class="btn btn-primary btn-sm" style="padding: 10px 18px;">
+          Track 🔍
+        </button>
+      </form>
+
+      <div id="trackingDynamicContainer">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="APNA_APP.closeAllModals()">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE SEARCH MODAL -->
+  <div class="modal-backdrop" id="searchModal" role="dialog" aria-modal="true" aria-label="Search Hampers">
+    <div class="search-modal-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--maroon-900);">
+          Search Diwali Hampers 🪔
+        </h3>
+        <button type="button" class="icon-btn" onclick="APNA_APP.closeAllModals()" aria-label="Close search">✕</button>
+      </div>
+
+      <div class="search-input-wrap">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchModalInput" placeholder="Search by sweet, dry fruit, price, or budget..." oninput="APNA_APP.handleSearchInput(this.value)">
+      </div>
+
+      <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.785rem;">
+        <span style="color: var(--dark-500);">Trending searches:</span>
+        <button type="button" class="filter-pill" style="padding: 3px 10px; font-size: 0.75rem;" onclick="APNA_APP.handleSearchInput('Kaju Katli')">Kaju Katli</button>
+        <button type="button" class="filter-pill" style="padding: 3px 10px; font-size: 0.75rem;" onclick="APNA_APP.handleSearchInput('Brass Diya')">Brass Diya</button>
+        <button type="button" class="filter-pill" style="padding: 3px 10px; font-size: 0.75rem;" onclick="APNA_APP.handleSearchInput('Budget')">Under ₹500</button>
+        <button type="button" class="filter-pill" style="padding: 3px 10px; font-size: 0.75rem;" onclick="APNA_APP.handleSearchInput('Corporate')">Corporate</button>
+      </div>
+
+      <div class="search-results-list" id="searchResultsList">
+        <!-- Live search results -->
+      </div>
+    </div>
+  </div>
+
+  <!-- POLICY MODAL -->
+  <div class="modal-backdrop" id="policyModal" role="dialog" aria-modal="true" aria-label="Store Policy">
+    <div class="modal-container" style="max-width: 680px; padding: 36px 30px;">
+      <button type="button" class="modal-close-btn" onclick="APNA_APP.closeAllModals()" aria-label="Close policy modal">✕</button>
+      <h2 id="policyModalTitle" style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--maroon-900); margin-bottom: 18px; border-bottom: 1px solid var(--cream-300); padding-bottom: 10px;">
+        Policy Title
+      </h2>
+      <div id="policyModalBody" style="font-size: 0.88rem; color: var(--dark-700); line-height: 1.7; display: flex; flex-direction: column; gap: 14px;">
+        <!-- Injected dynamically -->
+      </div>
+      <div style="margin-top: 24px; text-align: right;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="APNA_APP.closeAllModals()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
