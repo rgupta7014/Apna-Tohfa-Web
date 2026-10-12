@@ -39,7 +39,11 @@ function requireAdminAuth(req, res, next) {
 // PUBLIC API ROUTES
 // -----------------------------------------------------------------------------
 
-// Health Check
+// Health Check & Uptime Pings (Prevents Render spin-down)
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
