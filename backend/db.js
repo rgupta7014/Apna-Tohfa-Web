@@ -342,10 +342,40 @@ class StoreDB {
   }
 
   addProduct(productData) {
-    const id = productData.id || productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    let id = productData.id || productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    if (!id) id = `hamper-${Date.now().toString().slice(-6)}`;
+    if (this.data.products.some(p => p.id === id)) {
+      id = `${id}-${Date.now().toString().slice(-4)}`;
+    }
+
+    const images = Array.isArray(productData.images) && productData.images.length > 0
+      ? productData.images
+      : (productData.image ? [productData.image] : ['assets/images/apna-tohfa.jpg']);
+    const image = productData.image || images[0] || 'assets/images/apna-tohfa.jpg';
+
+    // Ensure whatsInside is an array of objects
+    let whatsInside = [];
+    if (Array.isArray(productData.whatsInside) && productData.whatsInside.length > 0) {
+      whatsInside = productData.whatsInside.map(item => {
+        if (typeof item === 'string') return { item, icon: '✨' };
+        return { item: item.item || item.name || '', icon: item.icon || '✨' };
+      });
+    } else {
+      whatsInside = [
+        { item: 'Handcrafted Festive Keepsakes & Diyas', icon: '🪔' },
+        { item: 'Premium Curated Festive Delights', icon: '🍬' },
+        { item: 'Roasted Dry Fruits in Airtight Pack', icon: '🌰' },
+        { item: "Gold-Foiled 'Shubh Deepavali' Greeting Card", icon: '📜' },
+        { item: 'Festive Keepsake Presentation Box', icon: '🎁' }
+      ];
+    }
+
     const newProduct = {
       ...productData,
       id,
+      image,
+      images,
+      whatsInside,
       price: Number(productData.price) || 0,
       originalPrice: Number(productData.originalPrice) || Number(productData.price) || 0,
       rating: Number(productData.rating) || 5.0,
@@ -364,6 +394,19 @@ class StoreDB {
 
     if (updateData.price) updateData.price = Number(updateData.price);
     if (updateData.originalPrice) updateData.originalPrice = Number(updateData.originalPrice);
+
+    if (updateData.images && Array.isArray(updateData.images) && updateData.images.length > 0) {
+      if (!updateData.image) updateData.image = updateData.images[0];
+    } else if (updateData.image) {
+      if (!updateData.images || !updateData.images.length) updateData.images = [updateData.image];
+    }
+
+    if (updateData.whatsInside && Array.isArray(updateData.whatsInside)) {
+      updateData.whatsInside = updateData.whatsInside.map(item => {
+        if (typeof item === 'string') return { item, icon: '✨' };
+        return { item: item.item || item.name || '', icon: item.icon || '✨' };
+      });
+    }
 
     this.data.products[index] = {
       ...this.data.products[index],

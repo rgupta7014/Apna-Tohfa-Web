@@ -12,8 +12,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'apna_tohfa_festive_secret_key_2026
 
 // Middlewares
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Static Files
 app.use(express.static(path.join(__dirname)));

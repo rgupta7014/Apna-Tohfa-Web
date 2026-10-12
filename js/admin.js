@@ -767,6 +767,7 @@ const ADMIN = {
   },
 
   /* --- Hamper Images Manager --- */
+  /* --- Hamper Images Manager --- */
   renderProductImagePreviews() {
     const grid = document.getElementById('prodImagePreviewGrid');
     const countEl = document.getElementById('prodImageCount');
@@ -780,8 +781,11 @@ const ADMIN = {
 
     if (!this.currentProductImages.length) {
       grid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 14px; color: var(--text-dim); font-size: 0.8rem;">
-          No images attached yet. Click the upload box above or paste a URL!
+        <div style="grid-column: 1 / -1; text-align: center; padding: 22px 14px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(212,160,23,0.35); border-radius: var(--radius-sm); color: var(--text-dim); font-size: 0.82rem;">
+          📷 <strong>No photos attached yet.</strong><br>
+          <span style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px; display: inline-block;">
+            Click <strong>"Upload Photos from Device"</strong> above or paste an image URL / click a preset.
+          </span>
         </div>
       `;
       return;
@@ -789,11 +793,11 @@ const ADMIN = {
 
     grid.innerHTML = this.currentProductImages.map((src, idx) => `
       <div class="image-preview-card ${idx === 0 ? 'primary' : ''}">
-        ${idx === 0 ? '<span class="image-card-badge">Cover</span>' : ''}
+        ${idx === 0 ? '<span class="image-card-badge">★ Cover</span>' : ''}
         <img src="${src}" alt="Photo ${idx + 1}" onerror="this.src='assets/images/apna-tohfa.jpg'">
         <div class="image-card-actions">
           ${idx !== 0 ? `
-            <button type="button" class="image-action-btn" title="Make Primary Cover" onclick="ADMIN.makeProductImagePrimary(${idx})">
+            <button type="button" class="image-action-btn" title="Make Primary Cover Photo" onclick="ADMIN.makeProductImagePrimary(${idx})">
               ★ Set Cover
             </button>
           ` : ''}
@@ -803,6 +807,38 @@ const ADMIN = {
         </div>
       </div>
     `).join('');
+  },
+
+  // Client-side Canvas Image Compression (1200px max, 0.85 quality)
+  compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        return reject(new Error('Invalid image file'));
+      }
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Failed to load image element'));
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
   },
 
   async handleImageFileUpload(e) {
@@ -823,31 +859,31 @@ const ADMIN = {
         e.target.value = '';
         return;
       } catch (uploadErr) {
-        console.error('Firebase storage upload error, falling back to local storage:', uploadErr);
-        this.showToast('Cloud upload failed, saving to local device...', 'warning');
+        console.error('Firebase storage upload error, falling back to local compression:', uploadErr);
+        this.showToast('Cloud upload fallback: optimizing photo locally...', 'warning');
       }
     }
 
-    // 2. Standard Local Device / Base64 Fallback
-    let loaded = 0;
-    files.forEach(file => {
-      if (!file.type.startsWith('image/')) {
-        this.showToast(`Skipped non-image file: ${file.name}`, 'error');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const dataUrl = loadEvent.target.result;
-        this.currentProductImages.push(dataUrl);
-        loaded++;
-        if (loaded === files.length) {
-          this.renderProductImagePreviews();
-          this.showToast(`Uploaded ${files.length} photo(s) from device!`, 'success');
+    // 2. High performance local compression
+    try {
+      let added = 0;
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) {
+          this.showToast(`Skipped non-image file: ${file.name}`, 'error');
+          continue;
         }
-      };
-      reader.readAsDataURL(file);
-    });
+        const compressedBase64 = await this.compressImage(file);
+        this.currentProductImages.push(compressedBase64);
+        added++;
+      }
+      this.renderProductImagePreviews();
+      if (added > 0) {
+        this.showToast(`✓ Added ${added} photo(s)! Cover photo set.`, 'success');
+      }
+    } catch (err) {
+      console.error('Image compression error:', err);
+      this.showToast('Error processing photos. Please try again.', 'error');
+    }
 
     e.target.value = '';
   },
@@ -863,13 +899,19 @@ const ADMIN = {
     this.currentProductImages.push(url);
     input.value = '';
     this.renderProductImagePreviews();
-    this.showToast('Added image to hamper photos!', 'success');
+    this.showToast(this.currentProductImages.length === 1 ? 'Cover photo set!' : 'Added photo to gallery!', 'success');
   },
 
   addImagePreset(presetUrl) {
     this.currentProductImages.push(presetUrl);
     this.renderProductImagePreviews();
     this.showToast('Preset photo added!', 'success');
+  },
+
+  clearProductImages() {
+    this.currentProductImages = [];
+    this.renderProductImagePreviews();
+    this.showToast('All photos cleared. You can upload new photos now.', 'info');
   },
 
   makeProductImagePrimary(index) {
@@ -881,19 +923,29 @@ const ADMIN = {
   },
 
   removeProductImage(index) {
-    if (this.currentProductImages.length <= 1) {
-      this.showToast('A hamper must have at least one image!', 'error');
-      return;
+    if (index >= 0 && index < this.currentProductImages.length) {
+      this.currentProductImages.splice(index, 1);
+      this.renderProductImagePreviews();
+      this.showToast('Photo removed', 'info');
     }
-    this.currentProductImages.splice(index, 1);
-    this.renderProductImagePreviews();
   },
 
   openAddProductModal() {
     document.getElementById('productModalTitle').textContent = 'Add New Festive Hamper';
     document.getElementById('productForm').reset();
     document.getElementById('prodEditId').value = '';
-    this.currentProductImages = ['assets/images/apna-tohfa.jpg'];
+    const insideEl = document.getElementById('prodWhatsInside');
+    if (insideEl) {
+      insideEl.value = [
+        'Artisanal Kaju Katli (100g)',
+        'Hand-painted Terracotta Diya with pure cotton wicks',
+        'Roasted California Almonds in Jute Potli (60g)',
+        "Gold-Foiled 'Shubh Deepavali' Greeting Card",
+        'Rigid Festive Keepsake Gift Box'
+      ].join('\n');
+    }
+    // Start with empty photos so user uploaded photo becomes the primary Cover photo immediately!
+    this.currentProductImages = [];
     this.renderProductImagePreviews();
     this.openModal('productModal');
   },
@@ -904,9 +956,9 @@ const ADMIN = {
 
     document.getElementById('productModalTitle').textContent = `Edit Hamper: ${p.name}`;
     document.getElementById('prodEditId').value = p.id;
-    document.getElementById('prodName').value = p.name;
-    document.getElementById('prodCategory').value = p.category;
-    document.getElementById('prodPrice').value = p.price;
+    document.getElementById('prodName').value = p.name || '';
+    document.getElementById('prodCategory').value = p.category || 'budget';
+    document.getElementById('prodPrice').value = p.price || '';
     document.getElementById('prodOrigPrice').value = p.originalPrice || '';
     document.getElementById('prodBadge').value = p.badge || '';
     document.getElementById('prodDispatch').value = p.dispatchTime || 'Ships in 24 Hours';
@@ -914,12 +966,21 @@ const ADMIN = {
     document.getElementById('prodFullDesc').value = p.fullDescription || '';
     document.getElementById('prodTags').value = (p.tags || []).join(', ');
 
+    const insideEl = document.getElementById('prodWhatsInside');
+    if (insideEl) {
+      if (Array.isArray(p.whatsInside) && p.whatsInside.length > 0) {
+        insideEl.value = p.whatsInside.map(item => (typeof item === 'object' ? (item.item || item.name || '') : item)).filter(Boolean).join('\n');
+      } else {
+        insideEl.value = '';
+      }
+    }
+
     if (Array.isArray(p.images) && p.images.length > 0) {
       this.currentProductImages = [...p.images];
     } else if (p.image) {
       this.currentProductImages = [p.image];
     } else {
-      this.currentProductImages = ['assets/images/apna-tohfa.jpg'];
+      this.currentProductImages = [];
     }
     this.renderProductImagePreviews();
 
@@ -938,7 +999,31 @@ const ADMIN = {
     const shortDescription = document.getElementById('prodShortDesc').value.trim();
     const fullDescription = document.getElementById('prodFullDesc').value.trim();
     const tagsStr = document.getElementById('prodTags').value.trim();
-    const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : [];
+    const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+    const insideEl = document.getElementById('prodWhatsInside');
+    const whatsInsideRaw = insideEl ? insideEl.value.trim() : '';
+    const whatsInside = whatsInsideRaw
+      ? whatsInsideRaw.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+          let icon = '🎁';
+          const lower = line.toLowerCase();
+          if (lower.includes('diya') || lower.includes('light') || lower.includes('deepak')) icon = '🪔';
+          else if (lower.includes('kaju') || lower.includes('sweet') || lower.includes('mithai') || lower.includes('ladoo') || lower.includes('barfi') || lower.includes('peda')) icon = '🍬';
+          else if (lower.includes('almond') || lower.includes('cashew') || lower.includes('nut') || lower.includes('raisin') || lower.includes('pista') || lower.includes('walnut')) icon = '🌰';
+          else if (lower.includes('chocolate') || lower.includes('truffle')) icon = '🍫';
+          else if (lower.includes('candle')) icon = '🕯️';
+          else if (lower.includes('card') || lower.includes('scroll') || lower.includes('note')) icon = '📜';
+          else if (lower.includes('honey') || lower.includes('jar') || lower.includes('brittle')) icon = '🍯';
+          else if (lower.includes('ganesha') || lower.includes('idol') || lower.includes('god') || lower.includes('pooja')) icon = '🕉️';
+          return { item: line, icon };
+        })
+      : [
+          { item: 'Handcrafted Festive Keepsakes & Diyas', icon: '🪔' },
+          { item: 'Premium Curated Festive Delights', icon: '🍬' },
+          { item: 'Roasted Dry Fruits in Airtight Pack', icon: '🌰' },
+          { item: "Gold-Foiled 'Shubh Deepavali' Greeting Card", icon: '📜' },
+          { item: 'Festive Keepsake Presentation Box', icon: '🎁' }
+        ];
 
     const images = this.currentProductImages.length ? this.currentProductImages : ['assets/images/apna-tohfa.jpg'];
     const image = images[0];
@@ -948,13 +1033,14 @@ const ADMIN = {
       category,
       price,
       originalPrice,
-      badge,
+      badge: badge || (category === 'luxury' ? 'Luxury Pick' : category === 'budget' ? 'Festive Value' : 'Bestseller'),
       badgeType: category === 'luxury' ? 'royal' : category === 'corporate' ? 'corporate' : 'bestseller',
       dispatchTime,
       image,
       images,
       shortDescription,
       fullDescription: fullDescription || shortDescription,
+      whatsInside,
       tags,
       discount: originalPrice > price ? `${Math.round(((originalPrice - price) / originalPrice) * 100)}% OFF` : ''
     };
@@ -973,16 +1059,17 @@ const ADMIN = {
         });
       }
 
-      if (data.success) {
+      if (data && data.success) {
         this.showToast(data.message || 'Hamper saved successfully!', 'success');
         this.closeModal('productModal');
         await this.fetchProducts();
         await this.fetchStats();
       } else {
-        this.showToast(data.message || 'Failed to save product', 'error');
+        this.showToast(data?.message || 'Failed to save hamper. Please check inputs.', 'error');
       }
     } catch (e) {
-      this.showToast('Network error while saving product', 'error');
+      console.error('Error saving hamper:', e);
+      this.showToast('Network error while saving hamper', 'error');
     }
   },
 

@@ -26,6 +26,13 @@ const APNA_APP = {
     // Sync live catalog and settings with backend
     this.syncWithBackend();
 
+    // Re-sync catalog when returning to tab from Admin
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        this.syncWithBackend();
+      }
+    });
+
     // Check URL hash for direct navigation
     this.handleHashChange();
     window.addEventListener("hashchange", () => this.handleHashChange());
@@ -413,8 +420,12 @@ const APNA_APP = {
 
   /* --- Product Details Modal --- */
   openProductModal(productId) {
-    const product = APNA_DATA.products.find(p => p.id === productId);
-    if (!product) return;
+    if (!productId) return;
+    const product = APNA_DATA.products.find(p => p.id === productId || String(p.id) === String(productId));
+    if (!product) {
+      console.warn('Product not found:', productId);
+      return;
+    }
 
     this.selectedProduct = product;
     this.productModalQty = 1;
@@ -424,23 +435,51 @@ const APNA_APP = {
 
     if (!modal || !container) return;
 
+    // Robust safety fallbacks
+    const mainImg = product.image || (product.images && product.images[0]) || 'assets/images/apna-tohfa.jpg';
+    const galleryImages = (Array.isArray(product.images) && product.images.length > 0) ? product.images : [mainImg];
+    const badgeText = product.badge || 'Festive Special';
+    const badgeType = product.badgeType || 'accent';
+    const rating = product.rating || 5.0;
+    const reviewsCount = product.reviewsCount || 1;
+    const dispatchTime = product.dispatchTime || 'Ships in 24 Hours';
+    const shortDesc = product.shortDescription || '';
+    const fullDesc = product.fullDescription || shortDesc || 'Handcrafted festive hamper curated for Diwali celebrations.';
+
+    // Normalize whatsInside safely (handles array of strings, array of objects, or empty)
+    let whatsInsideItems = [];
+    if (Array.isArray(product.whatsInside) && product.whatsInside.length > 0) {
+      whatsInsideItems = product.whatsInside.map(item => {
+        if (typeof item === 'string') return { item, icon: '✨' };
+        return { item: item.item || item.name || '', icon: item.icon || '✨' };
+      });
+    } else {
+      whatsInsideItems = [
+        { item: 'Handcrafted Festive Keepsakes & Diyas', icon: '🪔' },
+        { item: 'Premium Curated Festive Delights', icon: '🍬' },
+        { item: 'Roasted Dry Fruits in Airtight Pack', icon: '🌰' },
+        { item: "Gold-Foiled 'Shubh Deepavali' Greeting Card", icon: '📜' },
+        { item: 'Festive Keepsake Presentation Box', icon: '🎁' }
+      ];
+    }
+
     container.innerHTML = `
       <div class="modal-product-layout">
         <!-- Left: Image View -->
         <div class="modal-image-col">
           <div class="modal-main-image-wrap">
-            <img src="${product.image}" alt="${product.name}" class="modal-main-image" id="modalMainImg">
+            <img src="${mainImg}" alt="${product.name}" class="modal-main-image" id="modalMainImg" onerror="this.src='assets/images/apna-tohfa.jpg'">
           </div>
-          ${(product.images && product.images.length > 1) ? `
+          ${galleryImages.length > 1 ? `
             <div class="modal-gallery-thumbs" id="modalGalleryThumbs">
-              ${product.images.map((img, idx) => `
-                <img src="${img}" alt="${product.name} photo ${idx + 1}" class="modal-gallery-thumb ${img === product.image ? 'active' : ''}" onclick="APNA_APP.switchModalImage('${img}', this)">
+              ${galleryImages.map((img, idx) => `
+                <img src="${img}" alt="${product.name} photo ${idx + 1}" class="modal-gallery-thumb ${idx === 0 ? 'active' : ''}" onclick="APNA_APP.switchModalImageByIndex(${idx}, this)" onerror="this.src='assets/images/apna-tohfa.jpg'">
               `).join('')}
             </div>
           ` : ''}
           <div style="display: flex; gap: 8px; margin-top: 10px;">
             <div style="flex: 1; padding: 10px; background: var(--cream-100); border-radius: var(--radius-sm); border: 1px solid var(--cream-300); text-align: center; font-size: 0.785rem; color: var(--maroon-800); font-weight: 700;">
-              ✨ ${product.dispatchTime}
+              ✨ ${dispatchTime}
             </div>
             <div style="flex: 1; padding: 10px; background: var(--cream-100); border-radius: var(--radius-sm); border: 1px solid var(--cream-300); text-align: center; font-size: 0.785rem; color: var(--maroon-800); font-weight: 700;">
               🪔 100% Festive Freshness
@@ -451,7 +490,7 @@ const APNA_APP = {
         <!-- Right: Product Info & Actions -->
         <div class="modal-info-col">
           <div style="margin-bottom: 8px;">
-            <span class="badge badge-${product.badgeType || 'accent'}">${product.badge}</span>
+            <span class="badge badge-${badgeType}">${badgeText}</span>
             <span style="font-size: 0.75rem; color: var(--gold-800); margin-left: 8px; font-weight: 700; text-transform: uppercase;">Diwali 2026 Collection</span>
           </div>
 
@@ -459,8 +498,8 @@ const APNA_APP = {
 
           <div class="modal-product-meta">
             <span class="stars-gold">★★★★★</span>
-            <span style="font-weight: 700; color: var(--dark-900);">${product.rating}</span>
-            <span>(${product.reviewsCount} customer reviews)</span>
+            <span style="font-weight: 700; color: var(--dark-900);">${rating}</span>
+            <span>(${reviewsCount} customer reviews)</span>
             <span>•</span>
             <span style="color: var(--success-600); font-weight: 600;">✓ In Stock</span>
           </div>
@@ -472,7 +511,7 @@ const APNA_APP = {
             <span style="font-size: 0.75rem; color: var(--dark-500); margin-left: auto;">(Inclusive of all taxes)</span>
           </div>
 
-          <p class="modal-desc">${product.fullDescription}</p>
+          <p class="modal-desc">${fullDesc}</p>
 
           <!-- What's Inside Checklist -->
           <div class="whats-inside-box">
@@ -480,7 +519,7 @@ const APNA_APP = {
               <span>🎁</span> What's Inside This Hamper:
             </h4>
             <div class="whats-inside-list">
-              ${product.whatsInside.map(item => `
+              ${whatsInsideItems.map(item => `
                 <div class="whats-inside-item">
                   <span class="item-icon">${item.icon}</span>
                   <span>${item.item}</span>
@@ -549,6 +588,18 @@ const APNA_APP = {
 
     modal.classList.add("active");
     document.body.classList.add("no-scroll");
+  },
+
+  switchModalImageByIndex(idx, clickedEl) {
+    if (!this.selectedProduct) return;
+    const images = (Array.isArray(this.selectedProduct.images) && this.selectedProduct.images.length > 0)
+      ? this.selectedProduct.images
+      : [this.selectedProduct.image || 'assets/images/apna-tohfa.jpg'];
+    const imgSrc = images[idx] || images[0];
+    const main = document.getElementById("modalMainImg");
+    if (main && imgSrc) main.src = imgSrc;
+    document.querySelectorAll(".modal-gallery-thumb").forEach(t => t.classList.remove("active"));
+    if (clickedEl) clickedEl.classList.add("active");
   },
 
   switchModalImage(imgSrc, clickedEl) {

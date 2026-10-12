@@ -649,14 +649,19 @@
                 </div>
               </div>
 
-              <!-- Quick Presets -->
-              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 8px;">
-                Quick Presets: 
-                <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/apna-tohfa.jpg')" style="color: var(--gold-300);">Apna Tohfa</a> • 
-                <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/shubh-aarambh.jpg')" style="color: var(--gold-300);">Shubh Aarambh</a> • 
-                <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/khushi-special.jpg')" style="color: var(--gold-300);">Khushi Special</a> • 
-                <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/shahi-tohfa.jpg')" style="color: var(--gold-300);">Shahi Tohfa</a> • 
-                <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/royal-celebration.jpg')" style="color: var(--gold-300);">Royal Celebration</a>
+              <!-- Quick Presets & Actions -->
+              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px;">
+                <div>
+                  Presets: 
+                  <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/apna-tohfa.jpg')" style="color: var(--gold-300);">Apna Tohfa</a> • 
+                  <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/shubh-aarambh.jpg')" style="color: var(--gold-300);">Shubh Aarambh</a> • 
+                  <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/khushi-special.jpg')" style="color: var(--gold-300);">Khushi Special</a> • 
+                  <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/shahi-tohfa.jpg')" style="color: var(--gold-300);">Shahi Tohfa</a> • 
+                  <a href="javascript:void(0)" onclick="ADMIN.addImagePreset('assets/images/royal-celebration.jpg')" style="color: var(--gold-300);">Royal Celebration</a>
+                </div>
+                <button type="button" onclick="ADMIN.clearProductImages()" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.7rem; color: #ff8888;">
+                  🗑️ Clear Photos
+                </button>
               </div>
 
               <!-- Live Image Thumbnails Grid -->
@@ -676,6 +681,18 @@
           <div class="form-group">
             <label class="form-label">Full Description</label>
             <textarea id="prodFullDesc" class="form-textarea" rows="3" placeholder="Elaborate details for hamper modal..."></textarea>
+          </div>
+
+          <!-- What's Inside Checklist -->
+          <div class="form-group">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>What's Inside Items (One item per line)</span>
+              <span style="font-size: 0.72rem; color: var(--gold-400); font-weight: normal;">Diwali items checklist</span>
+            </label>
+            <textarea id="prodWhatsInside" class="form-textarea" rows="4" placeholder="Artisanal Kaju Katli (100g)&#10;Hand-painted Terracotta Diya&#10;Roasted California Almonds (60g)&#10;Gold-foiled Greeting Card&#10;Festive Keepsake Gift Box"></textarea>
+            <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 4px;">
+              Enter items line by line. Festive icons (🪔, 🍬, 🌰, 🍫, 📜, 🎁) will be assigned automatically!
+            </div>
           </div>
 
           <div class="form-group">
