@@ -69,6 +69,26 @@ const ADMIN = {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
 
+    // 1. Firebase Auth (if configured)
+    if (window.APNA_FIREBASE && window.APNA_FIREBASE.isConfigured) {
+      try {
+        const { user, idToken } = await window.APNA_FIREBASE.loginWithEmail(email, password);
+        this.token = idToken;
+        localStorage.setItem('apna_admin_token', this.token);
+        const nameEl = document.getElementById('sidebarAdminName');
+        if (nameEl) nameEl.textContent = user.displayName || user.email || 'Admin User';
+        this.hideLogin();
+        this.showToast('🔥 Logged in securely via Firebase Auth!', 'success');
+        this.loadAllData();
+        return;
+      } catch (fbErr) {
+        console.warn('Firebase login attempt:', fbErr);
+        this.showToast(fbErr.message || 'Firebase authentication failed', 'error');
+        return;
+      }
+    }
+
+    // 2. Standard Local Backend Authentication
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -94,6 +114,43 @@ const ADMIN = {
       this.loadAllData();
     } catch (err) {
       this.showToast('Network error during login', 'error');
+    }
+  },
+
+  async handleGoogleLogin() {
+    if (!window.APNA_FIREBASE || !window.APNA_FIREBASE.isConfigured) {
+      this.showToast('Firebase keys not configured yet in js/firebase-config.js', 'info');
+      return;
+    }
+    try {
+      const { user, idToken } = await window.APNA_FIREBASE.loginWithGoogle();
+      this.token = idToken;
+      localStorage.setItem('apna_admin_token', this.token);
+      const nameEl = document.getElementById('sidebarAdminName');
+      if (nameEl) nameEl.textContent = user.displayName || user.email || 'Admin User';
+      this.hideLogin();
+      this.showToast(`🔥 Welcome, ${user.displayName || 'Admin'}!`, 'success');
+      this.loadAllData();
+    } catch (err) {
+      this.showToast(err.message || 'Google sign-in cancelled or failed', 'error');
+    }
+  },
+
+  async handleForgotPassword() {
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!email) {
+      this.showToast('Please type your admin email in the box above first', 'info');
+      return;
+    }
+    if (window.APNA_FIREBASE && window.APNA_FIREBASE.isConfigured) {
+      try {
+        await window.APNA_FIREBASE.sendPasswordReset(email);
+        this.showToast(`📩 Password reset link sent to ${email}`, 'success');
+      } catch (err) {
+        this.showToast(err.message || 'Failed to send reset link', 'error');
+      }
+    } else {
+      this.showToast('Firebase not configured. Please use your standard admin credentials.', 'info');
     }
   },
 
@@ -702,10 +759,30 @@ const ADMIN = {
     `).join('');
   },
 
-  handleImageFileUpload(e) {
+  async handleImageFileUpload(e) {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
+    // 1. If Firebase Storage is configured, upload directly to Cloud Storage
+    if (window.APNA_FIREBASE && window.APNA_FIREBASE.isConfigured && window.APNA_FIREBASE.storage) {
+      this.showToast(`Uploading ${files.length} photo(s) to Firebase Cloud Storage...`, 'info');
+      try {
+        for (const file of files) {
+          if (!file.type.startsWith('image/')) continue;
+          const downloadUrl = await window.APNA_FIREBASE.uploadProductImage(file);
+          this.currentProductImages.push(downloadUrl);
+        }
+        this.renderProductImagePreviews();
+        this.showToast(`🔥 Successfully uploaded to Firebase Cloud Storage!`, 'success');
+        e.target.value = '';
+        return;
+      } catch (uploadErr) {
+        console.error('Firebase storage upload error, falling back to local storage:', uploadErr);
+        this.showToast('Cloud upload failed, saving to local device...', 'warning');
+      }
+    }
+
+    // 2. Standard Local Device / Base64 Fallback
     let loaded = 0;
     files.forEach(file => {
       if (!file.type.startsWith('image/')) {
