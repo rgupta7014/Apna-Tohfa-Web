@@ -123,8 +123,8 @@
             <span class="admin-role">Super Admin</span>
           </div>
         </div>
-        <button type="button" class="logout-btn" onclick="ADMIN.logout()" title="Logout Admin" aria-label="Logout">
-          🚪
+        <button type="button" class="btn btn-sm" onclick="ADMIN.logout()" title="Logout Admin" style="background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4); padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+          🚪 Logout
         </button>
       </div>
     </aside>
@@ -150,6 +150,9 @@
           </button>
           <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.openAddProductModal()">
             + Add Hamper
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.logout()" title="Logout Admin" style="color: #f87171; border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); font-weight: 600;">
+            🚪 Logout
           </button>
         </div>
       </header>

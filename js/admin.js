@@ -19,6 +19,13 @@ const ADMIN = {
   currentProductImages: [],
 
   init() {
+    // If URL has #login, #logout or ?action=logout, force logout and display login screen
+    const urlParams = new URLSearchParams(window.location.search);
+    if (window.location.hash === '#login' || window.location.hash === '#logout' || urlParams.get('logout') === 'true' || urlParams.get('action') === 'logout') {
+      this.logout();
+      return;
+    }
+
     if (this.token) {
       this.verifySession();
     } else {
@@ -172,11 +179,22 @@ const ADMIN = {
     }
   },
 
-  logout() {
+  async logout() {
     this.token = null;
     localStorage.removeItem('apna_admin_token');
+    sessionStorage.clear();
+
+    // Sign out from Firebase Auth if initialized
+    if (window.APNA_FIREBASE && window.APNA_FIREBASE.isConfigured && window.APNA_FIREBASE.auth) {
+      try {
+        await window.APNA_FIREBASE.logout();
+      } catch (err) {
+        console.warn('Firebase logout notice:', err);
+      }
+    }
+
     this.showLogin();
-    this.showToast('Logged out of Admin Desk successfully');
+    this.showToast('Logged out of Admin Desk successfully', 'info');
   },
 
   toggleSidebar() {
