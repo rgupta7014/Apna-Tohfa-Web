@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static Files
 app.use(express.static(path.join(__dirname)));
 
-// Admin Auth Middleware
+// Admin Auth Middleware (Dual support for Local JWT & Firebase ID Tokens)
 function requireAdminAuth(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -26,10 +26,37 @@ function requireAdminAuth(req, res, next) {
   }
 
   const token = authHeader.split(' ')[1];
+
+  // 1. Check if token is a Firebase ID Token
+  try {
+    const decodedFb = jwt.decode(token);
+    if (decodedFb && (
+      (decodedFb.iss && decodedFb.iss.startsWith('https://securetoken.google.com/')) ||
+      decodedFb.aud === 'apna-tohfa-web' ||
+      (decodedFb.firebase && decodedFb.firebase.sign_in_provider)
+    )) {
+      const now = Math.floor(Date.now() / 1000);
+      if (decodedFb.exp && decodedFb.exp < now) {
+        return res.status(401).json({ success: false, message: 'Firebase session expired. Please log in again.' });
+      }
+      req.admin = {
+        id: decodedFb.user_id || decodedFb.sub || 'admin',
+        email: decodedFb.email || 'admin@apnatohfa.in',
+        name: decodedFb.name || decodedFb.email || 'Chief Admin',
+        role: 'superadmin',
+        authProvider: 'firebase'
+      };
+      return next();
+    }
+  } catch (fbErr) {
+    // Proceed to local token verification
+  }
+
+  // 2. Standard Local JWT Token verification
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.admin = decoded;
-    next();
+    return next();
   } catch (err) {
     return res.status(401).json({ success: false, message: 'Session expired or invalid token. Please log in again.' });
   }
@@ -92,6 +119,43 @@ app.post('/api/auth/login', (req, res) => {
 // Check Admin Session
 app.get('/api/auth/me', requireAdminAuth, (req, res) => {
   res.json({ success: true, user: req.admin });
+});
+
+// Firebase Session Exchange
+app.post('/api/auth/firebase-session', (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken) {
+    return res.status(400).json({ success: false, message: 'Firebase idToken required' });
+  }
+
+  try {
+    const decodedFb = jwt.decode(idToken);
+    if (!decodedFb || (
+      !(decodedFb.iss && decodedFb.iss.startsWith('https://securetoken.google.com/')) &&
+      decodedFb.aud !== 'apna-tohfa-web' &&
+      !decodedFb.firebase
+    )) {
+      return res.status(401).json({ success: false, message: 'Invalid Firebase token' });
+    }
+
+    const adminUser = {
+      id: decodedFb.user_id || decodedFb.sub || 'admin',
+      email: decodedFb.email || 'admin@apnatohfa.in',
+      name: decodedFb.name || decodedFb.email || 'Chief Admin',
+      role: 'superadmin',
+      authProvider: 'firebase'
+    };
+
+    const serverToken = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      success: true,
+      token: serverToken,
+      user: adminUser
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to verify Firebase session' });
+  }
 });
 
 // Get Products (with search, category, stock filters)

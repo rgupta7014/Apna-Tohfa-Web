@@ -47,7 +47,11 @@ const ADMIN = {
       const res = await fetch(url, options);
       const data = await res.json();
       if (res.status === 401) {
-        this.logout();
+        if (!this._isLoggingOut) {
+          this._isLoggingOut = true;
+          this.logout();
+          setTimeout(() => { this._isLoggingOut = false; }, 3000);
+        }
         throw new Error(data.message || 'Session expired. Please log in again.');
       }
       return data;
@@ -80,7 +84,20 @@ const ADMIN = {
     if (window.APNA_FIREBASE && window.APNA_FIREBASE.isConfigured) {
       try {
         const { user, idToken } = await window.APNA_FIREBASE.loginWithEmail(email, password);
-        this.token = idToken;
+        
+        // Exchange Firebase ID Token with server session
+        try {
+          const syncRes = await fetch('/api/auth/firebase-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+          });
+          const syncData = await syncRes.json();
+          this.token = (syncData.success && syncData.token) ? syncData.token : idToken;
+        } catch (syncErr) {
+          this.token = idToken;
+        }
+
         localStorage.setItem('apna_admin_token', this.token);
         const nameEl = document.getElementById('sidebarAdminName');
         if (nameEl) nameEl.textContent = user.displayName || user.email || 'Admin User';
@@ -89,9 +106,7 @@ const ADMIN = {
         this.loadAllData();
         return;
       } catch (fbErr) {
-        console.warn('Firebase login attempt:', fbErr);
-        this.showToast(fbErr.message || 'Firebase authentication failed', 'error');
-        return;
+        console.warn('Firebase login attempt, falling back to local credentials:', fbErr.message);
       }
     }
 
@@ -131,7 +146,20 @@ const ADMIN = {
     }
     try {
       const { user, idToken } = await window.APNA_FIREBASE.loginWithGoogle();
-      this.token = idToken;
+      
+      // Exchange Firebase ID Token with server session
+      try {
+        const syncRes = await fetch('/api/auth/firebase-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        const syncData = await syncRes.json();
+        this.token = (syncData.success && syncData.token) ? syncData.token : idToken;
+      } catch (syncErr) {
+        this.token = idToken;
+      }
+
       localStorage.setItem('apna_admin_token', this.token);
       const nameEl = document.getElementById('sidebarAdminName');
       if (nameEl) nameEl.textContent = user.displayName || user.email || 'Admin User';
