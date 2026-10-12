@@ -14,12 +14,13 @@
  */
 
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCtEcChVz7yTT6ZOoquzU6UBiPzmGua8pU",
+  authDomain: "apna-tohfa-web.firebaseapp.com",
+  projectId: "apna-tohfa-web",
+  storageBucket: "apna-tohfa-web.firebasestorage.app",
+  messagingSenderId: "247858987407",
+  appId: "1:247858987407:web:61ba87cce2501e954fcbfa",
+  measurementId: "G-808EX0B4GP"
 };
 
 // Check if valid Firebase credentials are configured
@@ -41,9 +42,26 @@ if (typeof firebase !== 'undefined') {
     if (isFirebaseConfigured) {
       firebaseApp = firebase.initializeApp(firebaseConfig);
       firebaseAuth = firebase.auth();
-      firebaseDb = firebase.firestore();
-      firebaseStorage = firebase.storage();
-      console.log("🔥 [Firebase] Initialized successfully for Apna Tohfa");
+      
+      // Optional Firestore Database
+      try {
+        if (typeof firebase.firestore === 'function') {
+          firebaseDb = firebase.firestore();
+        }
+      } catch (dbErr) {
+        console.info("ℹ️ [Firebase] Firestore skipped or not initialized:", dbErr.message);
+      }
+
+      // Optional Cloud Storage (skipped if free plan)
+      try {
+        if (typeof firebase.storage === 'function') {
+          firebaseStorage = firebase.storage();
+        }
+      } catch (stErr) {
+        console.info("ℹ️ [Firebase] Cloud Storage skipped (Free plan active)");
+      }
+
+      console.log("🔥 [Firebase] Auth & Services initialized successfully for Apna Tohfa");
     } else {
       console.info("ℹ️ [Firebase] Placeholder config detected. Paste your keys in js/firebase-config.js to activate.");
     }
