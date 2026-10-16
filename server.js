@@ -75,45 +75,52 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     store: 'APNA TOHFA',
-    version: '1.0.0',
+    version: '1.1.0',
+    database: db.isMongo ? 'MongoDB Atlas (Cloud)' : 'Local JSON Storage',
+    connectionStatus: db.connectionStatus,
     timestamp: new Date().toISOString()
   });
 });
 
 // Admin Login
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required' });
-  }
-
-  const admin = db.findAdminByEmail(email);
-  if (!admin) {
-    return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
-  }
-
-  const isMatch = bcrypt.compareSync(password, admin.passwordHash);
-  if (!isMatch) {
-    return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
-  }
-
-  const token = jwt.sign(
-    { id: admin.id, email: admin.email, name: admin.name, role: admin.role },
-    JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-
-  res.json({
-    success: true,
-    message: 'Welcome back to Apna Tohfa Admin Desk!',
-    token,
-    user: {
-      id: admin.id,
-      name: admin.name,
-      email: admin.email,
-      role: admin.role
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
-  });
+
+    const admin = await db.findAdminByEmail(email);
+    if (!admin) {
+      return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+    }
+
+    const isMatch = bcrypt.compareSync(password, admin.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: admin.id, email: admin.email, name: admin.name, role: admin.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      message: 'Welcome back to Apna Tohfa Admin Desk!',
+      token,
+      user: {
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+      }
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'Server error during login' });
+  }
 });
 
 // Check Admin Session
@@ -159,170 +166,217 @@ app.post('/api/auth/firebase-session', (req, res) => {
 });
 
 // Get Products (with search, category, stock filters)
-app.get('/api/products', (req, res) => {
-  const { category, search, inStock } = req.query;
-  const products = db.getProducts({ category, search, inStock });
-  res.json({ success: true, count: products.length, products });
+app.get('/api/products', async (req, res) => {
+  try {
+    const { category, search, inStock } = req.query;
+    const products = await db.getProducts({ category, search, inStock });
+    res.json({ success: true, count: products.length, products });
+  } catch (err) {
+    console.error('Error fetching products:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch hampers' });
+  }
 });
 
 // Get Single Product
-app.get('/api/products/:id', (req, res) => {
-  const product = db.getProductById(req.params.id);
-  if (!product) {
-    return res.status(404).json({ success: false, message: 'Hamper not found' });
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const product = await db.getProductById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Hamper not found' });
+    }
+    res.json({ success: true, product });
+  } catch (err) {
+    console.error('Error fetching product:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch hamper details' });
   }
-  res.json({ success: true, product });
 });
 
 // Get Categories
-app.get('/api/categories', (req, res) => {
-  res.json({ success: true, categories: db.data.categories });
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = await db.getCategories();
+    res.json({ success: true, categories });
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch categories' });
+  }
 });
 
 // Place New Order
-app.post('/api/orders', (req, res) => {
-  const { customer, items, subtotal, shipping, discount, grandTotal, paymentMethod, couponApplied, giftMessage } = req.body;
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { customer, items, subtotal, shipping, discount, grandTotal, paymentMethod, couponApplied, giftMessage } = req.body;
 
-  if (!customer || !customer.name || !customer.phone || !customer.address || !customer.city || !customer.pincode) {
-    return res.status(400).json({ success: false, message: 'Incomplete delivery address details' });
+    if (!customer || !customer.name || !customer.phone || !customer.address || !customer.city || !customer.pincode) {
+      return res.status(400).json({ success: false, message: 'Incomplete delivery address details' });
+    }
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cart items cannot be empty' });
+    }
+
+    // Preserve customer's gift message
+    if (giftMessage && !customer.giftMessage) {
+      customer.giftMessage = giftMessage;
+    }
+
+    const newOrder = await db.createOrder({
+      customer,
+      items,
+      subtotal,
+      shipping,
+      discount,
+      grandTotal,
+      paymentMethod,
+      couponApplied
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Diwali hamper order successfully placed!',
+      order: newOrder
+    });
+  } catch (err) {
+    console.error('Error creating order:', err);
+    res.status(500).json({ success: false, message: 'Failed to process order' });
   }
-
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ success: false, message: 'Cart items cannot be empty' });
-  }
-
-  // Preserve customer's gift message
-  if (giftMessage && !customer.giftMessage) {
-    customer.giftMessage = giftMessage;
-  }
-
-  const newOrder = db.createOrder({
-    customer,
-    items,
-    subtotal,
-    shipping,
-    discount,
-    grandTotal,
-    paymentMethod,
-    couponApplied
-  });
-
-  res.status(201).json({
-    success: true,
-    message: 'Diwali hamper order successfully placed!',
-    order: newOrder
-  });
 });
 
 // Customer Live Order Tracking
-app.get('/api/orders/:id/track', (req, res) => {
-  const order = db.getOrderById(req.params.id);
-  if (!order) {
-    return res.status(404).json({
-      success: false,
-      message: `No order found with ID "${req.params.id}". Please check your order number.`
-    });
-  }
+app.get('/api/orders/:id/track', async (req, res) => {
+  try {
+    const order = await db.getOrderById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: `No order found with ID "${req.params.id}". Please check your order number.`
+      });
+    }
 
-  res.json({
-    success: true,
-    orderId: order.orderId,
-    customerName: order.customer?.name,
-    city: order.customer?.city,
-    state: order.customer?.state,
-    orderStatus: order.orderStatus,
-    courier: order.courier,
-    estimatedDelivery: order.estimatedDelivery,
-    items: order.items,
-    grandTotal: order.grandTotal,
-    datePlaced: order.datePlaced,
-    timeline: order.timeline || []
-  });
+    res.json({
+      success: true,
+      orderId: order.orderId,
+      customerName: order.customer?.name,
+      city: order.customer?.city,
+      state: order.customer?.state,
+      orderStatus: order.orderStatus,
+      courier: order.courier,
+      estimatedDelivery: order.estimatedDelivery,
+      items: order.items,
+      grandTotal: order.grandTotal,
+      datePlaced: order.datePlaced,
+      timeline: order.timeline || []
+    });
+  } catch (err) {
+    console.error('Error tracking order:', err);
+    res.status(500).json({ success: false, message: 'Failed to track order' });
+  }
 });
 
 // Validate Coupon
-app.post('/api/coupons/validate', (req, res) => {
-  const { code, subtotal } = req.body;
-  if (!code) {
-    return res.status(400).json({ success: false, message: 'Please provide a promo code' });
-  }
-
-  const coupon = db.getCouponByCode(code);
-  if (!coupon || !coupon.active) {
-    return res.status(404).json({ success: false, message: 'Invalid or expired coupon code' });
-  }
-
-  const orderSubtotal = Number(subtotal) || 0;
-  if (coupon.minSpend && orderSubtotal < coupon.minSpend) {
-    return res.status(400).json({
-      success: false,
-      message: `Minimum order spend of ₹${coupon.minSpend} required for code "${coupon.code}"`
-    });
-  }
-
-  let discountAmount = 0;
-  if (coupon.discountPercent) {
-    discountAmount = Math.round((orderSubtotal * coupon.discountPercent) / 100);
-  } else if (coupon.discountFlat) {
-    discountAmount = Math.min(coupon.discountFlat, orderSubtotal);
-  }
-
-  res.json({
-    success: true,
-    coupon: {
-      code: coupon.code,
-      label: coupon.label,
-      discountAmount,
-      discountPercent: coupon.discountPercent,
-      discountFlat: coupon.discountFlat
+app.post('/api/coupons/validate', async (req, res) => {
+  try {
+    const { code, subtotal } = req.body;
+    if (!code) {
+      return res.status(400).json({ success: false, message: 'Please provide a promo code' });
     }
-  });
+
+    const coupon = await db.getCouponByCode(code);
+    if (!coupon || !coupon.active) {
+      return res.status(404).json({ success: false, message: 'Invalid or expired coupon code' });
+    }
+
+    const orderSubtotal = Number(subtotal) || 0;
+    if (coupon.minSpend && orderSubtotal < coupon.minSpend) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum order spend of ₹${coupon.minSpend} required for code "${coupon.code}"`
+      });
+    }
+
+    let discountAmount = 0;
+    if (coupon.discountPercent) {
+      discountAmount = Math.round((orderSubtotal * coupon.discountPercent) / 100);
+    } else if (coupon.discountFlat) {
+      discountAmount = Math.min(coupon.discountFlat, orderSubtotal);
+    }
+
+    res.json({
+      success: true,
+      coupon: {
+        code: coupon.code,
+        label: coupon.label,
+        discountAmount,
+        discountPercent: coupon.discountPercent,
+        discountFlat: coupon.discountFlat
+      }
+    });
+  } catch (err) {
+    console.error('Error validating coupon:', err);
+    res.status(500).json({ success: false, message: 'Failed to validate coupon' });
+  }
 });
 
 // Corporate Inquiry Submission
-app.post('/api/corporate', (req, res) => {
-  const { companyName, contactPerson, phone, email, hampersCount, budget, city, message } = req.body;
+app.post('/api/corporate', async (req, res) => {
+  try {
+    const { companyName, contactPerson, phone, email, hampersCount, budget, city, message } = req.body;
 
-  if (!contactPerson || !phone || !email) {
-    return res.status(400).json({ success: false, message: 'Please provide contact person name, mobile and email' });
+    if (!contactPerson || !phone || !email) {
+      return res.status(400).json({ success: false, message: 'Please provide contact person name, mobile and email' });
+    }
+
+    const lead = await db.createCorporateLead({
+      companyName,
+      contactPerson,
+      phone,
+      email,
+      hampersCount,
+      budget,
+      city,
+      message
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Corporate gifting inquiry received! Our dedicated desk will revert within 2 hours.',
+      leadId: lead.id
+    });
+  } catch (err) {
+    console.error('Error submitting corporate lead:', err);
+    res.status(500).json({ success: false, message: 'Failed to submit corporate inquiry' });
   }
-
-  const lead = db.createCorporateLead({
-    companyName,
-    contactPerson,
-    phone,
-    email,
-    hampersCount,
-    budget,
-    city,
-    message
-  });
-
-  res.status(201).json({
-    success: true,
-    message: 'Corporate gifting inquiry received! Our dedicated desk will revert within 2 hours.',
-    leadId: lead.id
-  });
 });
 
 // Contact Us Message
-app.post('/api/contact', (req, res) => {
-  const { name, email, phone, message } = req.body;
-  if (!name || !email || !message) {
-    return res.status(400).json({ success: false, message: 'Please fill name, email and message' });
-  }
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ success: false, message: 'Please fill name, email and message' });
+    }
 
-  const inquiry = db.createContactInquiry({ name, email, phone, message });
-  res.status(201).json({
-    success: true,
-    message: 'Thank you! Your message has reached our festive care team.',
-    inquiryId: inquiry.id
-  });
+    const inquiry = await db.createContactInquiry({ name, email, phone, message });
+    res.status(201).json({
+      success: true,
+      message: 'Thank you! Your message has reached our festive care team.',
+      inquiryId: inquiry.id
+    });
+  } catch (err) {
+    console.error('Error submitting contact form:', err);
+    res.status(500).json({ success: false, message: 'Failed to submit contact message' });
+  }
 });
 
 // Store Settings (Public)
-app.get('/api/settings', (req, res) => {
-  res.json({ success: true, settings: db.getSettings() });
+app.get('/api/settings', async (req, res) => {
+  try {
+    const settings = await db.getSettings();
+    res.json({ success: true, settings });
+  } catch (err) {
+    console.error('Error getting settings:', err);
+    res.status(500).json({ success: false, message: 'Failed to load settings' });
+  }
 });
 
 // -----------------------------------------------------------------------------
@@ -330,191 +384,282 @@ app.get('/api/settings', (req, res) => {
 // -----------------------------------------------------------------------------
 
 // Dashboard Stats & Analytics
-app.get('/api/admin/stats', requireAdminAuth, (req, res) => {
-  const stats = db.getAdminStats();
-  res.json({ success: true, stats });
+app.get('/api/admin/stats', requireAdminAuth, async (req, res) => {
+  try {
+    const stats = await db.getAdminStats();
+    res.json({ success: true, stats });
+  } catch (err) {
+    console.error('Error fetching admin stats:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch dashboard statistics' });
+  }
 });
 
 // All Orders
-app.get('/api/admin/orders', requireAdminAuth, (req, res) => {
-  const { status, search } = req.query;
-  const orders = db.getOrders({ status, search });
-  res.json({ success: true, count: orders.length, orders });
+app.get('/api/admin/orders', requireAdminAuth, async (req, res) => {
+  try {
+    const { status, search } = req.query;
+    const orders = await db.getOrders({ status, search });
+    res.json({ success: true, count: orders.length, orders });
+  } catch (err) {
+    console.error('Error fetching admin orders:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch orders' });
+  }
 });
 
 // Single Order
-app.get('/api/admin/orders/:id', requireAdminAuth, (req, res) => {
-  const order = db.getOrderById(req.params.id);
-  if (!order) {
-    return res.status(404).json({ success: false, message: 'Order not found' });
+app.get('/api/admin/orders/:id', requireAdminAuth, async (req, res) => {
+  try {
+    const order = await db.getOrderById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error('Error fetching order:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch order details' });
   }
-  res.json({ success: true, order });
 });
 
 // Update Order Status & Courier
-app.patch('/api/admin/orders/:id/status', requireAdminAuth, (req, res) => {
-  const { status, courier, note } = req.body;
-  if (!status) {
-    return res.status(400).json({ success: false, message: 'New order status is required' });
-  }
+app.patch('/api/admin/orders/:id/status', requireAdminAuth, async (req, res) => {
+  try {
+    const { status, courier, note } = req.body;
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'New order status is required' });
+    }
 
-  const updatedOrder = db.updateOrderStatus(req.params.id, status, courier, note);
-  if (!updatedOrder) {
-    return res.status(404).json({ success: false, message: 'Order not found' });
-  }
+    const updatedOrder = await db.updateOrderStatus(req.params.id, status, courier, note);
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
 
-  res.json({
-    success: true,
-    message: `Order #${updatedOrder.orderId} marked as ${status}!`,
-    order: updatedOrder
-  });
+    res.json({
+      success: true,
+      message: `Order #${updatedOrder.orderId} marked as ${status}!`,
+      order: updatedOrder
+    });
+  } catch (err) {
+    console.error('Error updating order status:', err);
+    res.status(500).json({ success: false, message: 'Failed to update order status' });
+  }
 });
 
 // Add Product
-app.post('/api/admin/products', requireAdminAuth, (req, res) => {
-  const { name, category, price, shortDescription } = req.body;
-  if (!name || !category || !price) {
-    return res.status(400).json({ success: false, message: 'Product name, category, and price are required' });
-  }
+app.post('/api/admin/products', requireAdminAuth, async (req, res) => {
+  try {
+    const { name, category, price } = req.body;
+    if (!name || !category || !price) {
+      return res.status(400).json({ success: false, message: 'Product name, category, and price are required' });
+    }
 
-  const newProduct = db.addProduct(req.body);
-  res.status(201).json({
-    success: true,
-    message: `Hamper "${newProduct.name}" added successfully!`,
-    product: newProduct
-  });
+    const newProduct = await db.addProduct(req.body);
+    res.status(201).json({
+      success: true,
+      message: `Hamper "${newProduct.name}" added successfully!`,
+      product: newProduct
+    });
+  } catch (err) {
+    console.error('Error adding product:', err);
+    res.status(500).json({ success: false, message: 'Failed to add product' });
+  }
 });
 
 // Update Product
-app.put('/api/admin/products/:id', requireAdminAuth, (req, res) => {
-  const updated = db.updateProduct(req.params.id, req.body);
-  if (!updated) {
-    return res.status(404).json({ success: false, message: 'Product not found' });
+app.put('/api/admin/products/:id', requireAdminAuth, async (req, res) => {
+  try {
+    const updated = await db.updateProduct(req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    res.json({
+      success: true,
+      message: `Hamper "${updated.name}" updated successfully!`,
+      product: updated
+    });
+  } catch (err) {
+    console.error('Error updating product:', err);
+    res.status(500).json({ success: false, message: 'Failed to update product' });
   }
-  res.json({
-    success: true,
-    message: `Hamper "${updated.name}" updated successfully!`,
-    product: updated
-  });
 });
 
 // Toggle Product In Stock / Out of Stock
-app.patch('/api/admin/products/:id/stock', requireAdminAuth, (req, res) => {
-  const product = db.getProductById(req.params.id);
-  if (!product) {
-    return res.status(404).json({ success: false, message: 'Product not found' });
-  }
+app.patch('/api/admin/products/:id/stock', requireAdminAuth, async (req, res) => {
+  try {
+    const product = await db.getProductById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
 
-  const updated = db.updateProduct(req.params.id, { inStock: !product.inStock });
-  res.json({
-    success: true,
-    message: `Product is now ${updated.inStock ? 'In Stock' : 'Out of Stock'}!`,
-    product: updated
-  });
+    const updated = await db.updateProduct(req.params.id, { inStock: !product.inStock });
+    res.json({
+      success: true,
+      message: `Product is now ${updated.inStock ? 'In Stock' : 'Out of Stock'}!`,
+      product: updated
+    });
+  } catch (err) {
+    console.error('Error toggling product stock:', err);
+    res.status(500).json({ success: false, message: 'Failed to change stock status' });
+  }
 });
 
 // Delete Product
-app.delete('/api/admin/products/:id', requireAdminAuth, (req, res) => {
-  const success = db.deleteProduct(req.params.id);
-  if (!success) {
-    return res.status(404).json({ success: false, message: 'Product not found or already deleted' });
+app.delete('/api/admin/products/:id', requireAdminAuth, async (req, res) => {
+  try {
+    const success = await db.deleteProduct(req.params.id);
+    if (!success) {
+      return res.status(404).json({ success: false, message: 'Product not found or already deleted' });
+    }
+    res.json({ success: true, message: 'Hamper removed from catalog' });
+  } catch (err) {
+    console.error('Error deleting product:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete product' });
   }
-  res.json({ success: true, message: 'Hamper removed from catalog' });
 });
 
 // Corporate Leads List
-app.get('/api/admin/corporate', requireAdminAuth, (req, res) => {
-  const leads = db.getCorporateLeads();
-  res.json({ success: true, count: leads.length, leads });
+app.get('/api/admin/corporate', requireAdminAuth, async (req, res) => {
+  try {
+    const leads = await db.getCorporateLeads();
+    res.json({ success: true, count: leads.length, leads });
+  } catch (err) {
+    console.error('Error fetching corporate leads:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch corporate leads' });
+  }
 });
 
 // Update Corporate Lead Status
-app.patch('/api/admin/corporate/:id/status', requireAdminAuth, (req, res) => {
-  const { status } = req.body;
-  const lead = db.updateLeadStatus(req.params.id, status);
-  if (!lead) {
-    return res.status(404).json({ success: false, message: 'Corporate lead not found' });
+app.patch('/api/admin/corporate/:id/status', requireAdminAuth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const lead = await db.updateLeadStatus(req.params.id, status);
+    if (!lead) {
+      return res.status(404).json({ success: false, message: 'Corporate lead not found' });
+    }
+    res.json({ success: true, message: `Lead updated to "${status}"`, lead });
+  } catch (err) {
+    console.error('Error updating corporate lead status:', err);
+    res.status(500).json({ success: false, message: 'Failed to update lead status' });
   }
-  res.json({ success: true, message: `Lead updated to "${status}"`, lead });
 });
 
 // Contact Inquiries List
-app.get('/api/admin/contact', requireAdminAuth, (req, res) => {
-  const inquiries = db.getContactInquiries();
-  res.json({ success: true, count: inquiries.length, inquiries });
+app.get('/api/admin/contact', requireAdminAuth, async (req, res) => {
+  try {
+    const inquiries = await db.getContactInquiries();
+    res.json({ success: true, count: inquiries.length, inquiries });
+  } catch (err) {
+    console.error('Error fetching contact inquiries:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch inquiries' });
+  }
 });
 
 // Coupons List
-app.get('/api/admin/coupons', requireAdminAuth, (req, res) => {
-  const coupons = db.getCoupons();
-  res.json({ success: true, count: coupons.length, coupons });
+app.get('/api/admin/coupons', requireAdminAuth, async (req, res) => {
+  try {
+    const coupons = await db.getCoupons();
+    res.json({ success: true, count: coupons.length, coupons });
+  } catch (err) {
+    console.error('Error fetching coupons:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch coupons' });
+  }
 });
 
 // Create Coupon
-app.post('/api/admin/coupons', requireAdminAuth, (req, res) => {
-  const { code, discountPercent, discountFlat, minSpend, label } = req.body;
-  if (!code) {
-    return res.status(400).json({ success: false, message: 'Coupon code is required' });
-  }
+app.post('/api/admin/coupons', requireAdminAuth, async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) {
+      return res.status(400).json({ success: false, message: 'Coupon code is required' });
+    }
 
-  const newCoupon = db.createCoupon(req.body);
-  if (!newCoupon) {
-    return res.status(400).json({ success: false, message: `Coupon with code "${code}" already exists` });
-  }
+    const newCoupon = await db.createCoupon(req.body);
+    if (!newCoupon) {
+      return res.status(400).json({ success: false, message: `Coupon with code "${code}" already exists` });
+    }
 
-  res.status(201).json({
-    success: true,
-    message: `Coupon "${newCoupon.code}" created!`,
-    coupon: newCoupon
-  });
+    res.status(201).json({
+      success: true,
+      message: `Coupon "${newCoupon.code}" created!`,
+      coupon: newCoupon
+    });
+  } catch (err) {
+    console.error('Error creating coupon:', err);
+    res.status(500).json({ success: false, message: 'Failed to create coupon' });
+  }
 });
 
 // Toggle Coupon
-app.patch('/api/admin/coupons/:code/toggle', requireAdminAuth, (req, res) => {
-  const coupon = db.toggleCoupon(req.params.code);
-  if (!coupon) {
-    return res.status(404).json({ success: false, message: 'Coupon not found' });
+app.patch('/api/admin/coupons/:code/toggle', requireAdminAuth, async (req, res) => {
+  try {
+    const coupon = await db.toggleCoupon(req.params.code);
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: 'Coupon not found' });
+    }
+    res.json({
+      success: true,
+      message: `Coupon "${coupon.code}" is now ${coupon.active ? 'Active' : 'Inactive'}`,
+      coupon
+    });
+  } catch (err) {
+    console.error('Error toggling coupon:', err);
+    res.status(500).json({ success: false, message: 'Failed to toggle coupon' });
   }
-  res.json({
-    success: true,
-    message: `Coupon "${coupon.code}" is now ${coupon.active ? 'Active' : 'Inactive'}`,
-    coupon
-  });
 });
 
 // Delete Coupon
-app.delete('/api/admin/coupons/:code', requireAdminAuth, (req, res) => {
-  const deleted = db.deleteCoupon(req.params.code);
-  if (!deleted) {
-    return res.status(404).json({ success: false, message: 'Coupon not found' });
+app.delete('/api/admin/coupons/:code', requireAdminAuth, async (req, res) => {
+  try {
+    const deleted = await db.deleteCoupon(req.params.code);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Coupon not found' });
+    }
+    res.json({ success: true, message: `Coupon "${req.params.code}" deleted` });
+  } catch (err) {
+    console.error('Error deleting coupon:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete coupon' });
   }
-  res.json({ success: true, message: `Coupon "${req.params.code}" deleted` });
 });
 
 // Update Store Settings
-app.put('/api/admin/settings', requireAdminAuth, (req, res) => {
-  const updatedSettings = db.updateSettings(req.body);
-  res.json({
-    success: true,
-    message: 'Store configuration updated successfully!',
-    settings: updatedSettings
-  });
+app.put('/api/admin/settings', requireAdminAuth, async (req, res) => {
+  try {
+    const updatedSettings = await db.updateSettings(req.body);
+    res.json({
+      success: true,
+      message: 'Store configuration updated successfully!',
+      settings: updatedSettings
+    });
+  } catch (err) {
+    console.error('Error updating settings:', err);
+    res.status(500).json({ success: false, message: 'Failed to update store settings' });
+  }
 });
 
 // Export Database JSON
-app.get('/api/admin/export', requireAdminAuth, (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Content-Disposition', 'attachment; filename=apna_tohfa_store_backup.json');
-  res.send(JSON.stringify(db.data, null, 2));
+app.get('/api/admin/export', requireAdminAuth, async (req, res) => {
+  try {
+    const exportData = await db.exportData();
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename=apna_tohfa_store_backup.json');
+    res.send(JSON.stringify(exportData, null, 2));
+  } catch (err) {
+    console.error('Error exporting data:', err);
+    res.status(500).json({ success: false, message: 'Failed to export backup data' });
+  }
 });
 
 // Reset Database to Seed
-app.post('/api/admin/reset', requireAdminAuth, (req, res) => {
-  db.resetData();
-  res.json({
-    success: true,
-    message: 'Store database reset to original Diwali seed data!'
-  });
+app.post('/api/admin/reset', requireAdminAuth, async (req, res) => {
+  try {
+    await db.resetData();
+    res.json({
+      success: true,
+      message: 'Store database reset to original Diwali seed data!'
+    });
+  } catch (err) {
+    console.error('Error resetting database:', err);
+    res.status(500).json({ success: false, message: 'Failed to reset database' });
+  }
 });
 
 // Route /admin to admin.html
@@ -542,5 +687,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Customer Storefront:  http://localhost:${PORT}`);
   console.log(`👑 Admin Control Portal: http://localhost:${PORT}/admin`);
   console.log(`🔑 Admin Login:          admin@apnatohfa.in / apnaAdmin@2026`);
+  console.log(`🍃 Database Status:      ${db.isMongo ? 'MongoDB Atlas (Connected)' : 'Local JSON File DB'}`);
   console.log(`=======================================================`);
 });

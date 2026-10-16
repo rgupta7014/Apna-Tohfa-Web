@@ -38,16 +38,43 @@ const APNA_APP = {
     window.addEventListener("hashchange", () => this.handleHashChange());
   },
 
+  getApiUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+    if (window.location.protocol === 'file:' || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '3000')) {
+      return `http://localhost:3000${cleanUrl}`;
+    }
+    return cleanUrl;
+  },
+
   async syncWithBackend() {
+    // 0. Pre-load from local storage if available for instant render
+    const cachedSettings = localStorage.getItem('apna_store_settings');
+    if (cachedSettings) {
+      try { this.applyStoreSettings(JSON.parse(cachedSettings)); } catch (e) {}
+    }
+    const cachedProducts = localStorage.getItem('apna_store_products');
+    if (cachedProducts) {
+      try {
+        const parsed = JSON.parse(cachedProducts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          APNA_DATA.products = parsed;
+          this.renderProducts();
+        }
+      } catch (e) {}
+    }
+
     try {
       const [prodRes, catRes, setRes] = await Promise.all([
-        fetch('/api/products').then(r => r.json()).catch(() => null),
-        fetch('/api/categories').then(r => r.json()).catch(() => null),
-        fetch('/api/settings').then(r => r.json()).catch(() => null)
+        fetch(this.getApiUrl('/api/products')).then(r => r.json()).catch(() => null),
+        fetch(this.getApiUrl('/api/categories')).then(r => r.json()).catch(() => null),
+        fetch(this.getApiUrl('/api/settings')).then(r => r.json()).catch(() => null)
       ]);
 
       if (prodRes && prodRes.success && Array.isArray(prodRes.products) && prodRes.products.length > 0) {
         APNA_DATA.products = prodRes.products;
+        try { localStorage.setItem('apna_store_products', JSON.stringify(prodRes.products)); } catch (e) {}
         this.renderProducts();
       }
 
@@ -57,10 +84,11 @@ const APNA_APP = {
       }
 
       if (setRes && setRes.success && setRes.settings) {
+        try { localStorage.setItem('apna_store_settings', JSON.stringify(setRes.settings)); } catch (e) {}
         this.applyStoreSettings(setRes.settings);
       }
     } catch (err) {
-      console.warn('Live API sync unavailable, using offline fallback catalog:', err);
+      console.warn('Live API sync unavailable, using cached catalog:', err);
     }
   },
 
@@ -299,16 +327,30 @@ const APNA_APP = {
     // Filter
     if (this.currentCategoryFilter !== "all") {
       const cat = this.currentCategoryFilter.toLowerCase();
-      if (cat === "under500") {
-        list = list.filter(p => p.price <= 500);
-      } else if (cat === "budget") {
+      if (cat === "under500" || cat === "budget") {
         list = list.filter(p => p.category === "budget" || p.price <= 500 || (p.tags && p.tags.some(t => t.toLowerCase().includes("budget"))));
+      } else if (cat === "classic") {
+        list = list.filter(p => p.category === "classic" || (p.price >= 500 && p.price <= 1000) || (p.tags && p.tags.some(t => t.toLowerCase().includes("classic"))));
       } else if (cat === "premium") {
-        list = list.filter(p => p.category === "premium" || (p.price > 500 && p.price <= 1000) || (p.tags && p.tags.some(t => t.toLowerCase().includes("premium"))));
+        list = list.filter(p => p.category === "premium" || (p.price >= 1000 && p.price <= 2500) || (p.tags && p.tags.some(t => t.toLowerCase().includes("premium"))));
       } else if (cat === "luxury") {
-        list = list.filter(p => p.category === "luxury" || p.price > 1000 || (p.tags && p.tags.some(t => t.toLowerCase().includes("luxury"))));
+        list = list.filter(p => p.category === "luxury" || p.price >= 2500 || (p.tags && p.tags.some(t => t.toLowerCase().includes("luxury"))));
       } else if (cat === "corporate") {
         list = list.filter(p => p.category === "corporate" || p.corporateAvailable || (p.tags && p.tags.some(t => t.toLowerCase().includes("corporate"))));
+      } else if (cat === "family-combo" || cat === "family") {
+        list = list.filter(p => p.category === "family-combo" || (p.tags && p.tags.some(t => t.toLowerCase().includes("family") || t.toLowerCase().includes("combo"))));
+      } else if (cat === "mini-baskets" || cat === "small-basket") {
+        list = list.filter(p => p.category === "mini-baskets" || p.category === "small-basket" || (p.tags && p.tags.some(t => t.toLowerCase().includes("mini") || t.toLowerCase().includes("small basket"))));
+      } else if (cat === "classic-baskets" || cat === "medium-basket") {
+        list = list.filter(p => p.category === "classic-baskets" || p.category === "medium-basket" || (p.tags && p.tags.some(t => t.toLowerCase().includes("classic basket") || t.toLowerCase().includes("medium basket"))));
+      } else if (cat === "grand-baskets" || cat === "large-basket") {
+        list = list.filter(p => p.category === "grand-baskets" || p.category === "large-basket" || (p.tags && p.tags.some(t => t.toLowerCase().includes("grand basket") || t.toLowerCase().includes("large basket"))));
+      } else if (cat === "mini-jars" || cat === "small-basket-jar") {
+        list = list.filter(p => p.category === "mini-jars" || p.category === "small-basket-jar" || (p.tags && p.tags.some(t => t.toLowerCase().includes("mini jar") || t.toLowerCase().includes("small basket jar"))));
+      } else if (cat === "classic-jars" || cat === "medium-jar-basket") {
+        list = list.filter(p => p.category === "classic-jars" || p.category === "medium-jar-basket" || (p.tags && p.tags.some(t => t.toLowerCase().includes("classic jar") || t.toLowerCase().includes("medium jar"))));
+      } else if (cat === "grand-jars" || cat === "large-jar-basket") {
+        list = list.filter(p => p.category === "grand-jars" || p.category === "large-jar-basket" || (p.tags && p.tags.some(t => t.toLowerCase().includes("grand jar") || t.toLowerCase().includes("large jar"))));
       } else {
         const catNormalized = cat.replace(/-/g, ' ');
         const matches = list.filter(p => {
@@ -345,6 +387,7 @@ const APNA_APP = {
     container.innerHTML = list.map(prod => `
       <div class="product-card" id="card-${prod.id}">
         <div class="product-thumb-wrap">
+          <div class="product-thumb-backdrop" style="background-image: url('${prod.image}');"></div>
           <img src="${prod.image}" alt="${prod.name}" class="product-thumb" loading="lazy">
           <div class="product-badge-overlay">
             ${prod.badge ? `<span class="badge badge-${prod.badgeType || 'accent'}">${prod.badge}</span>` : ''}
@@ -468,6 +511,7 @@ const APNA_APP = {
         <!-- Left: Image View -->
         <div class="modal-image-col">
           <div class="modal-main-image-wrap">
+            <div class="modal-image-backdrop" id="modalMainImgBackdrop" style="background-image: url('${mainImg}');"></div>
             <img src="${mainImg}" alt="${product.name}" class="modal-main-image" id="modalMainImg" onerror="this.src='assets/images/apna-tohfa.jpg'">
           </div>
           ${galleryImages.length > 1 ? `
@@ -598,6 +642,8 @@ const APNA_APP = {
     const imgSrc = images[idx] || images[0];
     const main = document.getElementById("modalMainImg");
     if (main && imgSrc) main.src = imgSrc;
+    const backdrop = document.getElementById("modalMainImgBackdrop");
+    if (backdrop && imgSrc) backdrop.style.backgroundImage = `url('${imgSrc}')`;
     document.querySelectorAll(".modal-gallery-thumb").forEach(t => t.classList.remove("active"));
     if (clickedEl) clickedEl.classList.add("active");
   },
@@ -605,6 +651,8 @@ const APNA_APP = {
   switchModalImage(imgSrc, clickedEl) {
     const main = document.getElementById("modalMainImg");
     if (main) main.src = imgSrc;
+    const backdrop = document.getElementById("modalMainImgBackdrop");
+    if (backdrop && imgSrc) backdrop.style.backgroundImage = `url('${imgSrc}')`;
     document.querySelectorAll(".modal-gallery-thumb").forEach(t => t.classList.remove("active"));
     if (clickedEl) clickedEl.classList.add("active");
   },
@@ -1069,8 +1117,10 @@ const APNA_APP = {
     const container = document.getElementById("socialGridContainer");
     if (!container) return;
 
+    const targetInsta = (APNA_DATA && APNA_DATA.brand && APNA_DATA.brand.instagram) || 'https://www.instagram.com/apna.tohfa?cplk=MmRjZDFraWVmbm8y';
+
     container.innerHTML = APNA_DATA.instagramFeed.map(item => `
-      <div class="social-card" onclick="window.open('https://instagram.com', '_blank')">
+      <div class="social-card" onclick="window.open('${targetInsta}', '_blank')">
         <img src="${item.image}" alt="Apna Tohfa Festive Moment" class="social-img" loading="lazy">
         <div class="social-overlay">
           <div class="social-likes">❤️ ${item.likes} likes</div>
