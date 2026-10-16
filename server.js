@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('./backend/db');
@@ -15,7 +16,11 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Static Files
+// Static Files (Serve React production build if available, fallback to root assets)
+const reactDistPath = path.join(__dirname, 'frontend', 'dist');
+if (fs.existsSync(reactDistPath)) {
+  app.use(express.static(reactDistPath));
+}
 app.use(express.static(path.join(__dirname)));
 
 // Admin Auth Middleware (Dual support for Local JWT & Firebase ID Tokens)
@@ -667,15 +672,21 @@ app.get('/admin', (req, res) => {
   res.sendFile('admin.html', { root: __dirname });
 });
 
-// Root Route
+// Root Route (React Storefront if built, fallback to static index.html)
 app.get('/', (req, res) => {
+  if (fs.existsSync(path.join(reactDistPath, 'index.html'))) {
+    return res.sendFile('index.html', { root: reactDistPath });
+  }
   res.sendFile('index.html', { root: __dirname });
 });
 
-// Fallback 404
+// Fallback 404 & SPA routing
 app.use((req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ success: false, message: 'API route not found' });
+  }
+  if (fs.existsSync(path.join(reactDistPath, 'index.html'))) {
+    return res.sendFile('index.html', { root: reactDistPath });
   }
   res.sendFile('index.html', { root: __dirname });
 });
