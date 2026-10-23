@@ -265,7 +265,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-17T15:45:55.091Z",
-    "updatedAt": "2026-10-17T15:45:55.091Z"
+    "updatedAt": "2026-10-17T15:45:55.091Z",
+    "jarCount": 6,
+    "hamperType": "box",
+    "hasJars": true
   },
   {
     "id": "large-jar-basket-hamper",
@@ -320,7 +323,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-16T14:01:09.489Z",
-    "updatedAt": "2026-10-16T14:01:09.489Z"
+    "updatedAt": "2026-10-16T14:01:09.489Z",
+    "jarCount": 6,
+    "hamperType": "basket",
+    "hasJars": true
   },
   {
     "id": "medium-jar-basket-hamper",
@@ -380,7 +386,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-16T14:01:09.488Z",
-    "updatedAt": "2026-10-16T14:01:09.488Z"
+    "updatedAt": "2026-10-16T14:01:09.488Z",
+    "jarCount": 4,
+    "hamperType": "basket",
+    "hasJars": true
   },
   {
     "id": "small-basket-jar-hamper",
@@ -436,7 +445,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-16T14:01:09.487Z",
-    "updatedAt": "2026-10-17T18:59:39.344Z"
+    "updatedAt": "2026-10-17T18:59:39.344Z",
+    "jarCount": 2,
+    "hamperType": "basket",
+    "hasJars": true
   },
   {
     "id": "large-basket-hamper",
@@ -496,7 +508,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-16T14:01:09.486Z",
-    "updatedAt": "2026-10-16T14:01:09.486Z"
+    "updatedAt": "2026-10-16T14:01:09.486Z",
+    "jarCount": 6,
+    "hamperType": "basket",
+    "hasJars": true
   },
   {
     "id": "medium-basket-hamper",
@@ -556,7 +571,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-16T14:01:09.484Z",
-    "updatedAt": "2026-10-16T14:01:09.484Z"
+    "updatedAt": "2026-10-16T14:01:09.484Z",
+    "jarCount": 4,
+    "hamperType": "basket",
+    "hasJars": true
   },
   {
     "id": "small-basket-hamper",
@@ -610,7 +628,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-16T14:01:09.482Z",
-    "updatedAt": "2026-10-16T14:01:09.482Z"
+    "updatedAt": "2026-10-16T14:01:09.482Z",
+    "jarCount": 2,
+    "hamperType": "basket",
+    "hasJars": true
   },
   {
     "id": "rajwada-badam-kaju-box",
@@ -669,7 +690,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-15T18:53:19.011Z",
-    "updatedAt": "2026-10-15T19:16:11.553Z"
+    "updatedAt": "2026-10-15T19:16:11.553Z",
+    "jarCount": 2,
+    "hamperType": "box",
+    "hasJars": true
   },
   {
     "id": "corporate-tohfa",
@@ -731,7 +755,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": true,
     "createdAt": "2026-10-01T11:15:00.000Z",
-    "updatedAt": "2026-10-15T19:16:01.063Z"
+    "updatedAt": "2026-10-15T19:16:01.063Z",
+    "jarCount": 3,
+    "hamperType": "box",
+    "hasJars": true
   },
   {
     "id": "royal-celebration",
@@ -794,7 +821,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-01T11:00:00.000Z",
-    "updatedAt": "2026-10-15T19:16:25.883Z"
+    "updatedAt": "2026-10-15T19:16:25.883Z",
+    "jarCount": 4,
+    "hamperType": "box",
+    "hasJars": true
   },
   {
     "id": "shahi-tohfa",
@@ -858,7 +888,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-01T10:45:00.000Z",
-    "updatedAt": "2026-10-15T19:29:11.762Z"
+    "updatedAt": "2026-10-15T19:29:11.762Z",
+    "jarCount": 4,
+    "hamperType": "box",
+    "hasJars": true
   },
   {
     "id": "parivar-utsav-combo",
@@ -922,7 +955,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-01T10:35:00.000Z",
-    "updatedAt": "2026-10-15T19:29:05.640Z"
+    "updatedAt": "2026-10-15T19:29:05.640Z",
+    "jarCount": 4,
+    "hamperType": "box",
+    "hasJars": true
   },
   {
     "id": "khushi-special",
@@ -994,7 +1030,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-01T10:30:00.000Z",
-    "updatedAt": "2026-10-16T14:01:09.473Z"
+    "updatedAt": "2026-10-16T14:01:09.473Z",
+    "jarCount": 4,
+    "hamperType": "box",
+    "hasJars": true
   },
   {
     "id": "apna-tohfa",
@@ -1061,7 +1100,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-01T10:15:00.000Z",
-    "updatedAt": "2026-10-16T14:01:09.470Z"
+    "updatedAt": "2026-10-16T14:01:09.470Z",
+    "jarCount": 0,
+    "hamperType": "box",
+    "hasJars": false
   },
   {
     "id": "shubh-aarambh",
@@ -1127,7 +1169,10 @@ const APNA_DATA = {
     "corporateAvailable": true,
     "isCorporateQuote": false,
     "createdAt": "2026-10-01T10:00:00.000Z",
-    "updatedAt": "2026-10-16T14:01:09.466Z"
+    "updatedAt": "2026-10-16T14:01:09.466Z",
+    "jarCount": 0,
+    "hamperType": "box",
+    "hasJars": false
   }
 ],
   "corporatePricing": [
