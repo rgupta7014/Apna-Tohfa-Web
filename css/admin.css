@@ -716,10 +716,12 @@ body {
 }
 
 .product-admin-img-wrap {
-  height: 190px;
+  width: 100%;
+  aspect-ratio: 1200 / 900; /* Strict 4:3 dimension ratio (1200x900) */
+  height: auto;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(circle at center, #2c1a1f 0%, #15090c 100%);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -728,9 +730,9 @@ body {
 .product-admin-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
-  padding: 6px;
+  padding: 0;
   transition: transform 0.4s;
 }
 
@@ -1160,4 +1162,130 @@ body {
 
 .image-action-btn.delete:hover {
   color: #ff4d4f;
+}
+
+/* Customizable Jars & Baskets Inventory Cards */
+.custom-item-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.custom-item-card:hover {
+  border-color: var(--gold-500);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.custom-item-card.out-of-stock {
+  opacity: 0.65;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.custom-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.custom-type-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.custom-type-pill.badge-jar {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.custom-type-pill.badge-basket {
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold-300);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.custom-status-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.custom-status-tag.stock-in {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.custom-status-tag.stock-out {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.custom-card-body {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.custom-card-icon {
+  font-size: 2.2rem;
+  width: 54px;
+  height: 54px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.custom-card-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.custom-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.custom-card-price {
+  font-size: 0.82rem;
+}
+
+.custom-card-actions {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--admin-border);
+  padding-top: 12px;
+}
+
+.custom-card-actions button {
+  flex: 1;
 }

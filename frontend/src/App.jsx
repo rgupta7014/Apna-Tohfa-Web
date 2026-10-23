@@ -46,10 +46,11 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const now = Date.now();
         const [prodRes, catRes, setRes] = await Promise.all([
-          fetch('/api/products').then(r => r.json()).catch(() => null),
-          fetch('/api/categories').then(r => r.json()).catch(() => null),
-          fetch('/api/settings').then(r => r.json()).catch(() => null)
+          fetch(`/api/products?_t=${now}`, { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+          fetch(`/api/categories?_t=${now}`, { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+          fetch(`/api/settings?_t=${now}`, { cache: 'no-store' }).then(r => r.json()).catch(() => null)
         ]);
 
         if (prodRes && prodRes.success && Array.isArray(prodRes.products)) {
@@ -67,6 +68,29 @@ export default function App() {
     };
 
     fetchData();
+
+    // Listen for live updates broadcast from Admin panel
+    let channel;
+    if ('BroadcastChannel' in window) {
+      try {
+        channel = new BroadcastChannel('apna_tohfa_updates');
+        channel.onmessage = () => {
+          fetchData();
+        };
+      } catch (e) {}
+    }
+
+    const onStorage = (e) => {
+      if (e.key === 'apna_last_catalog_update' || e.key === 'apna_store_products') {
+        fetchData();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      if (channel) channel.close();
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   const showToast = (msg) => {
@@ -191,6 +215,12 @@ export default function App() {
   const instagramHandle = settings?.instagramHandle || '@apnatohfa.official';
   const whatsappNumber = settings?.whatsapp || '919950263957';
   const brandPhone = settings?.phone || '+91 9950263957';
+
+  const getImageUrl = (img) => {
+    if (!img) return '/assets/images/apna-tohfa.jpg';
+    if (img.startsWith('data:') || img.startsWith('http://') || img.startsWith('https://')) return img;
+    return img.startsWith('/') ? img : `/${img}`;
+  };
 
   return (
     <div>
@@ -385,8 +415,12 @@ export default function App() {
             {filteredProducts.map(product => (
               <div key={product.id} className="product-card">
                 <div className="card-img-wrap" onClick={() => setSelectedProduct(product)} style={{ cursor: 'pointer' }}>
+                  <div 
+                    className="card-img-backdrop" 
+                    style={{ backgroundImage: `url("${getImageUrl(product.image)}")` }} 
+                  />
                   <img 
-                    src={product.image || '/assets/images/apna-tohfa.jpg'} 
+                    src={getImageUrl(product.image)} 
                     alt={product.name} 
                     onError={(e) => { e.target.src = '/assets/images/apna-tohfa.jpg'; }}
                     loading="lazy"
@@ -456,19 +490,26 @@ export default function App() {
 
             <div className="modal-grid">
               <div>
-                <img 
-                  src={selectedProduct.image || '/assets/images/apna-tohfa.jpg'} 
-                  alt={selectedProduct.name} 
-                  className="modal-img"
-                  onError={(e) => { e.target.src = '/assets/images/apna-tohfa.jpg'; }}
-                />
+                <div className="modal-img-wrap">
+                  <div 
+                    className="card-img-backdrop" 
+                    style={{ backgroundImage: `url("${getImageUrl(selectedProduct.image)}")` }} 
+                  />
+                  <img 
+                    src={getImageUrl(selectedProduct.image)} 
+                    alt={selectedProduct.name} 
+                    className="modal-img"
+                    onError={(e) => { e.target.src = '/assets/images/apna-tohfa.jpg'; }}
+                  />
+                </div>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                   {(selectedProduct.images || [selectedProduct.image]).slice(0, 4).map((img, i) => (
                     <img 
                       key={i} 
-                      src={img} 
+                      src={getImageUrl(img)} 
                       alt="" 
-                      style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--card-border)' }}
+                      style={{ width: '60px', height: '60px', objectFit: 'contain', background: 'radial-gradient(circle at center, #2e0915 0%, #130307 100%)', borderRadius: '6px', border: '1px solid var(--card-border)', padding: '2px' }}
+                      onError={(e) => { e.target.src = '/assets/images/apna-tohfa.jpg'; }}
                     />
                   ))}
                 </div>
@@ -589,7 +630,7 @@ export default function App() {
             ) : (
               cart.map(item => (
                 <div key={item.id} className="cart-item">
-                  <img src={item.image} alt={item.name} onError={(e) => { e.target.src = '/assets/images/apna-tohfa.jpg'; }} />
+                  <img src={getImageUrl(item.image)} alt={item.name} onError={(e) => { e.target.src = '/assets/images/apna-tohfa.jpg'; }} />
                   <div className="cart-item-info">
                     <h4 className="cart-item-title">{item.name}</h4>
                     <span className="cart-item-price">₹{item.price} each</span>

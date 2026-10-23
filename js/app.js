@@ -8,10 +8,57 @@ const APNA_APP = {
   currentSort: "featured",
   selectedProduct: null,
   productModalQty: 1,
+  currentJarCount: 4,
+  currentActiveJar: 1,
+  currentJarSelections: {},
+  availableJarItems: [
+    { id: 'badam', name: 'California Badam with Jar', icon: '🌰' },
+    { id: 'kaju', name: 'Whole Roasted Kaju with Jar', icon: '🥜' },
+    { id: 'pista', name: 'Salted Pistachios with Jar', icon: '🟢' },
+    { id: 'kishmish', name: 'Golden Afghan Kishmish with Jar', icon: '🍇' },
+    { id: 'akhrot', name: 'Kashmiri Akhrot with Jar', icon: '🌰' },
+    { id: 'anjeer', name: 'Royal Dried Anjeer with Jar', icon: '🍯' },
+    { id: 'choco_badam', name: 'Belgian Chocolate Badam with Jar', icon: '🍫' },
+    { id: 'mukhwas', name: 'Royal Paan Mukhwas with Jar', icon: '🍬' }
+  ],
+  availableBasketItems: [
+    { id: 'b1', name: 'Handwoven Cane Basket', icon: '🧺', description: 'Artisanal Eco-friendly Cane Tokri' },
+    { id: 'b2', name: 'Traditional Bamboo Tokri', icon: '🎋', description: 'Classic Golden-rimmed Bamboo Tokri' },
+    { id: 'b3', name: 'Luxury Golden Wire Basket', icon: '✨', description: 'Metallic Gold Lattice Presentation Basket' },
+    { id: 'b4', name: 'Royal Velvet Chest Basket', icon: '👑', description: 'Plush Velvet Trimmed Keepsake Basket' },
+    { id: 'b5', name: 'Vintage Wooden Crate', icon: '📦', description: 'Handcrafted Pine Wood Display Crate' }
+  ],
+  currentBasketSelection: null,
+  isCurrentProductBasket: false,
 
   init() {
+    // 0. Immediately apply cached products & settings & custom items if available
+    const cachedProducts = localStorage.getItem('apna_store_products');
+    if (cachedProducts) {
+      try {
+        const parsed = JSON.parse(cachedProducts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          APNA_DATA.products = parsed;
+        }
+      } catch (e) {}
+    }
+    const cachedSettings = localStorage.getItem('apna_store_settings');
+    if (cachedSettings) {
+      try { this.applyStoreSettings(JSON.parse(cachedSettings)); } catch (e) {}
+    }
+    const cachedCustom = localStorage.getItem('apna_store_custom_items');
+    if (cachedCustom) {
+      try {
+        const parsed = JSON.parse(cachedCustom);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.applyCustomItems(parsed);
+        }
+      } catch (e) {}
+    }
+
     this.renderCategories();
     this.renderProducts();
+    this.renderCatalogs();
     this.renderCorporateFeatures();
     this.renderPricingTiers();
     this.renderWhyFeatures();
@@ -29,6 +76,25 @@ const APNA_APP = {
     // Re-sync catalog when returning to tab from Admin
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
+        this.syncWithBackend();
+      }
+    });
+
+    // Instant cross-tab real-time sync from Admin panel
+    if ('BroadcastChannel' in window) {
+      try {
+        const syncChannel = new BroadcastChannel('apna_tohfa_updates');
+        syncChannel.onmessage = (event) => {
+          console.log('🔄 Real-time catalog update broadcast received:', event.data);
+          this.syncWithBackend();
+        };
+      } catch (e) {}
+    }
+
+    // Cross-tab sync fallback via localStorage storage events
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'apna_last_catalog_update' || e.key === 'apna_store_products' || e.key === 'apna_store_custom_items' || e.key === 'apna_store_settings') {
+        console.log('🔄 Storage change detected, syncing catalog...');
         this.syncWithBackend();
       }
     });
@@ -66,10 +132,13 @@ const APNA_APP = {
     }
 
     try {
-      const [prodRes, catRes, setRes] = await Promise.all([
-        fetch(this.getApiUrl('/api/products')).then(r => r.json()).catch(() => null),
-        fetch(this.getApiUrl('/api/categories')).then(r => r.json()).catch(() => null),
-        fetch(this.getApiUrl('/api/settings')).then(r => r.json()).catch(() => null)
+      const now = Date.now();
+      const [prodRes, catRes, setRes, catlgRes, customRes] = await Promise.all([
+        fetch(this.getApiUrl(`/api/products?_t=${now}`), { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+        fetch(this.getApiUrl(`/api/categories?_t=${now}`), { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+        fetch(this.getApiUrl(`/api/settings?_t=${now}`), { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+        fetch(this.getApiUrl(`/api/catalogs?_t=${now}`), { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+        fetch(this.getApiUrl(`/api/custom-items?_t=${now}`), { cache: 'no-store' }).then(r => r.json()).catch(() => null)
       ]);
 
       if (prodRes && prodRes.success && Array.isArray(prodRes.products) && prodRes.products.length > 0) {
@@ -87,9 +156,48 @@ const APNA_APP = {
         try { localStorage.setItem('apna_store_settings', JSON.stringify(setRes.settings)); } catch (e) {}
         this.applyStoreSettings(setRes.settings);
       }
+
+      if (catlgRes && catlgRes.success && Array.isArray(catlgRes.catalogs) && catlgRes.catalogs.length > 0) {
+        APNA_DATA.catalogs = catlgRes.catalogs;
+        this.renderCatalogs();
+      }
+
+      if (customRes && customRes.success && Array.isArray(customRes.items) && customRes.items.length > 0) {
+        this.applyCustomItems(customRes.items);
+        try { localStorage.setItem('apna_store_custom_items', JSON.stringify(customRes.items)); } catch (e) {}
+      }
     } catch (err) {
       console.warn('Live API sync unavailable, using cached catalog:', err);
     }
+  },
+
+  applyCustomItems(items) {
+    if (!Array.isArray(items)) return;
+    const jars = items.filter(i => i.type === 'jar' && i.inStock !== false);
+    if (jars.length > 0) {
+      this.availableJarItems = jars;
+    }
+    const baskets = items.filter(i => i.type === 'basket' && i.inStock !== false);
+    if (baskets.length > 0) {
+      this.availableBasketItems = baskets;
+    }
+  },
+
+  selectBasketItem(basketName) {
+    this.currentBasketSelection = basketName;
+    const container = document.getElementById('basketCustomizerOptions');
+    if (container) {
+      container.querySelectorAll('.basket-chip-btn').forEach(btn => {
+        if (btn.dataset.basketName === basketName) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+    const label = document.getElementById('selectedBasketLabel');
+    if (label) label.textContent = basketName;
+    this.showToast(`🧺 Basket style selected: ${basketName}`, 'info');
   },
 
   applyStoreSettings(s) {
@@ -299,10 +407,21 @@ const APNA_APP = {
     });
   },
 
+  /* --- Price Visibility Check --- */
+  isPriceHidden(prod) {
+    if (!prod) return true;
+    const globalHide = (APNA_DATA && APNA_DATA.brand && APNA_DATA.brand.hidePrices !== undefined)
+      ? Boolean(APNA_DATA.brand.hidePrices)
+      : true;
+    return globalHide || Boolean(prod.hidePrice) || !prod.price || Number(prod.price) <= 0;
+  },
+
   /* --- Render Categories --- */
   renderCategories() {
     const container = document.getElementById("categoriesGrid");
     if (!container) return;
+
+    const globalHide = (APNA_DATA && APNA_DATA.brand && APNA_DATA.brand.hidePrices !== undefined) ? Boolean(APNA_DATA.brand.hidePrices) : true;
 
     container.innerHTML = APNA_DATA.categories.map(cat => `
       <div class="category-card" onclick="APNA_APP.filterByCategory('${cat.id}')">
@@ -310,7 +429,7 @@ const APNA_APP = {
         <h3 class="category-title">${cat.title}</h3>
         <p class="category-subtitle">${cat.subtitle}</p>
         <div class="category-price-tag">
-          <span>${cat.priceTag}</span>
+          <span>${globalHide ? 'Explore Collection' : cat.priceTag}</span>
           <span class="arrow-icon">→</span>
         </div>
       </div>
@@ -322,6 +441,7 @@ const APNA_APP = {
     const container = document.getElementById("productGridContainer");
     if (!container) return;
 
+    const cleanWa = (APNA_DATA && APNA_DATA.brand && APNA_DATA.brand.whatsapp) || '919950263957';
     let list = [...APNA_DATA.products];
 
     // Filter
@@ -412,13 +532,26 @@ const APNA_APP = {
           <p class="product-card-desc">${prod.shortDescription}</p>
 
           <div class="product-card-price-row">
-            <span class="price-current">₹${prod.price}${prod.priceSuffix || ''}</span>
-            ${prod.originalPrice ? `<span class="price-original">₹${prod.originalPrice}</span>` : ''}
-            ${prod.discount ? `<span class="price-discount-tag">${prod.discount}</span>` : ''}
+            ${this.isPriceHidden(prod) ? `
+              <span class="price-current" style="font-size: 0.98rem; font-weight: 700; color: var(--maroon-800); display: flex; align-items: center; gap: 6px;">
+                ✨ Price on Request
+              </span>
+            ` : `
+              <span class="price-current">₹${prod.price}${prod.priceSuffix || ''}</span>
+              ${prod.originalPrice ? `<span class="price-original">₹${prod.originalPrice}</span>` : ''}
+              ${prod.discount ? `<span class="price-discount-tag">${prod.discount}</span>` : ''}
+            `}
           </div>
 
           <div class="product-card-actions">
-            ${prod.isCorporateQuote ? `
+            ${this.isPriceHidden(prod) ? `
+              <a href="https://wa.me/${cleanWa}?text=${encodeURIComponent('Hi APNA TOHFA! Please share the price, volume discounts and details for: ' + prod.name)}" target="_blank" rel="noopener" class="btn btn-gold btn-block" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                💬 Get Price on WhatsApp
+              </a>
+              <button class="btn btn-secondary btn-block" onclick="APNA_APP.openProductModal('${prod.id}')">
+                View Details
+              </button>
+            ` : (prod.isCorporateQuote ? `
               <button class="btn btn-gold btn-block" onclick="APNA_APP.openCorporateQuoteModal('${prod.name}')">
                 Get Quote 🏢
               </button>
@@ -432,11 +565,255 @@ const APNA_APP = {
               <button class="btn btn-secondary btn-block" onclick="APNA_APP.openProductModal('${prod.id}')">
                 View Details
               </button>
-            `}
+            `)}
           </div>
         </div>
       </div>
     `).join('');
+  },
+
+  /* --- Digital Catalogs & Lookbook Posters --- */
+  currentCatalogIndex: 0,
+  currentCatalogZoom: 1,
+
+  renderCatalogs() {
+    const container = document.getElementById('catalogsGridContainer');
+    if (!container) return;
+
+    const catalogs = (APNA_DATA && Array.isArray(APNA_DATA.catalogs) && APNA_DATA.catalogs.length > 0)
+      ? APNA_DATA.catalogs
+      : [
+          {
+            id: 'peacock-floral-6jar',
+            title: 'Peacock Floral 6-Jar Gift Box with Premium Dry Fruits',
+            tagline: '100% Natural • Premium Quality • Hygienic Packing • Long Shelf Life',
+            badge: 'Signature Catalog Poster',
+            category: 'grand-jars',
+            posterImage: 'assets/images/catalogs/peacock-floral-6jar-catalog.png',
+            jars: [
+              'Jar 1: Premium Cashews (Kaju)',
+              'Jar 2: Premium Almonds (Badam)',
+              'Jar 3: Raisins (Kishmish)',
+              'Jar 4: Walnuts (Akhrot)',
+              'Jar 5: Pistachios (Pista)',
+              'Jar 6: Makhana'
+            ],
+            features: [
+              'Handcrafted Peacock and Floral Artwork',
+              '6 Premium Round Brass Jars with Designer Lids',
+              'Golden Satin Cushion and Reusable Briefcase Box',
+              'Includes Premium Gold Handle and Lock',
+              'Delivery: Pan India'
+            ],
+            customisation: [
+              'Customise the box as per your choice',
+              'Chocolates, Candies and different Dry Fruits can be added on request',
+              'Perfect for your own brand, logo and personal message'
+            ],
+            whyChooseUs: [
+              'Premium Quality Dry Fruits, Carefully Selected',
+              'Hygienic Packing with Premium Presentation',
+              'Ideal for Gifting, Stays Fresh for Long Time',
+              'Bulk and Corporate Orders Accepted'
+            ],
+            perfectFor: [
+              'Diwali, Wedding, Rakhi and Festive Gifting',
+              'Corporate, Client and Employee Gifts',
+              'Housewarming, Baby Shower and Special Occasions'
+            ],
+            inquiryMessage: 'Hello Apna Tohfa! I saw the Peacock Floral 6-Jar Gift Box catalog poster on your website and would like to order / enquire about pricing and bulk options.'
+          }
+        ];
+
+    container.innerHTML = catalogs.map((cat, idx) => {
+      const whatsappText = encodeURIComponent(cat.inquiryMessage || `Hello Apna Tohfa, I would like to enquire about ${cat.title}.`);
+      const phone = (APNA_DATA.brand && APNA_DATA.brand.whatsapp) || '919950263957';
+      const whatsappUrl = `https://wa.me/${phone}?text=${whatsappText}`;
+
+      // Check if a related product exists in store
+      const relatedProduct = (APNA_DATA.products || []).find(p =>
+        p.id === cat.id ||
+        p.id === `${cat.id}-box` ||
+        (p.name && cat.title && p.name.toLowerCase().includes(cat.title.slice(0, 15).toLowerCase()))
+      );
+
+      return `
+        <article class="catalog-card" id="catalog-card-${cat.id}">
+          <div class="catalog-poster-col">
+            <div class="catalog-poster-frame" onclick="APNA_APP.openCatalogLightbox('${cat.id}')" title="Click to view & zoom poster">
+              <img src="${cat.posterImage}" alt="${cat.title} Official Catalog Poster" class="catalog-poster-img" loading="lazy" onerror="this.src='assets/images/catalogs/peacock-floral-6jar-catalog.png'">
+              <div class="catalog-zoom-badge">
+                <span>🔍</span> Tap to Zoom Poster
+              </div>
+            </div>
+          </div>
+
+          <div class="catalog-info-col">
+            <div>
+              <div class="catalog-badge-pill">
+                <span>🪔</span> ${cat.badge || 'Signature Gifting Catalog'}
+              </div>
+              <h3 class="catalog-item-title">${cat.title}</h3>
+              <p class="catalog-item-tagline">
+                ${cat.tagline || '100% Natural • Premium Quality • Hygienic Packing'}
+              </p>
+
+              <div class="catalog-spec-grid">
+                <div class="catalog-spec-box">
+                  <div class="catalog-spec-heading">
+                    <span>🫙</span> Inside the Box (${(cat.jars && cat.jars.length) || 6} Jars)
+                  </div>
+                  <ul class="catalog-spec-list">
+                    ${(cat.jars || []).map(j => `<li>${j}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <div class="catalog-spec-box">
+                  <div class="catalog-spec-heading">
+                    <span>👑</span> Box Features & Specs
+                  </div>
+                  <ul class="catalog-spec-list">
+                    ${(cat.features || []).map(f => `<li>${f}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <div class="catalog-spec-box">
+                  <div class="catalog-spec-heading">
+                    <span>🎨</span> Customisation Available
+                  </div>
+                  <ul class="catalog-spec-list">
+                    ${(cat.customisation || []).map(c => `<li>${c}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <div class="catalog-spec-box">
+                  <div class="catalog-spec-heading">
+                    <span>🎉</span> Perfect For
+                  </div>
+                  <ul class="catalog-spec-list">
+                    ${(cat.perfectFor || []).map(p => `<li>${p}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="catalog-actions-bar">
+              <button type="button" class="btn btn-primary" onclick="APNA_APP.openCatalogLightbox('${cat.id}')">
+                <span>🔍</span> View Full Poster (ज़ूम करके देखें)
+              </button>
+              <a href="${cat.posterImage}" download="${cat.title.replace(/[^a-zA-Z0-9]+/g, '_')}_Catalog.png" class="btn btn-secondary" style="text-decoration: none;">
+                <span>📥</span> Download Poster
+              </a>
+              <a href="${whatsappUrl}" target="_blank" class="btn btn-success" style="text-decoration: none; background: #25D366; color: #fff; border-color: #22c35e;">
+                <span>💬</span> WhatsApp Order / Inquiry
+              </a>
+              ${relatedProduct ? `
+                <button type="button" class="btn btn-gold" onclick="APNA_APP.openProductModal('${relatedProduct.id}')">
+                  <span>🎁</span> View Hamper Box
+                </button>
+              ` : `
+                <a href="${whatsappUrl}" target="_blank" class="btn btn-gold" style="text-decoration: none;">
+                  <span>💬</span> Custom Order Box
+                </a>
+              `}
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+  },
+
+  openCatalogLightbox(catalogId) {
+    const catalogs = (APNA_DATA && Array.isArray(APNA_DATA.catalogs) && APNA_DATA.catalogs.length > 0)
+      ? APNA_DATA.catalogs
+      : [];
+    if (catalogs.length === 0) return;
+
+    let idx = catalogs.findIndex(c => c.id === catalogId);
+    if (idx === -1) idx = 0;
+    this.currentCatalogIndex = idx;
+
+    this.updateLightboxDisplay();
+
+    const modal = document.getElementById('catalogLightboxModal');
+    if (modal) {
+      modal.classList.add('active');
+      document.body.classList.add('no-scroll');
+    }
+  },
+
+  updateLightboxDisplay() {
+    const catalogs = (APNA_DATA && Array.isArray(APNA_DATA.catalogs)) ? APNA_DATA.catalogs : [];
+    if (catalogs.length === 0) return;
+
+    if (this.currentCatalogIndex < 0) this.currentCatalogIndex = catalogs.length - 1;
+    if (this.currentCatalogIndex >= catalogs.length) this.currentCatalogIndex = 0;
+
+    const cat = catalogs[this.currentCatalogIndex];
+    if (!cat) return;
+
+    const titleEl = document.getElementById('lightboxPosterTitle');
+    const imgEl = document.getElementById('lightboxPosterImg');
+    const downloadBtn = document.getElementById('lightboxDownloadBtn');
+    const whatsappBtn = document.getElementById('lightboxWhatsappBtn');
+
+    if (titleEl) {
+      titleEl.textContent = catalogs.length > 1
+        ? `(${this.currentCatalogIndex + 1}/${catalogs.length}) ${cat.title}`
+        : cat.title;
+    }
+    if (imgEl) {
+      imgEl.src = cat.posterImage;
+      imgEl.alt = cat.title;
+      this.currentCatalogZoom = 1;
+      imgEl.style.transform = 'scale(1)';
+    }
+    if (downloadBtn) {
+      downloadBtn.href = cat.posterImage;
+      downloadBtn.download = `${cat.title.replace(/[^a-zA-Z0-9]+/g, '_')}_Catalog.png`;
+    }
+    if (whatsappBtn) {
+      const phone = (APNA_DATA.brand && APNA_DATA.brand.whatsapp) || '919950263957';
+      const msg = encodeURIComponent(cat.inquiryMessage || `Hello Apna Tohfa, I am interested in ${cat.title}.`);
+      whatsappBtn.href = `https://wa.me/${phone}?text=${msg}`;
+    }
+
+    const prevBtn = document.querySelector('.lightbox-nav-prev');
+    const nextBtn = document.querySelector('.lightbox-nav-next');
+    if (prevBtn) prevBtn.style.display = catalogs.length > 1 ? 'flex' : 'none';
+    if (nextBtn) nextBtn.style.display = catalogs.length > 1 ? 'flex' : 'none';
+  },
+
+  nextCatalogLightbox() {
+    this.currentCatalogIndex++;
+    this.updateLightboxDisplay();
+  },
+
+  prevCatalogLightbox() {
+    this.currentCatalogIndex--;
+    this.updateLightboxDisplay();
+  },
+
+  closeCatalogLightbox() {
+    const modal = document.getElementById('catalogLightboxModal');
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.classList.remove('no-scroll');
+    }
+  },
+
+  zoomCatalog(delta) {
+    const imgEl = document.getElementById('lightboxPosterImg');
+    if (!imgEl) return;
+    this.currentCatalogZoom = Math.max(0.5, Math.min(3.0, (this.currentCatalogZoom || 1) + delta));
+    imgEl.style.transform = `scale(${this.currentCatalogZoom})`;
+  },
+
+  resetCatalogZoom() {
+    const imgEl = document.getElementById('lightboxPosterImg');
+    if (!imgEl) return;
+    this.currentCatalogZoom = 1;
+    imgEl.style.transform = 'scale(1)';
   },
 
   /* --- Product Filtering & Sorting --- */
@@ -506,6 +883,37 @@ const APNA_APP = {
       ];
     }
 
+    // Determine Jar count for this hamper:
+    // Respect Admin's configured jarCount first!
+    let jarCount = 4;
+    if (product.jarCount !== undefined && product.jarCount !== null && product.jarCount !== '') {
+      jarCount = Number(product.jarCount);
+    } else {
+      const pName = (product.name || '').toLowerCase();
+      if (pName.includes('teen') || pName.includes('three')) jarCount = 3;
+      else if (pName.includes('badam-kaju') || pName.includes('mini jar') || pName.includes('laghu')) jarCount = 2;
+      else if (pName.includes('mahabasket') || pName.includes('6x') || pName.includes('6 jar')) jarCount = 6;
+      else if (pName.includes('tokri') && !pName.includes('jar')) jarCount = 2;
+    }
+
+    this.currentJarCount = jarCount;
+    this.currentActiveJar = 1;
+    this.currentJarSelections = {};
+
+    if (jarCount > 0) {
+      for (let i = 1; i <= jarCount; i++) {
+        const defaultItem = (this.availableJarItems && this.availableJarItems[(i - 1) % this.availableJarItems.length]) || { name: 'California Badam with Jar' };
+        this.currentJarSelections[i] = defaultItem.name;
+      }
+    }
+
+    // Determine Container / Basket Type
+    const isBasket = (product.hamperType === 'basket') || ((product.category || '').includes('basket')) || ((product.name || '').toLowerCase().includes('basket')) || ((product.name || '').toLowerCase().includes('tokri'));
+    this.isCurrentProductBasket = isBasket;
+    this.currentBasketSelection = product.basketType || (this.availableBasketItems && this.availableBasketItems[0] ? this.availableBasketItems[0].name : 'Handwoven Cane Basket');
+
+    const cleanWa = (APNA_DATA && APNA_DATA.brand && APNA_DATA.brand.whatsapp) || '919950263957';
+
     container.innerHTML = `
       <div class="modal-product-layout">
         <!-- Left: Image View -->
@@ -549,10 +957,20 @@ const APNA_APP = {
           </div>
 
           <div class="modal-price-box">
-            <span style="font-size: 1.85rem; font-weight: 800; color: var(--maroon-900);">₹${product.price}${product.priceSuffix || ''}</span>
-            ${product.originalPrice ? `<span style="font-size: 1.1rem; color: var(--dark-300); text-decoration: line-through;">₹${product.originalPrice}</span>` : ''}
-            ${product.discount ? `<span class="price-discount-tag">${product.discount}</span>` : ''}
-            <span style="font-size: 0.75rem; color: var(--dark-500); margin-left: auto;">(Inclusive of all taxes)</span>
+            ${this.isPriceHidden(product) ? `
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; width: 100%;">
+                <div>
+                  <span style="font-size: 1.35rem; font-weight: 800; color: var(--maroon-900); display: block;">Price on Request / Custom Gifting</span>
+                  <span style="font-size: 0.8rem; color: var(--dark-500);">Direct wholesale pricing & festive customization available</span>
+                </div>
+                <span class="badge badge-gold" style="font-size: 0.75rem;">Wholesale & Retail</span>
+              </div>
+            ` : `
+              <span style="font-size: 1.85rem; font-weight: 800; color: var(--maroon-900);">₹${product.price}${product.priceSuffix || ''}</span>
+              ${product.originalPrice ? `<span style="font-size: 1.1rem; color: var(--dark-300); text-decoration: line-through;">₹${product.originalPrice}</span>` : ''}
+              ${product.discount ? `<span class="price-discount-tag">${product.discount}</span>` : ''}
+              <span style="font-size: 0.75rem; color: var(--dark-500); margin-left: auto;">(Inclusive of all taxes)</span>
+            `}
           </div>
 
           <p class="modal-desc">${fullDesc}</p>
@@ -572,6 +990,12 @@ const APNA_APP = {
             </div>
           </div>
 
+          <!-- Interactive Basket Style Selector -->
+          <div id="basketCustomizerContainer"></div>
+
+          <!-- Interactive Jar Customizer Container -->
+          <div id="jarCustomizerContainer"></div>
+
           <!-- Quantity & CTAs -->
           <div class="modal-actions-row">
             <div class="qty-stepper">
@@ -581,7 +1005,14 @@ const APNA_APP = {
             </div>
 
             <div class="modal-ctas">
-              ${product.isCorporateQuote ? `
+              ${this.isPriceHidden(product) ? `
+                <a href="https://wa.me/${cleanWa}?text=${encodeURIComponent('Hello APNA TOHFA! I want to get the price and order details for ' + product.name + ' (Qty: ' + (this.productModalQty || 1) + ')')}" target="_blank" rel="noopener" class="btn btn-gold btn-lg btn-block" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                  💬 Enquire Best Price on WhatsApp
+                </a>
+                <button class="btn btn-secondary btn-block" onclick="APNA_APP.openCorporateQuoteModal('${product.name}')">
+                  🏢 Request Bulk / Corporate Quote
+                </button>
+              ` : (product.isCorporateQuote ? `
                 <button class="btn btn-gold btn-lg btn-block" onclick="APNA_APP.openCorporateQuoteModal('${product.name}')">
                   Request Corporate Quote 🏢
                 </button>
@@ -592,9 +1023,17 @@ const APNA_APP = {
                 <button class="btn btn-gold btn-block" onclick="APNA_APP.buyNowCurrentModal()">
                   Buy Now ⚡
                 </button>
-              `}
+              `)}
             </div>
           </div>
+
+          ${(product.id === 'peacock-floral-6jar-box' || (product.image && product.image.includes('catalog'))) ? `
+            <div style="margin: 10px 0 16px 0;">
+              <button type="button" class="btn btn-secondary btn-block" onclick="APNA_APP.closeAllModals(); APNA_APP.openCatalogLightbox('peacock-floral-6jar');" style="display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid var(--gold-500); background: #fffdf9; color: var(--maroon-900); font-weight: 700; padding: 10px 14px;">
+                <span>📖</span> View Official Full Specification Poster (ज़ूम & डाउनलोड) ↗
+              </button>
+            </div>
+          ` : ''}
 
           <!-- Delivery Availability / Pincode Check -->
           <div class="pincode-checker-box">
@@ -632,6 +1071,7 @@ const APNA_APP = {
 
     modal.classList.add("active");
     document.body.classList.add("no-scroll");
+    this.renderJarCustomizer();
   },
 
   switchModalImageByIndex(idx, clickedEl) {
@@ -663,11 +1103,133 @@ const APNA_APP = {
     if (display) display.textContent = this.productModalQty;
   },
 
+  selectJarTab(jarNum) {
+    this.currentActiveJar = jarNum;
+    this.renderJarCustomizer();
+  },
+
+  chooseJarItem(itemName) {
+    if (!this.currentActiveJar) this.currentActiveJar = 1;
+    this.currentJarSelections[this.currentActiveJar] = itemName;
+    this.renderJarCustomizer();
+    this.showToast(`✨ Jar ${this.currentActiveJar} set to: ${itemName}`, "info");
+  },
+
+  renderJarCustomizer() {
+    // 1. Render Basket Customizer if applicable
+    const basketContainer = document.getElementById("basketCustomizerContainer");
+    if (basketContainer) {
+      if (this.isCurrentProductBasket && this.availableBasketItems && this.availableBasketItems.length > 0) {
+        basketContainer.innerHTML = `
+          <div class="basket-customizer-banner">
+            <div class="basket-customizer-header">
+              <span class="basket-customizer-title">🧺 Choose Your Basket Style:</span>
+              <span class="basket-customizer-current" id="selectedBasketLabel">${this.currentBasketSelection || 'Handwoven Cane Basket'}</span>
+            </div>
+            <div class="basket-options-chips" id="basketCustomizerOptions">
+              ${this.availableBasketItems.map(b => {
+                const isSelected = (this.currentBasketSelection === b.name);
+                return `
+                  <button type="button" class="basket-chip-btn ${isSelected ? 'active' : ''}" data-basket-name="${b.name}" onclick="APNA_APP.selectBasketItem('${b.name}')">
+                    <span>${b.icon || '🧺'}</span>
+                    <span>${b.name}</span>
+                    ${isSelected ? '✓' : ''}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        basketContainer.innerHTML = '';
+      }
+    }
+
+    // 2. Render Jar Customizer
+    const container = document.getElementById("jarCustomizerContainer");
+    if (!container) return;
+
+    if (this.currentJarCount <= 0) {
+      container.innerHTML = `
+        <div class="jar-customizer-box" style="padding: 16px 20px; background: rgba(212,175,55,0.06); border: 1.5px dashed var(--gold-400); text-align: center; border-radius: var(--radius-sm); margin-bottom: 20px;">
+          <div style="font-size: 1.4rem; margin-bottom: 4px;">🍬 🪔</div>
+          <strong style="color: var(--maroon-900); font-size: 0.95rem;">Artisanal Festive Delights & Sweets Box</strong>
+          <p style="font-size: 0.8rem; color: var(--dark-500); margin-top: 4px; margin-bottom: 0;">
+            This hamper is curated with authentic Indian festive sweets, hand-painted terracotta diyas, and celebratory keepsakes. (No customizable jars in this box).
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    const activeJar = this.currentActiveJar || 1;
+    const currentSelection = this.currentJarSelections[activeJar] || (this.availableJarItems[0] ? this.availableJarItems[0].name : 'California Badam with Jar');
+
+    let tabsHtml = "";
+    for (let i = 1; i <= this.currentJarCount; i++) {
+      const selName = this.currentJarSelections[i] || "Select Item";
+      const isActive = (i === activeJar);
+      tabsHtml += `
+        <div class="jar-tab-card ${isActive ? 'active' : ''}" onclick="APNA_APP.selectJarTab(${i})" title="Click to customize Jar ${i}">
+          <span class="jar-tab-number">🫙 Jar ${i}</span>
+          <span class="jar-tab-item">${selName}</span>
+          <span class="jar-tab-change">${isActive ? '● Selected' : 'Change ▾'}</span>
+        </div>
+      `;
+    }
+
+    let optionsHtml = "";
+    (this.availableJarItems || []).forEach(item => {
+      const isSelected = (item.name === currentSelection);
+      optionsHtml += `
+        <button type="button" class="jar-chip-btn ${isSelected ? 'active' : ''}" onclick="APNA_APP.chooseJarItem('${item.name}')">
+          <span>${item.icon || '🌰'}</span> <span>${item.name}</span> ${item.priceExtra ? `<small style="color: var(--gold-700); font-weight: bold;">(+₹${item.priceExtra})</small>` : ''} ${isSelected ? '✓' : ''}
+        </button>
+      `;
+    });
+
+    container.innerHTML = `
+      <div class="jar-customizer-box">
+        <div class="jar-customizer-header">
+          <div class="jar-customizer-title">
+            <span>🍯</span> Customize Items Inside Each Jar (${this.currentJarCount} Jars Included)
+          </div>
+          <span class="jar-customizer-badge">Customized at No Extra Cost</span>
+        </div>
+        <p class="jar-customizer-sub">Click any Jar slot below to choose which fresh dry fruit or sweet to pack inside:</p>
+        
+        <div class="jars-selection-grid">
+          ${tabsHtml}
+        </div>
+
+        <div class="jar-options-panel">
+          <div class="jar-options-label">
+            Choose item for <strong style="color: var(--maroon-900);">Jar ${activeJar}</strong>:
+          </div>
+          <div class="jar-options-chips">
+            ${optionsHtml}
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
   addCurrentModalToCart() {
     if (!this.selectedProduct) return;
     const noteEl = document.getElementById("modalGiftNote");
     const note = noteEl ? noteEl.value.trim() : "";
-    APNA_CART.addItem(this.selectedProduct.id, this.productModalQty, note);
+
+    const customJars = [];
+    if (this.currentJarCount > 0) {
+      for (let i = 1; i <= this.currentJarCount; i++) {
+        if (this.currentJarSelections[i]) {
+          customJars.push(`Jar ${i}: ${this.currentJarSelections[i]}`);
+        }
+      }
+    }
+
+    const customBasket = this.isCurrentProductBasket ? this.currentBasketSelection : null;
+    APNA_CART.addItem(this.selectedProduct.id, this.productModalQty, note, customJars, customBasket);
     this.closeAllModals();
     this.openCartDrawer();
   },
@@ -676,7 +1238,18 @@ const APNA_APP = {
     if (!this.selectedProduct) return;
     const noteEl = document.getElementById("modalGiftNote");
     const note = noteEl ? noteEl.value.trim() : "";
-    APNA_CART.addItem(this.selectedProduct.id, this.productModalQty, note);
+
+    const customJars = [];
+    if (this.currentJarCount > 0) {
+      for (let i = 1; i <= this.currentJarCount; i++) {
+        if (this.currentJarSelections[i]) {
+          customJars.push(`Jar ${i}: ${this.currentJarSelections[i]}`);
+        }
+      }
+    }
+
+    const customBasket = this.isCurrentProductBasket ? this.currentBasketSelection : null;
+    APNA_CART.addItem(this.selectedProduct.id, this.productModalQty, note, customJars, customBasket);
     this.closeAllModals();
     this.openCheckoutView();
   },
@@ -723,7 +1296,7 @@ const APNA_APP = {
   },
 
   closeAllModals() {
-    document.querySelectorAll(".modal-backdrop, .cart-drawer-backdrop, .mobile-nav-backdrop").forEach(el => {
+    document.querySelectorAll(".modal-backdrop, .cart-drawer-backdrop, .mobile-nav-backdrop, .catalog-lightbox-backdrop").forEach(el => {
       el.classList.remove("active");
     });
     document.body.classList.remove("no-scroll");

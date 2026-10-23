@@ -9,5 +9,6 @@ Thumbs.db
 .env.*
 !.env.example
 *.tmp
+*.backup.json
 screenshot_*.png
 *.webp

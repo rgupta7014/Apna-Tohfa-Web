@@ -26,7 +26,8 @@ const SettingSchema = new mongoose.Schema({
   announcementText: { type: String, default: '🪔 Diwali 2026 Festivel' },
   activeCouponPill: { type: String, default: '' },
   freeShippingThreshold: { type: Number, default: 5000 },
-  standardShippingFee: { type: Number, default: 99 }
+  standardShippingFee: { type: Number, default: 99 },
+  hidePrices: { type: Boolean, default: true }
 }, { timestamps: true });
 
 // Category Schema
@@ -47,10 +48,11 @@ const ProductSchema = new mongoose.Schema({
   category: { type: String, required: true },
   badge: { type: String, default: '' },
   badgeType: { type: String, default: 'accent' },
-  price: { type: Number, required: true },
+  price: { type: Number, default: 0 },
   originalPrice: { type: Number },
   discount: { type: String, default: '' },
   priceSuffix: { type: String, default: '' },
+  hidePrice: { type: Boolean, default: false },
   rating: { type: Number, default: 4.8 },
   reviewsCount: { type: Number, default: 10 },
   shortDescription: { type: String, default: '' },
@@ -65,10 +67,27 @@ const ProductSchema = new mongoose.Schema({
     icon: { type: String, default: '✨' }
   }],
   customizationOptions: [{ type: String }],
+  hamperType: { type: String, default: 'box' }, // 'box', 'basket', 'trunk', 'potli', 'tray'
+  jarCount: { type: Number, default: 4 }, // 0 = no jars, 1, 2, 3, 4, 6, etc.
+  hasJars: { type: Boolean, default: true },
+  basketType: { type: String, default: '' },
+  customizable: { type: Boolean, default: true },
   corporateAvailable: { type: Boolean, default: true },
   isCorporateQuote: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
+});
+
+// Customizable Jars and Baskets Items Schema
+const CustomItemSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  type: { type: String, enum: ['jar', 'basket'], required: true },
+  icon: { type: String, default: '🫙' },
+  description: { type: String, default: '' },
+  priceExtra: { type: Number, default: 0 },
+  inStock: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
 });
 
 // Coupon Schema
@@ -146,6 +165,23 @@ const ContactInquirySchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now }
 });
 
+// Official Catalog / Brochure Poster Schema
+const CatalogSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  tagline: { type: String, default: '' },
+  badge: { type: String, default: 'Signature Catalog' },
+  category: { type: String, default: 'luxury' },
+  posterImage: { type: String, required: true },
+  jars: [{ type: String }],
+  features: [{ type: String }],
+  customisation: [{ type: String }],
+  whyChooseUs: [{ type: String }],
+  perfectFor: [{ type: String }],
+  inquiryMessage: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
 module.exports = {
   AdminUser: mongoose.models.AdminUser || mongoose.model('AdminUser', AdminUserSchema),
   Setting: mongoose.models.Setting || mongoose.model('Setting', SettingSchema),
@@ -154,5 +190,7 @@ module.exports = {
   Coupon: mongoose.models.Coupon || mongoose.model('Coupon', CouponSchema),
   Order: mongoose.models.Order || mongoose.model('Order', OrderSchema),
   CorporateLead: mongoose.models.CorporateLead || mongoose.model('CorporateLead', CorporateLeadSchema),
-  ContactInquiry: mongoose.models.ContactInquiry || mongoose.model('ContactInquiry', ContactInquirySchema)
+  ContactInquiry: mongoose.models.ContactInquiry || mongoose.model('ContactInquiry', ContactInquirySchema),
+  Catalog: mongoose.models.Catalog || mongoose.model('Catalog', CatalogSchema),
+  CustomItem: mongoose.models.CustomItem || mongoose.model('CustomItem', CustomItemSchema)
 };

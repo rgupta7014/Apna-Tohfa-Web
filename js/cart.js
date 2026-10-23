@@ -46,11 +46,12 @@ const APNA_CART = {
     this.renderHeaderCount();
   },
 
-  addItem(productId, quantity = 1, customNote = "") {
+  addItem(productId, quantity = 1, customNote = "", customJars = [], customBasket = "") {
     const product = APNA_DATA.products.find(p => p.id === productId);
     if (!product) return;
 
-    const existingIndex = this.items.findIndex(item => item.id === productId);
+    const jarsKey = (Array.isArray(customJars) && customJars.length > 0 ? customJars.join(' | ') : '') + (customBasket ? ` [${customBasket}]` : '');
+    const existingIndex = this.items.findIndex(item => item.id === productId && (item.jarsKey || '') === jarsKey);
     if (existingIndex > -1) {
       this.items[existingIndex].quantity += quantity;
       if (customNote) this.items[existingIndex].customNote = customNote;
@@ -61,7 +62,10 @@ const APNA_CART = {
         price: product.price,
         image: product.image,
         quantity: quantity,
-        customNote: customNote || ""
+        customNote: customNote || "",
+        customJars: customJars || [],
+        customBasket: customBasket || "",
+        jarsKey: jarsKey
       });
     }
 
@@ -245,6 +249,16 @@ const APNA_CART = {
           <div class="cart-item-info">
             <span class="cart-item-name">${item.name}</span>
             <span class="cart-item-price">₹${item.price}</span>
+            ${item.customBasket ? `
+              <div class="cart-item-basket" style="margin-top: 3px;">
+                <span class="cart-jar-pill" style="background: rgba(212,175,55,0.18); color: var(--maroon-900); font-weight: 700;">🧺 ${item.customBasket}</span>
+              </div>
+            ` : ''}
+            ${item.customJars && item.customJars.length > 0 ? `
+              <div class="cart-item-jars">
+                ${item.customJars.map(j => `<span class="cart-jar-pill">🫙 ${j}</span>`).join('')}
+              </div>
+            ` : ''}
             ${item.customNote ? `<span style="font-size: 0.72rem; color: var(--gold-800); font-style: italic;">Note: "${item.customNote.substring(0, 30)}..."</span>` : ''}
             <div class="cart-item-stepper">
               <button type="button" onclick="APNA_CART.updateQuantity('${item.id}', ${item.quantity - 1})" aria-label="Decrease quantity">−</button>
@@ -346,9 +360,16 @@ const APNA_CART = {
       return;
     }
 
-    const itemsSummary = this.items.map((item, idx) => 
-      `${idx + 1}. *${item.name}* (Qty: ${item.quantity}) - ₹${item.price * item.quantity}${item.customNote ? `\n   Note: "${item.customNote}"` : ''}`
-    ).join('\n');
+    const itemsSummary = this.items.map((item, idx) => {
+      let line = `${idx + 1}. *${item.name}* (Qty: ${item.quantity}) - ₹${item.price * item.quantity}`;
+      if (item.customJars && item.customJars.length > 0) {
+        line += `\n   *Custom Jars:* ${item.customJars.join(', ')}`;
+      }
+      if (item.customNote) {
+        line += `\n   *Note:* "${item.customNote}"`;
+      }
+      return line;
+    }).join('\n');
 
     const total = this.getGrandTotal();
     const subtotal = this.getSubtotal();
@@ -447,9 +468,13 @@ const APNA_CART = {
     }
 
     // Build WhatsApp message text with full items and recipient details
-    const itemsSummary = this.items.map((item, idx) => 
-      `${idx + 1}. *${item.name}* (Qty: ${item.quantity}) - ₹${item.price * item.quantity}`
-    ).join('\n');
+    const itemsSummary = this.items.map((item, idx) => {
+      let line = `${idx + 1}. *${item.name}* (Qty: ${item.quantity}) - ₹${item.price * item.quantity}`;
+      if (item.customBasket) line += `\n   🧺 Basket: ${item.customBasket}`;
+      if (item.customJars && item.customJars.length > 0) line += `\n   🫙 Jars: ${item.customJars.join(' • ')}`;
+      if (item.customNote) line += `\n   ✍️ Card Note: "${item.customNote}"`;
+      return line;
+    }).join('\n');
 
     const paymentLabel = this.activePaymentMethod === 'phone' 
       ? `Phone Helpline (${APNA_DATA.brand.phone || '+91 9950263957'})` 

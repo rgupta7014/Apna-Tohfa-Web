@@ -52,7 +52,8 @@ function getDefaultSeed() {
       announcementText: '🪔 Diwali 2026 Festivel',
       activeCouponPill: '',
       freeShippingThreshold: 5000,
-      standardShippingFee: 99
+      standardShippingFee: 99,
+      hidePrices: true
     },
     categories: [
       { id: 'budget', title: 'Budget Hampers (Under ₹500)', subtitle: 'Thoughtful & pocket-friendly festive joy', priceTag: 'Under ₹500', minPrice: 299, badge: 'Festive Value', icon: '✨' },
@@ -316,7 +317,69 @@ function getDefaultSeed() {
     ],
     orders: [],
     corporateLeads: [],
-    contactInquiries: []
+    contactInquiries: [],
+    catalogs: [
+      {
+        id: 'peacock-floral-6jar',
+        title: 'Peacock Floral 6-Jar Gift Box with Premium Dry Fruits',
+        tagline: '100% Natural | Premium Quality | Hygienic Packing | Long Shelf Life',
+        badge: 'Signature Catalog Poster',
+        category: 'grand-jars',
+        posterImage: 'assets/images/catalogs/peacock-floral-6jar-catalog.png',
+        jars: [
+          'Jar 1: Premium Cashews (Kaju)',
+          'Jar 2: Premium Almonds (Badam)',
+          'Jar 3: Raisins (Kishmish)',
+          'Jar 4: Walnuts (Akhrot)',
+          'Jar 5: Pistachios (Pista)',
+          'Jar 6: Makhana'
+        ],
+        features: [
+          'Handcrafted Peacock and Floral Artwork',
+          '6 Premium Round Brass Jars with Designer Lids',
+          'Golden Satin Cushion and Reusable Briefcase Box',
+          'Includes Premium Gold Handle and Lock',
+          'Delivery: Pan India'
+        ],
+        customisation: [
+          'Customise the box as per your choice',
+          'Chocolates, Candies and different Dry Fruits can be added on request',
+          'Perfect for your own brand, logo and personal message'
+        ],
+        whyChooseUs: [
+          'Premium Quality Dry Fruits, Carefully Selected',
+          'Hygienic Packing with Premium Presentation',
+          'Ideal for Gifting, Stays Fresh for Long Time',
+          'Bulk and Corporate Orders Accepted'
+        ],
+        perfectFor: [
+          'Diwali, Wedding, Rakhi and Festive Gifting',
+          'Corporate, Client and Employee Gifts',
+          'Housewarming, Baby Shower and Special Occasions'
+        ],
+        inquiryMessage: 'Hello Apna Tohfa! I saw the Peacock Floral 6-Jar Gift Box catalog poster on your website and would like to order / enquire about pricing and bulk options.'
+      }
+    ],
+    customItems: [
+      // Customizable Jar Items (Dry fruits, sweets & mukhwas inside jars)
+      { id: 'badam', name: 'California Badam with Jar', type: 'jar', icon: '🌰', description: 'Crunchy California roasted almonds (100g airtight jar)', priceExtra: 0, inStock: true },
+      { id: 'kaju', name: 'Whole Roasted Kaju with Jar', type: 'jar', icon: '🥜', description: 'Premium jumbo whole roasted cashews (100g airtight jar)', priceExtra: 0, inStock: true },
+      { id: 'pista', name: 'Salted Pistachios with Jar', type: 'jar', icon: '🟢', description: 'Crispy salted roasted Iranian pistachios (90g airtight jar)', priceExtra: 0, inStock: true },
+      { id: 'kishmish', name: 'Golden Afghan Kishmish with Jar', type: 'jar', icon: '🍇', description: 'Juicy long green golden Afghan raisins (120g airtight jar)', priceExtra: 0, inStock: true },
+      { id: 'akhrot', name: 'Kashmiri Akhrot with Jar', type: 'jar', icon: '🌰', description: 'Snow white Kashmiri walnut kernels (80g airtight jar)', priceExtra: 0, inStock: true },
+      { id: 'anjeer', name: 'Royal Dried Anjeer with Jar', type: 'jar', icon: '🍯', description: 'Sweet organic dried Turkish figs (100g airtight jar)', priceExtra: 0, inStock: true },
+      { id: 'choco_badam', name: 'Belgian Chocolate Badam with Jar', type: 'jar', icon: '🍫', description: 'California almonds coated in dark Belgian chocolate (100g jar)', priceExtra: 0, inStock: true },
+      { id: 'mukhwas', name: 'Royal Paan Mukhwas with Jar', type: 'jar', icon: '🍬', description: 'Artisanal banarasi paan digestive mukhwas (100g airtight jar)', priceExtra: 0, inStock: true },
+      { id: 'mamra_badam', name: 'Irani Mamra Badam with Jar', type: 'jar', icon: '🌰', description: 'Original high-oil nutrient rich Irani Mamra almonds (85g jar)', priceExtra: 0, inStock: true },
+      { id: 'berry_mix', name: 'Berries & Seeds Mix with Jar', type: 'jar', icon: '🫐', description: 'Dried cranberries, blueberries, pumpkin & chia seeds (100g jar)', priceExtra: 0, inStock: true },
+
+      // Customizable Basket Styles / Types
+      { id: 'wicker_basket', name: 'Artisanal Handwoven Wicker Basket', type: 'basket', icon: '🧺', description: 'Classic festive hand-plaited natural wicker basket with handle', priceExtra: 0, inStock: true },
+      { id: 'bamboo_basket', name: 'Natural Bamboo Festive Tokri', type: 'basket', icon: '🧺', description: 'Eco-friendly polished cane bamboo basket with festive border', priceExtra: 0, inStock: true },
+      { id: 'golden_wire_basket', name: 'Regal Golden Filigree Wire Basket', type: 'basket', icon: '🧺', description: 'Handcrafted gold-plated metal wire filigree basket for grand gifting', priceExtra: 0, inStock: true },
+      { id: 'velvet_trunk_basket', name: 'Royal Velvet Keepsake Trunk Basket', type: 'basket', icon: '👑', description: 'Deep maroon velvet basket chest with antique golden clasp', priceExtra: 0, inStock: true },
+      { id: 'oval_floral_basket', name: 'Oval Floral Designer Basket', type: 'basket', icon: '🧺', description: 'Brocade lined oval festive basket with satin ribbon bows', priceExtra: 0, inStock: true }
+    ]
   };
 }
 
@@ -331,7 +394,16 @@ class StoreDB {
 
   // 1. Local JSON Database Initialization (Always ready as fallback)
   initLocal() {
+    const backupFile = path.join(DATA_DIR, 'store.backup.json');
     if (!fs.existsSync(DB_FILE)) {
+      if (fs.existsSync(backupFile)) {
+        try {
+          const rawBackup = fs.readFileSync(backupFile, 'utf8');
+          this.data = JSON.parse(rawBackup);
+          this.saveLocal();
+          return;
+        } catch (e) {}
+      }
       this.data = getDefaultSeed();
       this.saveLocal();
     } else {
@@ -339,12 +411,70 @@ class StoreDB {
         const raw = fs.readFileSync(DB_FILE, 'utf8');
         this.data = JSON.parse(raw);
         if (!this.data.products || !this.data.orders) {
-          this.data = getDefaultSeed();
+          if (fs.existsSync(backupFile)) {
+            try {
+              const rawBackup = fs.readFileSync(backupFile, 'utf8');
+              this.data = JSON.parse(rawBackup);
+            } catch (e) {
+              this.data = getDefaultSeed();
+            }
+          } else {
+            this.data = getDefaultSeed();
+          }
           this.saveLocal();
         }
       } catch (err) {
-        console.error('Error reading local store.json, re-initializing default seed:', err);
+        console.error('Error reading local store.json, restoring from backup if available:', err);
+        if (fs.existsSync(backupFile)) {
+          try {
+            const rawBackup = fs.readFileSync(backupFile, 'utf8');
+            this.data = JSON.parse(rawBackup);
+            this.saveLocal();
+            return;
+          } catch (e) {}
+        }
         this.data = getDefaultSeed();
+        this.saveLocal();
+      }
+    }
+
+    // Ensure custom items exist
+    if (!this.data.customItems || !Array.isArray(this.data.customItems) || this.data.customItems.length === 0) {
+      this.data.customItems = getDefaultSeed().customItems;
+      this.saveLocal();
+    }
+
+    // Ensure products have hamperType, jarCount, hasJars
+    if (Array.isArray(this.data.products)) {
+      let changed = false;
+      this.data.products.forEach(p => {
+        if (p.jarCount === undefined) {
+          const pName = (p.name || '').toLowerCase();
+          if (pName.includes('teen') || pName.includes('three')) p.jarCount = 3;
+          else if (pName.includes('badam-kaju') || pName.includes('mini jar') || pName.includes('laghu')) p.jarCount = 2;
+          else if (pName.includes('mahabasket') || pName.includes('6x') || pName.includes('6 jar') || pName.includes('6-jar')) p.jarCount = 6;
+          else if (p.category === 'mini-jars' || p.category === 'mini-baskets') p.jarCount = 2;
+          else if (p.category === 'classic-jars' || p.category === 'classic-baskets') p.jarCount = 4;
+          else if (p.category === 'grand-jars' || p.category === 'grand-baskets') p.jarCount = 6;
+          else if (p.category === 'budget' && !pName.includes('jar')) p.jarCount = 0;
+          else p.jarCount = 4;
+          changed = true;
+        }
+        if (!p.hamperType) {
+          const pCat = (p.category || '').toLowerCase();
+          const pName = (p.name || '').toLowerCase();
+          if (pCat.includes('basket') || pName.includes('basket') || pName.includes('tokri')) p.hamperType = 'basket';
+          else if (pCat.includes('trunk') || pName.includes('trunk') || pCat === 'luxury') p.hamperType = 'trunk';
+          else if (pCat.includes('potli') || pName.includes('potli')) p.hamperType = 'potli';
+          else p.hamperType = 'box';
+          changed = true;
+        }
+        if (p.hasJars === undefined) {
+          p.hasJars = (p.jarCount > 0);
+          changed = true;
+        }
+      });
+      if (changed) {
         this.saveLocal();
       }
     }
@@ -353,8 +483,17 @@ class StoreDB {
   saveLocal() {
     try {
       const tempPath = `${DB_FILE}.tmp`;
-      fs.writeFileSync(tempPath, JSON.stringify(this.data, null, 2), 'utf8');
+      const backupPath = path.join(DATA_DIR, 'store.backup.json');
+      const dataStr = JSON.stringify(this.data, null, 2);
+
+      fs.writeFileSync(tempPath, dataStr, 'utf8');
       fs.renameSync(tempPath, DB_FILE);
+
+      try {
+        fs.writeFileSync(backupPath, dataStr, 'utf8');
+      } catch (bErr) {}
+
+      this.syncToDataJs();
       return true;
     } catch (e) {
       console.error('Error saving local store.json:', e);
@@ -362,7 +501,60 @@ class StoreDB {
     }
   }
 
-  // 2. MongoDB Atlas Connection & Automatic Data Migration
+  syncToDataJs() {
+    try {
+      const dataJsPath = path.join(__dirname, '..', 'js', 'data.js');
+      if (!fs.existsSync(dataJsPath)) return;
+      let content = fs.readFileSync(dataJsPath, 'utf8');
+
+      // 1. Sync brand settings if available
+      if (this.data.settings) {
+        const s = this.data.settings;
+        const brandObj = {
+          name: s.brandName || "APNA TOHFA",
+          tagline: s.tagline || "Apno Ke Naam",
+          phone: s.phone || "+91 9950263957",
+          phoneDisplay: s.phone || "+91 9950263957",
+          email: s.email || "apnatohfa26@gmail.com",
+          corporateEmail: s.corporateEmail || "apnatohfa26@gmail.com",
+          whatsapp: s.whatsapp || "919950263957",
+          address: s.address || "Malviya Nagar, Jaipur, Rajasthan - 302017",
+          hours: s.hours || "Mon – Sun: 9:00 AM – 9:00 PM IST",
+          instagram: s.instagram || "https://www.instagram.com/apna.tohfa?cplk=MmRjZDFraWVmbm8y",
+          instagramHandle: s.instagramHandle || "@apnatohfa.official",
+          hidePrices: s.hidePrices !== undefined ? Boolean(s.hidePrices) : true
+        };
+        const brandStart = content.indexOf('"brand": {');
+        const catStart = content.indexOf('"categories": [', brandStart);
+        if (brandStart !== -1 && catStart !== -1) {
+          const brandEnd = content.lastIndexOf('},', catStart);
+          if (brandEnd !== -1) {
+            const newBrandJson = '"brand": ' + JSON.stringify(brandObj, null, 2);
+            content = content.slice(0, brandStart) + newBrandJson + content.slice(brandEnd + 1);
+          }
+        }
+      }
+
+      // 2. Sync products array
+      if (this.data.products && this.data.products.length > 0) {
+        const prodStart = content.indexOf('"products": [');
+        const nextKey = content.indexOf('"corporatePricing":', prodStart);
+        if (prodStart !== -1 && nextKey !== -1) {
+          const prodEnd = content.lastIndexOf('],', nextKey);
+          if (prodEnd !== -1) {
+            const newProductsJson = '"products": ' + JSON.stringify(this.data.products, null, 2);
+            content = content.slice(0, prodStart) + newProductsJson + content.slice(prodEnd + 1);
+          }
+        }
+      }
+
+      fs.writeFileSync(dataJsPath, content, 'utf8');
+    } catch (err) {
+      console.warn('Could not auto-sync to js/data.js:', err.message);
+    }
+  }
+
+  // 2. MongoDB Atlas Connection & Automatic Data Migration / Restoration
   async initMongo() {
     const mongoUri = process.env.MONGODB_URI;
     if (!mongoUri || mongoUri.trim() === '') {
@@ -386,12 +578,150 @@ class StoreDB {
       console.log('Database Mode: Cloud MongoDB (Enterprise Scalable)');
       console.log('----------------------------------------------------');
 
-      // Auto Migrate from local store.json if MongoDB is empty
-      await this.syncLocalToMongoIfEmpty();
+      const productCount = await models.Product.countDocuments();
+      if (productCount === 0) {
+        // Auto Migrate from local store.json if MongoDB is fresh/empty
+        await this.syncLocalToMongoIfEmpty();
+      } else {
+        // Auto Sync from MongoDB Atlas to local store.json & data.js so updates are never lost
+        await this.syncMongoToLocal();
+      }
     } catch (err) {
       this.isMongo = false;
       this.connectionStatus = 'local_fallback_error';
       console.warn('⚠️  MongoDB connection failed, falling back to local store.json:', err.message);
+    }
+  }
+
+  // Restore latest data from MongoDB Atlas into local store.json and js/data.js
+  async syncMongoToLocal() {
+    try {
+      console.log('🔄 Syncing latest data from MongoDB Atlas to local store.json & js/data.js...');
+      const [products, settings, categories, coupons, orders, leads, catalogs, customItems] = await Promise.all([
+        models.Product.find({}).sort({ createdAt: -1 }).lean(),
+        models.Setting.findOne({}).lean(),
+        models.Category.find({}).lean(),
+        models.Coupon.find({}).lean(),
+        models.Order.find({}).sort({ datePlaced: -1 }).lean(),
+        models.CorporateLead.find({}).sort({ submittedAt: -1 }).lean(),
+        models.Catalog ? models.Catalog.find({}).sort({ createdAt: -1 }).lean() : Promise.resolve([]),
+        models.CustomItem ? models.CustomItem.find({}).sort({ createdAt: 1 }).lean() : Promise.resolve([])
+      ]);
+
+      if (customItems && customItems.length > 0) {
+        this.data.customItems = customItems.map(i => {
+          const { _id, __v, ...rest } = i;
+          return rest;
+        });
+      } else {
+        const seedItems = getDefaultSeed().customItems || [];
+        this.data.customItems = seedItems;
+        if (models.CustomItem && seedItems.length > 0) {
+          try {
+            await models.CustomItem.deleteMany({});
+            await models.CustomItem.insertMany(seedItems);
+          } catch(e) {}
+        }
+      }
+
+      if (products && products.length > 0) {
+        this.data.products = products.map(p => {
+          const { _id, __v, ...rest } = p;
+          return rest;
+        });
+      }
+      if (settings) {
+        const { _id, __v, ...restSettings } = settings;
+        this.data.settings = { ...this.data.settings, ...restSettings };
+      }
+      if (categories && categories.length > 0) {
+        this.data.categories = categories.map(c => {
+          const { _id, __v, ...rest } = c;
+          return rest;
+        });
+      }
+      if (coupons && coupons.length > 0) {
+        this.data.coupons = coupons.map(cp => {
+          const { _id, __v, ...rest } = cp;
+          return rest;
+        });
+      }
+      if (orders && orders.length > 0) {
+        this.data.orders = orders.map(o => {
+          const { _id, __v, ...rest } = o;
+          return rest;
+        });
+      }
+      if (leads && leads.length > 0) {
+        this.data.corporateLeads = leads.map(l => {
+          const { _id, __v, ...rest } = l;
+          return rest;
+        });
+      }
+      if (catalogs && catalogs.length > 0) {
+        this.data.catalogs = catalogs.map(c => {
+          const { _id, __v, ...rest } = c;
+          return rest;
+        });
+      } else {
+        const defaultCatalogs = getDefaultSeed().catalogs || [];
+        this.data.catalogs = defaultCatalogs;
+        if (models.Catalog && defaultCatalogs.length > 0) {
+          try {
+            await models.Catalog.deleteMany({});
+            await models.Catalog.insertMany(defaultCatalogs);
+            console.log('📖 Auto-seeded official catalogs into MongoDB Atlas');
+          } catch(e) {}
+        }
+      }
+
+      // Ensure Peacock Floral 6-Jar Hamper is also present in products catalog
+      const hasPeacock = this.data.products.some(p => p.id === 'peacock-floral-6jar-box');
+      if (!hasPeacock) {
+        const peacockHamper = {
+          id: "peacock-floral-6jar-box",
+          name: "Peacock Floral 6-Jar Gift Box with Premium Dry Fruits",
+          category: "grand-jars",
+          badge: "Signature Catalog",
+          badgeType: "bestseller",
+          price: 2499,
+          originalPrice: 3499,
+          discount: "29% OFF",
+          rating: 5.0,
+          reviewsCount: 84,
+          shortDescription: "Handcrafted peacock floral briefcase box with 6 premium brass jars, airtight designer lids, gold handle and lock.",
+          fullDescription: "Our crowning festive masterpiece: The Peacock Floral 6-Jar Gift Box. Features exquisite handcrafted peacock and floral artwork on a reusable briefcase box with golden lock and handle. Inside, 6 premium round brass jars with designer lids rest on royal golden satin cushioning. Filled with hand-selected California Cashews, Almonds, Afghan Kishmish, Kashmiri Walnuts, Salted Pistachios, and Roasted Makhana.\n\nComplete specification poster and brochure available in our Digital Catalog section.",
+          image: "assets/images/catalogs/peacock-floral-6jar-catalog.png",
+          images: ["assets/images/catalogs/peacock-floral-6jar-catalog.png"],
+          inStock: true,
+          dispatchTime: "Ships in 24 Hours",
+          tags: ["Grand Gift Jars", "Briefcase Box", "Peacock Box", "Dry Fruits", "Brass Jars", "Catalog Special"],
+          whatsInside: [
+            { item: "Jar 1: Premium Cashews (Kaju) in Designer Brass Jar", icon: "🫙" },
+            { item: "Jar 2: Premium California Almonds (Badam)", icon: "🫙" },
+            { item: "Jar 3: Sweet Golden Afghan Raisins (Kishmish)", icon: "🫙" },
+            { item: "Jar 4: Royal Kashmiri Walnuts (Akhrot)", icon: "🫙" },
+            { item: "Jar 5: Salted Pistachios (Pista)", icon: "🫙" },
+            { item: "Jar 6: Crispy Roasted Makhana", icon: "🫙" },
+            { item: "Handcrafted Peacock & Floral Reusable Briefcase Box", icon: "👑" },
+            { item: "Golden Satin Cushioning, Gold Handle & Safety Lock", icon: "🎁" }
+          ],
+          customizationOptions: ["Custom Company Logo", "Personalized Diwali Card", "Chocolates/Candies on request"],
+          corporateAvailable: true
+        };
+        this.data.products.unshift(peacockHamper);
+        if (models.Product) {
+          try {
+            await models.Product.create(peacockHamper);
+            console.log('🪔 Added Peacock Floral 6-Jar Hamper to MongoDB Atlas products!');
+          } catch(e) {}
+        }
+      }
+
+      this.saveLocal();
+      console.log(`✅ Synced ${this.data.products.length} hampers, catalogs and store settings from MongoDB Atlas to local files!`);
+    } catch (syncErr) {
+      console.warn('⚠️ Could not sync MongoDB to local cache:', syncErr.message);
     }
   }
 
@@ -442,11 +772,264 @@ class StoreDB {
           await models.CorporateLead.insertMany(sourceData.corporateLeads);
         }
 
+        // 8. Catalogs
+        if (sourceData.catalogs && sourceData.catalogs.length > 0 && models.Catalog) {
+          await models.Catalog.deleteMany({});
+          await models.Catalog.insertMany(sourceData.catalogs);
+        }
+
+        // 9. Custom Items (Jars & Baskets)
+        if (sourceData.customItems && sourceData.customItems.length > 0 && models.CustomItem) {
+          await models.CustomItem.deleteMany({});
+          await models.CustomItem.insertMany(sourceData.customItems);
+        }
+
         console.log('✅ Auto-migration to MongoDB Atlas completed successfully!');
       }
     } catch (err) {
       console.error('Failed to auto-migrate data to MongoDB:', err);
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // CATALOGS & LOOKBOOK
+  // ---------------------------------------------------------------------------
+  async getCatalogs() {
+    if (this.isMongo && models.Catalog) {
+      const list = await models.Catalog.find({}).sort({ createdAt: -1 }).lean();
+      if (list && list.length > 0) return list;
+    }
+    return this.data.catalogs || (getDefaultSeed().catalogs || []);
+  }
+
+  async getCatalogById(id) {
+    if (!id) return null;
+    if (this.isMongo && models.Catalog) {
+      const cat = await models.Catalog.findOne({ id }).lean();
+      if (cat) return cat;
+    }
+    return (this.data.catalogs || []).find(c => c.id === id) || null;
+  }
+
+  async addCatalog(catalogData) {
+    if (!catalogData) throw new Error('Catalog data is required');
+    if (!catalogData.id) {
+      catalogData.id = 'catalog-' + Date.now();
+    }
+    catalogData.createdAt = new Date().toISOString();
+
+    // Check if posterImage is base64 data URL
+    if (catalogData.posterImage && catalogData.posterImage.startsWith('data:image/')) {
+      try {
+        const matches = catalogData.posterImage.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+        if (matches) {
+          const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+          const buffer = Buffer.from(matches[2], 'base64');
+          const fileName = `catalog_${Date.now()}.${ext}`;
+          const catalogDir = path.join(__dirname, '..', 'assets', 'images', 'catalogs');
+          if (!fs.existsSync(catalogDir)) fs.mkdirSync(catalogDir, { recursive: true });
+          const targetPath = path.join(catalogDir, fileName);
+          fs.writeFileSync(targetPath, buffer);
+
+          const frontendCatalogDir = path.join(__dirname, '..', 'frontend', 'public', 'assets', 'images', 'catalogs');
+          if (fs.existsSync(path.dirname(frontendCatalogDir))) {
+            if (!fs.existsSync(frontendCatalogDir)) fs.mkdirSync(frontendCatalogDir, { recursive: true });
+            fs.writeFileSync(path.join(frontendCatalogDir, fileName), buffer);
+          }
+          catalogData.posterImage = `assets/images/catalogs/${fileName}`;
+        }
+      } catch (imgErr) {
+        console.error('Error saving uploaded catalog image:', imgErr);
+      }
+    }
+
+    if (!Array.isArray(this.data.catalogs)) this.data.catalogs = [];
+    this.data.catalogs.unshift(catalogData);
+    this.saveLocal();
+
+    if (this.isMongo && models.Catalog) {
+      try {
+        await models.Catalog.create(catalogData);
+      } catch (mErr) {
+        console.error('Error adding catalog to MongoDB:', mErr);
+      }
+    }
+    return catalogData;
+  }
+
+  async updateCatalog(id, updateData) {
+    if (!id) return null;
+
+    // Check if posterImage is base64 data URL
+    if (updateData.posterImage && updateData.posterImage.startsWith('data:image/')) {
+      try {
+        const matches = updateData.posterImage.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+        if (matches) {
+          const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+          const buffer = Buffer.from(matches[2], 'base64');
+          const fileName = `catalog_${Date.now()}.${ext}`;
+          const catalogDir = path.join(__dirname, '..', 'assets', 'images', 'catalogs');
+          if (!fs.existsSync(catalogDir)) fs.mkdirSync(catalogDir, { recursive: true });
+          const targetPath = path.join(catalogDir, fileName);
+          fs.writeFileSync(targetPath, buffer);
+
+          const frontendCatalogDir = path.join(__dirname, '..', 'frontend', 'public', 'assets', 'images', 'catalogs');
+          if (fs.existsSync(path.dirname(frontendCatalogDir))) {
+            if (!fs.existsSync(frontendCatalogDir)) fs.mkdirSync(frontendCatalogDir, { recursive: true });
+            fs.writeFileSync(path.join(frontendCatalogDir, fileName), buffer);
+          }
+          updateData.posterImage = `assets/images/catalogs/${fileName}`;
+        }
+      } catch (imgErr) {
+        console.error('Error saving updated catalog image:', imgErr);
+      }
+    }
+
+    if (!Array.isArray(this.data.catalogs)) this.data.catalogs = [];
+    const idx = this.data.catalogs.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      this.data.catalogs[idx] = { ...this.data.catalogs[idx], ...updateData };
+      this.saveLocal();
+    }
+
+    if (this.isMongo && models.Catalog) {
+      try {
+        const updated = await models.Catalog.findOneAndUpdate(
+          { id },
+          { $set: updateData },
+          { new: true }
+        ).lean();
+        return updated || (idx !== -1 ? this.data.catalogs[idx] : null);
+      } catch (mErr) {
+        console.error('Error updating catalog in MongoDB:', mErr);
+      }
+    }
+    return idx !== -1 ? this.data.catalogs[idx] : null;
+  }
+
+  async deleteCatalog(id) {
+    if (!id) return false;
+    let deleted = false;
+    if (Array.isArray(this.data.catalogs)) {
+      const initLen = this.data.catalogs.length;
+      this.data.catalogs = this.data.catalogs.filter(c => c.id !== id);
+      if (this.data.catalogs.length < initLen) {
+        deleted = true;
+        this.saveLocal();
+      }
+    }
+
+    if (this.isMongo && models.Catalog) {
+      try {
+        const res = await models.Catalog.deleteOne({ id });
+        if (res.deletedCount > 0) deleted = true;
+      } catch (mErr) {
+        console.error('Error deleting catalog from MongoDB:', mErr);
+      }
+    }
+    return deleted;
+  }
+
+  // ---------------------------------------------------------------------------
+  // CUSTOMIZABLE JARS & BASKETS ITEMS
+  // ---------------------------------------------------------------------------
+  async getCustomItems(filter = {}) {
+    if (this.isMongo && models.CustomItem) {
+      const query = {};
+      if (filter.type && filter.type !== 'all') {
+        query.type = filter.type;
+      }
+      const list = await models.CustomItem.find(query).sort({ createdAt: 1 }).lean();
+      if (list && list.length > 0) return list;
+    }
+    let list = Array.isArray(this.data.customItems) ? [...this.data.customItems] : (getDefaultSeed().customItems || []);
+    if (filter.type && filter.type !== 'all') {
+      list = list.filter(item => item.type === filter.type);
+    }
+    return list;
+  }
+
+  async getCustomItemById(id) {
+    if (!id) return null;
+    if (this.isMongo && models.CustomItem) {
+      const item = await models.CustomItem.findOne({ id }).lean();
+      if (item) return item;
+    }
+    return (this.data.customItems || []).find(i => i.id === id) || null;
+  }
+
+  async addCustomItem(itemData) {
+    if (!itemData || !itemData.name) throw new Error('Item name is required');
+    const type = itemData.type === 'basket' ? 'basket' : 'jar';
+    const id = itemData.id || (itemData.name.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '_' + Date.now().toString(36));
+    const newItem = {
+      id,
+      name: itemData.name.trim(),
+      type,
+      icon: itemData.icon || (type === 'basket' ? '🧺' : '🫙'),
+      description: itemData.description || '',
+      priceExtra: Number(itemData.priceExtra) || 0,
+      inStock: itemData.inStock !== false,
+      createdAt: new Date().toISOString()
+    };
+    if (!Array.isArray(this.data.customItems)) this.data.customItems = [];
+    this.data.customItems.push(newItem);
+    this.saveLocal();
+
+    if (this.isMongo && models.CustomItem) {
+      try {
+        await models.CustomItem.create(newItem);
+      } catch (err) {
+        console.error('Error adding custom item to MongoDB:', err);
+      }
+    }
+    return newItem;
+  }
+
+  async updateCustomItem(id, updateData) {
+    if (!id) return null;
+    if (updateData.priceExtra !== undefined) updateData.priceExtra = Number(updateData.priceExtra) || 0;
+    if (updateData.inStock !== undefined) updateData.inStock = Boolean(updateData.inStock);
+
+    if (!Array.isArray(this.data.customItems)) this.data.customItems = [];
+    const idx = this.data.customItems.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      this.data.customItems[idx] = { ...this.data.customItems[idx], ...updateData };
+      this.saveLocal();
+    }
+
+    if (this.isMongo && models.CustomItem) {
+      try {
+        const updated = await models.CustomItem.findOneAndUpdate({ id }, { $set: updateData }, { new: true }).lean();
+        return updated || (idx !== -1 ? this.data.customItems[idx] : null);
+      } catch (err) {
+        console.error('Error updating custom item in MongoDB:', err);
+      }
+    }
+    return idx !== -1 ? this.data.customItems[idx] : null;
+  }
+
+  async deleteCustomItem(id) {
+    if (!id) return false;
+    let deleted = false;
+    if (Array.isArray(this.data.customItems)) {
+      const initLen = this.data.customItems.length;
+      this.data.customItems = this.data.customItems.filter(i => i.id !== id);
+      if (this.data.customItems.length < initLen) {
+        deleted = true;
+        this.saveLocal();
+      }
+    }
+
+    if (this.isMongo && models.CustomItem) {
+      try {
+        const res = await models.CustomItem.deleteOne({ id });
+        if (res.deletedCount > 0) deleted = true;
+      } catch (err) {
+        console.error('Error deleting custom item from MongoDB:', err);
+      }
+    }
+    return deleted;
   }
 
   // ---------------------------------------------------------------------------
@@ -548,14 +1131,26 @@ class StoreDB {
       ];
     }
 
+    const jarCount = productData.jarCount !== undefined ? Number(productData.jarCount) : 4;
+    const hamperType = productData.hamperType || (productData.category && productData.category.includes('basket') ? 'basket' : 'box');
+    const hasJars = productData.hasJars !== undefined ? Boolean(productData.hasJars) : (jarCount > 0);
+    const basketType = productData.basketType || '';
+    const customizable = productData.customizable !== undefined ? Boolean(productData.customizable) : true;
+
     const newProduct = {
       ...productData,
       id,
       image,
       images,
       whatsInside,
+      hamperType,
+      jarCount,
+      hasJars,
+      basketType,
+      customizable,
       price: Number(productData.price) || 0,
       originalPrice: Number(productData.originalPrice) || Number(productData.price) || 0,
+      hidePrice: productData.hidePrice !== undefined ? Boolean(productData.hidePrice) : false,
       rating: Number(productData.rating) || 5.0,
       reviewsCount: Number(productData.reviewsCount) || 1,
       inStock: productData.inStock !== false,
@@ -574,8 +1169,20 @@ class StoreDB {
   }
 
   async updateProduct(id, updateData) {
-    if (updateData.price) updateData.price = Number(updateData.price);
-    if (updateData.originalPrice) updateData.originalPrice = Number(updateData.originalPrice);
+    if (updateData.price !== undefined) updateData.price = Number(updateData.price) || 0;
+    if (updateData.originalPrice !== undefined) updateData.originalPrice = Number(updateData.originalPrice) || 0;
+    if (updateData.hidePrice !== undefined) updateData.hidePrice = Boolean(updateData.hidePrice);
+
+    if (updateData.jarCount !== undefined) {
+      updateData.jarCount = Number(updateData.jarCount);
+      if (updateData.hasJars === undefined) {
+        updateData.hasJars = updateData.jarCount > 0;
+      }
+    }
+    if (updateData.hasJars !== undefined) updateData.hasJars = Boolean(updateData.hasJars);
+    if (updateData.hamperType !== undefined) updateData.hamperType = String(updateData.hamperType);
+    if (updateData.basketType !== undefined) updateData.basketType = String(updateData.basketType);
+    if (updateData.customizable !== undefined) updateData.customizable = Boolean(updateData.customizable);
 
     if (updateData.images && Array.isArray(updateData.images) && updateData.images.length > 0) {
       if (!updateData.image) updateData.image = updateData.images[0];
@@ -604,21 +1211,48 @@ class StoreDB {
     }
 
     if (this.isMongo) {
-      return await models.Product.findOne({ id }).lean();
+      const fresh = await models.Product.findOne({ id }).lean();
+      if (fresh) {
+        const { _id, __v, ...cleanFresh } = fresh;
+        this.data.products.unshift(cleanFresh);
+        this.saveLocal();
+        return cleanFresh;
+      }
+      return null;
     }
     return null;
   }
 
   async deleteProduct(id) {
+    if (!id) return false;
+    const cleanId = decodeURIComponent(String(id)).trim();
     let deleted = false;
+
     if (this.isMongo) {
-      const res = await models.Product.deleteOne({ id });
-      deleted = res.deletedCount > 0;
+      const conditions = [{ id: cleanId }];
+      if (cleanId.toLowerCase() !== cleanId) {
+        conditions.push({ id: cleanId.toLowerCase() });
+      }
+      if (mongoose.Types.ObjectId.isValid(cleanId)) {
+        conditions.push({ _id: new mongoose.Types.ObjectId(cleanId) });
+      }
+      const res = await models.Product.deleteOne({ $or: conditions });
+      if (res && res.deletedCount > 0) {
+        deleted = true;
+      }
     }
 
     const initialLen = this.data.products.length;
-    this.data.products = this.data.products.filter(p => p.id !== id);
-    if (this.data.products.length < initialLen) {
+    this.data.products = this.data.products.filter(p => {
+      if (!p) return false;
+      const pid = String(p.id || '').trim();
+      const p_id = String(p._id || '').trim();
+      if (pid === cleanId || pid.toLowerCase() === cleanId.toLowerCase()) return false;
+      if (p_id === cleanId) return false;
+      return true;
+    });
+
+    if (this.data.products.length < initialLen || deleted) {
       deleted = true;
       this.saveLocal();
     }
@@ -959,6 +1593,9 @@ class StoreDB {
   }
 
   async updateSettings(newSettings) {
+    if (newSettings && newSettings.hidePrices !== undefined) {
+      newSettings.hidePrices = Boolean(newSettings.hidePrices);
+    }
     if (this.isMongo) {
       const updated = await models.Setting.findOneAndUpdate(
         {},
@@ -1036,7 +1673,7 @@ class StoreDB {
   // ---------------------------------------------------------------------------
   async exportData() {
     if (this.isMongo) {
-      const [settings, categories, products, coupons, orders, corporateLeads, contactInquiries, adminUsers] = await Promise.all([
+      const [settings, categories, products, coupons, orders, corporateLeads, contactInquiries, adminUsers, customItems] = await Promise.all([
         models.Setting.findOne({}).lean(),
         models.Category.find({}).lean(),
         models.Product.find({}).lean(),
@@ -1044,7 +1681,8 @@ class StoreDB {
         models.Order.find({}).lean(),
         models.CorporateLead.find({}).lean(),
         models.ContactInquiry.find({}).lean(),
-        models.AdminUser.find({}).lean()
+        models.AdminUser.find({}).lean(),
+        models.CustomItem ? models.CustomItem.find({}).lean() : Promise.resolve([])
       ]);
       return {
         exportedAt: new Date().toISOString(),
@@ -1056,7 +1694,8 @@ class StoreDB {
         orders,
         corporateLeads,
         contactInquiries,
-        adminUsers
+        adminUsers,
+        customItems
       };
     }
     return this.data;
@@ -1076,7 +1715,8 @@ class StoreDB {
         models.Order.deleteMany({}),
         models.CorporateLead.deleteMany({}),
         models.ContactInquiry.deleteMany({}),
-        models.AdminUser.deleteMany({})
+        models.AdminUser.deleteMany({}),
+        models.CustomItem ? models.CustomItem.deleteMany({}) : Promise.resolve()
       ]);
 
       await models.Setting.create(seed.settings);
@@ -1084,6 +1724,9 @@ class StoreDB {
       await models.Category.insertMany(seed.categories);
       await models.Product.insertMany(seed.products);
       await models.Coupon.insertMany(seed.coupons);
+      if (models.CustomItem && seed.customItems && seed.customItems.length > 0) {
+        await models.CustomItem.insertMany(seed.customItems);
+      }
     }
     return true;
   }

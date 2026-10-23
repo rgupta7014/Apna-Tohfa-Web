@@ -90,6 +90,16 @@
           <span>Hamper Catalog</span>
           <span class="sidebar-badge" id="sidebarProductCount" style="background: rgba(255,255,255,0.15); color: #fff;">0</span>
         </button>
+        <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('catalogs')">
+          <span class="sidebar-item-icon">📖</span>
+          <span>Catalogs & Posters</span>
+          <span class="sidebar-badge" id="sidebarCatalogCount" style="background: rgba(212,175,55,0.25); color: #d4af37;">1</span>
+        </button>
+        <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('customizer')">
+          <span class="sidebar-item-icon">🫙</span>
+          <span>Jars & Baskets Items</span>
+          <span class="sidebar-badge" id="sidebarCustomCount" style="background: rgba(212,175,55,0.25); color: #d4af37;">0</span>
+        </button>
 
         <div class="nav-section-title">B2B & Marketing</div>
         <button type="button" class="sidebar-item" onclick="ADMIN.switchTab('corporate')">
@@ -145,6 +155,10 @@
         </div>
 
         <div class="topbar-actions">
+          <div id="dbLiveStatusBadge" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); transition: all 0.3s ease;">
+            <span id="dbLiveStatusDot" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; display: inline-block;"></span>
+            <span id="dbLiveStatusText">Checking DB...</span>
+          </div>
           <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.refreshCurrentData()" title="Reload Data">
             🔄 Refresh
           </button>
@@ -321,6 +335,80 @@
           </div>
         </section>
 
+        <!-- TAB: DIGITAL CATALOGS & BROCHURE POSTERS -->
+        <section id="tab-catalogs" class="tab-content">
+          <div class="panel">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 class="panel-title">📖 Official Gifting Catalogs & Posters</h3>
+                <div style="font-size: 0.8rem; color: var(--gold-400);">Customer storefront ke lookbook section me display hone wale sabhi posters aur catalogs</div>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.openCatalogModal()" style="font-weight: 700;">
+                  + Add New Catalog Poster 📄
+                </button>
+                <a href="/#catalog-section" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none;">
+                  👁️ View on Website ↗
+                </a>
+              </div>
+            </div>
+            <div class="panel-body" style="padding: 24px;">
+              <div id="adminCatalogList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+                <!-- Catalogs rendered dynamically via ADMIN.loadCatalogs() -->
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-dim);">
+                  Loading catalogs & lookbook posters...
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: CUSTOMIZABLE JARS & BASKETS INVENTORY -->
+        <section id="tab-customizer" class="tab-content">
+          <div class="panel">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 class="panel-title">🫙 🧺 Customizable Jars & Baskets Inventory</h3>
+                <div style="font-size: 0.8rem; color: var(--gold-400);">
+                  Control which Dry Fruit / Sweet items can be packed in Jars, and manage Basket styles available for customer customization on website.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.openAddCustomItemModal()" style="font-weight: 700;">
+                  + Add New Item ✨
+                </button>
+              </div>
+            </div>
+
+            <div class="panel-body" style="padding: 20px 24px;">
+              <!-- Sub-Filters Bar -->
+              <div class="filter-bar" style="margin-bottom: 20px;">
+                <div class="filter-pills" id="customItemFilters">
+                  <button type="button" class="filter-pill active" onclick="ADMIN.filterCustomItems('all')">
+                    All Items (<span id="customFilterCountAll">0</span>)
+                  </button>
+                  <button type="button" class="filter-pill" onclick="ADMIN.filterCustomItems('jar')">
+                    🫙 Jar Items (<span id="customFilterCountJars">0</span>)
+                  </button>
+                  <button type="button" class="filter-pill" onclick="ADMIN.filterCustomItems('basket')">
+                    🧺 Basket Styles (<span id="customFilterCountBaskets">0</span>)
+                  </button>
+                </div>
+
+                <div class="search-input-wrap">
+                  <span class="search-input-icon">🔍</span>
+                  <input type="text" id="customItemSearchInput" placeholder="Search jar items or baskets..." oninput="ADMIN.searchCustomItems(this.value)">
+                </div>
+              </div>
+
+              <!-- Live Items Grid -->
+              <div id="adminCustomItemsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px;">
+                <!-- Dynamically rendered via ADMIN.renderCustomItems() -->
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- TAB 4: CORPORATE LEADS -->
         <section id="tab-corporate" class="tab-content">
           <div class="panel">
@@ -395,6 +483,24 @@
             </div>
             <div class="panel-body">
               <form id="storeSettingsForm" onsubmit="ADMIN.saveStoreSettings(event)">
+                <!-- PRICING VISIBILITY TOGGLE (User Request) -->
+                <div style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(128,0,32,0.18)); border: 1.5px solid rgba(212,175,55,0.4); border-radius: 12px; padding: 18px 20px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                      <div style="font-weight: 800; color: #fff; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.25rem;">💰</span> Storefront Pricing Visibility (Hide / Show Prices)
+                      </div>
+                      <div style="font-size: 0.8rem; color: var(--gold-300); margin-top: 4px; max-width: 500px; line-height: 1.4;">
+                        Jab yeh <strong>Enabled</strong> hoga, website par sabhi hampers ki Price hide ho jayegi aur customer ko direct <em>"Price on Request / WhatsApp Quote"</em> ka button dikhega. Agar aapko kabhi bhi price dikhana ho toh ise uncheck karke Save kar sakte hain.
+                      </div>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: rgba(0,0,0,0.35); padding: 10px 16px; border-radius: 30px; border: 1px solid var(--gold-400);">
+                      <input type="checkbox" id="settingHidePrices" style="width: 20px; height: 20px; accent-color: var(--gold-500); cursor: pointer;">
+                      <span style="font-weight: 700; color: #fff; font-size: 0.9rem;">Hide Product Prices on Website</span>
+                    </label>
+                  </div>
+                </div>
+
                 <!-- SECTION 1: BRAND IDENTITY & LOGO -->
                 <div style="margin-bottom: 24px;">
                   <h4 style="font-family: var(--font-serif); color: var(--gold-400); font-size: 1.05rem; margin-bottom: 12px; border-bottom: 1px solid var(--admin-border); padding-bottom: 6px;">
@@ -598,13 +704,20 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Selling Price (₹) *</label>
-              <input type="number" id="prodPrice" class="form-input" placeholder="499" required min="1">
+              <label class="form-label">Selling Price (₹) <span style="font-size: 0.75rem; color: var(--gold-300); font-weight: normal;">(Optional - Khali chhodne par Price hide rahegi)</span></label>
+              <input type="number" id="prodPrice" class="form-input" placeholder="e.g. 1899 (Khali = Price on Request)" min="0">
             </div>
             <div class="form-group">
-              <label class="form-label">Original Price (₹)</label>
-              <input type="number" id="prodOrigPrice" class="form-input" placeholder="799" min="1">
+              <label class="form-label">Original Price (₹) (Optional)</label>
+              <input type="number" id="prodOrigPrice" class="form-input" placeholder="e.g. 2499" min="0">
             </div>
+          </div>
+
+          <div class="form-group" style="margin-top: -6px; margin-bottom: 14px; background: rgba(212,175,55,0.06); padding: 8px 12px; border-radius: 6px; border: 1px dashed rgba(212,175,55,0.3);">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--gold-300); cursor: pointer; margin: 0;">
+              <input type="checkbox" id="prodHidePrice" style="accent-color: var(--gold-500); width: 17px; height: 17px; cursor: pointer;">
+              <span><strong>Hide Price for this Hamper</strong> (Customer ko "Price on Request / WhatsApp Quote" dikhega)</span>
+            </label>
           </div>
 
           <div class="form-row">
@@ -618,10 +731,92 @@
             </div>
           </div>
 
-          <!-- Multiple Images & Local Upload Manager -->
+          <!-- SECTION: CONTAINER & JAR SLOTS CONFIGURATION -->
+          <div style="background: rgba(212,175,55,0.06); border: 1.5px solid rgba(212,175,55,0.3); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label" style="color: var(--gold-300); margin: 0; font-weight: 700; font-size: 0.95rem;">
+                🧺 🫙 Hamper Container & Jar Setup (Customization Control)
+              </label>
+              <span style="font-size: 0.72rem; color: var(--gold-400); background: rgba(212,175,55,0.15); padding: 2px 8px; border-radius: 4px;">
+                Admin Configured
+              </span>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 12px;">
+              Choose container style (Box, Basket, Trunk) and configure how many jars (1, 2, 3, 4, 6 or No Jars) customer will customize on the website.
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom: 10px;">
+                <label class="form-label" style="font-size: 0.8rem;">Hamper Container / Box Type *</label>
+                <select id="prodHamperType" class="form-select" onchange="ADMIN.onHamperTypeChange(this.value)">
+                  <option value="box">🎁 Gift Box (Rigid Keepsake Box)</option>
+                  <option value="basket">🧺 Festive Basket (Tokri)</option>
+                  <option value="trunk">👑 Royal Velvet Trunk / Chest</option>
+                  <option value="potli">🪔 Traditional Potli Pack</option>
+                  <option value="tray">🍱 Handcrafted Presentation Tray</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 10px;">
+                <label class="form-label" style="font-size: 0.8rem;">Jar Capacity / Slots *</label>
+                <select id="prodJarCount" class="form-select" onchange="ADMIN.onJarCountChange(this.value)">
+                  <option value="0">🚫 No Jars (Mithai / Diyas / Goodies Only)</option>
+                  <option value="1">🫙 1 Jar Hamper</option>
+                  <option value="2">🫙 2 Jars Hamper (Duo)</option>
+                  <option value="3">🫙 3 Jars Hamper (Trio / Teen Jar)</option>
+                  <option value="4" selected>🫙 4 Jars Hamper (Standard 4-Pack)</option>
+                  <option value="6">🫙 6 Jars Hamper (Royal Suite / Briefcase)</option>
+                  <option value="custom">✏️ Custom Jar Count...</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Custom Count Input (Hidden by default unless custom is picked) -->
+            <div id="prodCustomJarCountWrap" style="display: none; margin-bottom: 10px;">
+              <label class="form-label" style="font-size: 0.78rem;">Enter Exact Number of Jars:</label>
+              <input type="number" id="prodCustomJarCount" class="form-input" min="1" max="16" placeholder="e.g. 5, 8">
+            </div>
+
+            <!-- Basket Specific Options (Visible when Basket container selected) -->
+            <div id="prodBasketOptionsWrap" style="display: none; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.25); border-radius: 6px; border: 1px dashed rgba(212,175,55,0.25);">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 6px;">
+                🧺 Basket + Jar Options:
+              </div>
+              <div class="form-row" style="margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" style="font-size: 0.75rem;">Default Basket Style</label>
+                  <select id="prodBasketType" class="form-select">
+                    <!-- Populated dynamically with available basket items -->
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0; display: flex; align-items: flex-end;">
+                  <span id="prodBasketJarSummary" style="font-size: 0.75rem; color: var(--gold-300); padding-bottom: 8px;">
+                    This Basket will have <strong id="prodBasketJarSummaryNum">4</strong> customizable jars inside.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+              <span style="font-size: 0.72rem; color: var(--text-dim); margin-right: 4px;">Quick Presets:</span>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('box', 2)">🎁 2-Jar Box</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('box', 3)">🎁 3-Jar Box</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('box', 4)">🎁 4-Jar Box</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('box', 6)">🎁 6-Jar Box</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('basket', 2)">🧺 Basket + 2 Jars</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('basket', 3)">🧺 Basket + 3 Jars</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('basket', 4)">🧺 Basket + 4 Jars</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('basket', 6)">🧺 Basket + 6 Jars</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('basket', 0)">🧺 Basket (No Jars)</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.72rem;" onclick="ADMIN.applyHamperPreset('box', 0)">🍬 Sweets Only (0 Jars)</button>
+            </div>
+          </div>
+
+          <!-- Multiple Images & Local Upload Manager (1200x900 Aspect Ratio) -->
           <div class="form-group">
             <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-              <span>Hamper Images (Multiple Photos & Upload Supported) *</span>
+              <span>Hamper Images (Standard Dimension: 1200 × 900 px - 4:3 Ratio) *</span>
               <span style="font-size: 0.75rem; color: var(--gold-400); font-weight: normal;">
                 <span id="prodImageCount">1</span> photo(s) attached
               </span>
@@ -635,7 +830,7 @@
                   Click to Upload Photos from Device / Storage
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
-                  Supports multiple selection (JPG, PNG, WEBP). Select all photos at once.
+                  All photos automatically scaled & centered to <strong>1200 × 900 px</strong> for website & admin.
                 </div>
                 <input type="file" id="prodFileInput" accept="image/*" multiple style="display: none;" onchange="ADMIN.handleImageFileUpload(event)">
               </div>
@@ -758,6 +953,227 @@
     </div>
   </div>
 
+  <!-- MODAL: ADD / EDIT CATALOG POSTER -->
+  <div class="modal-overlay" id="catalogModal">
+    <div class="modal-box" style="max-width: 720px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="catalogModalTitle">Add New Catalog Poster</h3>
+        <button type="button" class="modal-close-btn" onclick="ADMIN.closeModal('catalogModal')">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="catalogForm" onsubmit="ADMIN.saveCatalog(event)">
+          <input type="hidden" id="catalogEditId">
+
+          <div class="form-group">
+            <label class="form-label">Catalog Poster Title *</label>
+            <input type="text" id="catalogTitle" class="form-input" placeholder="e.g. Peacock Floral 6-Jar Gift Box with Premium Dry Fruits" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tagline / Subtitle</label>
+              <input type="text" id="catalogTagline" class="form-input" placeholder="100% Natural • Premium Quality • Hygienic Packing">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Badge Label</label>
+              <input type="text" id="catalogBadge" class="form-input" placeholder="Signature Catalog Poster">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="catalogCategory" class="form-select">
+              <option value="grand-jars">Grand Gift Jars (6 Jars / Luxury Boxes)</option>
+              <option value="classic-jars">Classic Gift Jars (4 Jars / Wooden Trays)</option>
+              <option value="mini-jars">Mini Gift Jars (2-3 Jars / Duo Packs)</option>
+              <option value="luxury">Luxury Hampers & Velvet Chests</option>
+              <option value="corporate">Corporate & Bulk Gifting</option>
+              <option value="baskets">Woven Gift Baskets & Hampers</option>
+            </select>
+          </div>
+
+          <!-- Poster Image Upload Manager -->
+          <div class="form-group">
+            <label class="form-label">High-Resolution Poster Image *</label>
+            <div class="image-manager-wrap">
+              <div class="upload-dropzone" onclick="document.getElementById('catalogFileInput').click()">
+                <div style="font-size: 1.6rem; margin-bottom: 4px;">🖼️ 📸</div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.9rem;">
+                  Click to Upload Catalog Poster from Computer / Phone
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
+                  PNG, JPG, WEBP formats supported. High resolution recommended.
+                </div>
+                <input type="file" id="catalogFileInput" accept="image/*" style="display: none;" onchange="ADMIN.handleCatalogFileUpload(event)">
+              </div>
+
+              <div style="margin-top: 12px;">
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+                  Or Enter Image URL / Asset Path:
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="catalogImageUrlInput" class="form-input" placeholder="assets/images/catalogs/... or https://..." style="flex: 1;" oninput="ADMIN.updateCatalogPreviewFromInput(this.value)">
+                </div>
+              </div>
+
+              <!-- Poster Preview -->
+              <div id="catalogImagePreviewWrap" style="margin-top: 14px; text-align: center; display: none;">
+                <div style="font-size: 0.75rem; color: var(--gold-300); margin-bottom: 6px; font-weight: 700;">Poster Image Preview:</div>
+                <img id="catalogImagePreview" src="" alt="Poster Preview" style="max-height: 220px; border-radius: 8px; border: 2px solid var(--gold-400); box-shadow: 0 4px 14px rgba(0,0,0,0.4); margin: 0 auto; display: block;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Inside the Box Items -->
+          <div class="form-group">
+            <label class="form-label">Inside the Box / Jars (1 per line) *</label>
+            <textarea id="catalogJars" class="form-textarea" rows="4" placeholder="Jar 1: Premium Cashews (Kaju)&#10;Jar 2: Premium Almonds (Badam)&#10;Jar 3: Raisins (Kishmish)&#10;Jar 4: Walnuts (Akhrot)&#10;Jar 5: Pistachios (Pista)&#10;Jar 6: Makhana" required></textarea>
+            <span style="font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 3px;">Har line par ek jar ya item daalein.</span>
+          </div>
+
+          <!-- Box Features -->
+          <div class="form-group">
+            <label class="form-label">Box Features (1 per line)</label>
+            <textarea id="catalogFeatures" class="form-textarea" rows="3" placeholder="Handcrafted Peacock and Floral Artwork&#10;6 Premium Round Brass Jars with Designer Lids&#10;Golden Satin Cushion and Reusable Briefcase Box&#10;Delivery: Pan India"></textarea>
+          </div>
+
+          <!-- Customisation Options -->
+          <div class="form-group">
+            <label class="form-label">Customisation Available (1 per line)</label>
+            <textarea id="catalogCustomisation" class="form-textarea" rows="3" placeholder="We can customise the box as per your choice.&#10;Chocolates, Candies and different Dry Fruits can be added on request.&#10;Perfect for your own brand, logo and personal message."></textarea>
+          </div>
+
+          <!-- Why Choose Us & Perfect For -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Why Choose Us (1 per line)</label>
+              <textarea id="catalogWhyChooseUs" class="form-textarea" rows="3" placeholder="Premium Quality Dry Fruits, Carefully Selected&#10;Hygienic Packing with Premium Presentation&#10;Bulk and Corporate Orders Accepted"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Perfect For Occasions (1 per line)</label>
+              <textarea id="catalogPerfectFor" class="form-textarea" rows="3" placeholder="Diwali, Wedding, Rakhi and Festive Gifting&#10;Corporate, Client and Employee Gifts&#10;Housewarming and Special Occasions"></textarea>
+            </div>
+          </div>
+
+          <!-- WhatsApp Custom Inquiry Message -->
+          <div class="form-group">
+            <label class="form-label">WhatsApp Pre-filled Order Message</label>
+            <input type="text" id="catalogInquiryMessage" class="form-input" placeholder="Hello Apna Tohfa! I would like to order / enquire about pricing and bulk options for this box.">
+          </div>
+
+          <div class="modal-footer" style="padding: 16px 0 0; margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.closeModal('catalogModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Save Catalog Poster ✨</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <!-- MODAL: ADD / EDIT CUSTOMIZABLE JAR OR BASKET ITEM -->
+  <div class="modal-overlay" id="customItemModal">
+    <div class="modal-box" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="customItemModalTitle">Add Customizable Item</h3>
+        <button type="button" class="modal-close-btn" onclick="ADMIN.closeModal('customItemModal')">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="customItemForm" onsubmit="ADMIN.saveCustomItem(event)">
+          <input type="hidden" id="customItemEditId">
+
+          <div class="form-group">
+            <label class="form-label">Item Category / Type *</label>
+            <div style="display: flex; gap: 12px;">
+              <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--admin-border); border-radius: var(--radius-sm); cursor: pointer;" id="typeRadioJarLabel">
+                <input type="radio" name="customItemType" id="typeRadioJar" value="jar" checked onchange="ADMIN.onCustomItemTypeChange('jar')">
+                <span>🫙 <strong>Jar Item</strong><br><small style="color: var(--text-dim);">Dry fruit/sweet inside jar</small></span>
+              </label>
+              <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--admin-border); border-radius: var(--radius-sm); cursor: pointer;" id="typeRadioBasketLabel">
+                <input type="radio" name="customItemType" id="typeRadioBasket" value="basket" onchange="ADMIN.onCustomItemTypeChange('basket')">
+                <span>🧺 <strong>Basket Style</strong><br><small style="color: var(--text-dim);">Basket container type</small></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Item Name *</label>
+            <input type="text" id="customItemName" class="form-input" placeholder="e.g. California Badam with Jar or Handwoven Wicker Basket" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Icon / Emoji *</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="customItemIcon" class="form-input" value="🌰" style="width: 70px; text-align: center; font-size: 1.3rem;" required>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="customItemEmojiPresets">
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🌰'">🌰</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🥜'">🥜</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🟢'">🟢</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🍇'">🍇</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🍯'">🍯</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🍫'">🍫</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🍬'">🍬</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🧺'">🧺</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='👑'">👑</button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="document.getElementById('customItemIcon').value='🫙'">🫙</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Extra Price (₹) <span style="font-size: 0.72rem; color: var(--text-dim);">(0 = Free / Included)</span></label>
+              <input type="number" id="customItemPrice" class="form-input" placeholder="0" min="0" value="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description / Size / Weight Highlight</label>
+            <input type="text" id="customItemDesc" class="form-input" placeholder="e.g. 100g Airtight Jar / Premium California Almonds">
+          </div>
+
+          <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--admin-border);">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #fff; font-size: 0.85rem; margin: 0;">
+              <input type="checkbox" id="customItemInStock" checked style="accent-color: var(--success); width: 17px; height: 17px; cursor: pointer;">
+              <span><strong>Mark In Stock</strong> (Visible and selectable for customer customization)</span>
+            </label>
+          </div>
+
+          <div class="modal-footer" style="padding: 16px 0 0; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.closeModal('customItemModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm">Save Item ✨</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRM DELETE HAMPER -->
+  <div class="modal-overlay" id="deleteConfirmModal">
+    <div class="modal-box" style="max-width: 440px; border: 1.5px solid var(--danger);">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(239,68,68,0.25);">
+        <h3 class="modal-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
+          <span>🗑️</span> Confirm Delete Hamper
+        </h3>
+        <button type="button" class="modal-close-btn" onclick="ADMIN.closeModal('deleteConfirmModal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="color: #fff; font-size: 0.95rem; margin-bottom: 12px;">
+          Are you sure you want to permanently delete this hamper from the store?
+        </p>
+        <div style="background: rgba(239,68,68,0.1); border-left: 3px solid var(--danger); padding: 10px 14px; border-radius: var(--radius-xs); margin-bottom: 20px;">
+          <strong id="deleteConfirmHamperName" style="color: #fca5a5; display: block; font-size: 1rem;"></strong>
+          <span style="font-size: 0.78rem; color: var(--text-dim);">This will permanently remove it from MongoDB Atlas & Catalog.</span>
+        </div>
+        <div class="modal-footer" style="padding: 0; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.closeModal('deleteConfirmModal')">Cancel</button>
+          <button type="button" class="btn btn-danger btn-sm" id="deleteConfirmSubmitBtn" onclick="ADMIN.executeDeleteProduct()">
+            🗑️ Yes, Delete Hamper
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PRINTABLE INVOICE CONTAINER (Hidden until print) -->
   <div id="printableInvoice" style="display: none;"></div>
 
@@ -772,6 +1188,9 @@
 
   <!-- Firebase Configuration & Helpers -->
   <script src="js/firebase-config.js"></script>
+
+  <!-- Base Data Seed (Fallback & Offline Sync) -->
+  <script src="js/data.js"></script>
 
   <!-- Admin Application Script -->
   <script src="js/admin.js"></script>

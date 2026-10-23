@@ -8,8 +8,13 @@ const ADMIN = {
   currentTab: 'dashboard',
   orders: [],
   products: [],
+  catalogs: [],
   corporateLeads: [],
   coupons: [],
+  customItems: [],
+  customItemFilter: 'all',
+  customItemSearch: '',
+  editingCustomItemId: null,
   settings: {},
   stats: {},
   selectedOrder: null,
@@ -30,6 +35,50 @@ const ADMIN = {
       this.verifySession();
     } else {
       this.showLogin();
+    }
+
+    // Monitor live database sync status
+    this.checkDatabaseHealth();
+    setInterval(() => this.checkDatabaseHealth(), 20000);
+  },
+
+  async checkDatabaseHealth() {
+    const badge = document.getElementById('dbLiveStatusBadge');
+    const text = document.getElementById('dbLiveStatusText');
+    const dot = document.getElementById('dbLiveStatusDot');
+    if (!badge || !text || !dot) return;
+
+    try {
+      const res = await fetch(this.getApiUrl('/api/health'), { signal: AbortSignal.timeout(4000) });
+      const data = await res.json();
+      if (data && data.status === 'ok') {
+        if (data.database && data.database.includes('MongoDB')) {
+          badge.style.background = 'rgba(16,185,129,0.15)';
+          badge.style.color = '#34d399';
+          badge.style.borderColor = 'rgba(16,185,129,0.3)';
+          dot.style.background = '#10b981';
+          dot.style.boxShadow = '0 0 8px #10b981';
+          text.textContent = '☁️ MongoDB Atlas (Sync Active)';
+          badge.title = 'All changes are permanently synced to MongoDB Atlas in Cloud.';
+        } else {
+          badge.style.background = 'rgba(234,179,8,0.15)';
+          badge.style.color = '#facc15';
+          badge.style.borderColor = 'rgba(234,179,8,0.3)';
+          dot.style.background = '#eab308';
+          dot.style.boxShadow = '0 0 8px #eab308';
+          text.textContent = '📁 Local Storage (store.json)';
+          badge.title = 'Saved locally to store.json. Add MONGODB_URI to .env for Cloud Sync.';
+        }
+        return;
+      }
+    } catch (e) {
+      badge.style.background = 'rgba(239,68,68,0.15)';
+      badge.style.color = '#f87171';
+      badge.style.borderColor = 'rgba(239,68,68,0.3)';
+      dot.style.background = '#ef4444';
+      dot.style.boxShadow = '0 0 8px #ef4444';
+      text.textContent = '⚠️ Server Offline (Run: npm start)';
+      badge.title = 'Backend server is not running on port 3000! Changes will only be saved in temporary browser cache.';
     }
   },
 
@@ -282,6 +331,8 @@ const ADMIN = {
       dashboard: { title: 'Dashboard Overview', sub: 'Real-time festive orders & logistics tracking' },
       orders: { title: 'Orders & Fulfillment', sub: 'Manage packaging, invoices and express courier tracking' },
       products: { title: 'Hamper Catalog Management', sub: 'Add, update pricing and curate gift box collections' },
+      catalogs: { title: 'Digital Catalogs & Lookbook Posters', sub: 'Manage official specification sheets and promotional brochures' },
+      customizer: { title: 'Customizable Jars & Baskets Inventory', sub: 'Add, update and remove Jar dry fruits/mukhwas & Basket styles' },
       corporate: { title: 'Corporate Bulk Leads', sub: 'High-value B2B inquiries & customized company quotes' },
       coupons: { title: 'Festive Discounts & Offers', sub: 'Create and activate promotional coupon codes' },
       settings: { title: 'Store Settings & Configuration', sub: 'Update top announcements, helpline & store policies' }
@@ -301,6 +352,8 @@ const ADMIN = {
       this.fetchStats(),
       this.fetchOrders(),
       this.fetchProducts(),
+      this.fetchCatalogs(),
+      this.fetchCustomItems(),
       this.fetchCorporateLeads(),
       this.fetchCoupons(),
       this.fetchSettings()
@@ -561,6 +614,7 @@ const ADMIN = {
                     <img src="${item.image}" alt="${item.name}" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover;">
                     <div>
                       <div style="font-weight: 700; color: #fff;">${item.name}</div>
+                      ${item.customJars && item.customJars.length > 0 ? `<div style="font-size: 0.72rem; color: #a7f3d0; margin-top: 3px;">🫙 ${item.customJars.join(' • ')}</div>` : ''}
                       ${item.customNote ? `<div style="font-size: 0.72rem; color: var(--gold-400); font-style: italic;">Note: ${item.customNote}</div>` : ''}
                     </div>
                   </div>
@@ -696,6 +750,7 @@ const ADMIN = {
                 <td style="padding: 8px;">${idx + 1}</td>
                 <td style="padding: 8px;">
                   <strong>${item.name}</strong>
+                  ${item.customJars && item.customJars.length > 0 ? `<br><small style="color: #1b5e20; font-weight: bold;">🫙 ${item.customJars.join(' • ')}</small>` : ''}
                   ${item.customNote ? `<br><small style="color: #666;">Note: ${item.customNote}</small>` : ''}
                 </td>
                 <td style="padding: 8px; text-align: center;">${item.quantity}</td>
@@ -728,8 +783,10 @@ const ADMIN = {
   // --- PRODUCTS ---
   async fetchProducts() {
     try {
-      const data = await this.fetchWithAuth('/api/products');
-      if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
+      const data = await this.fetchWithAuth(`/api/products?_t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (data && data.success && Array.isArray(data.products)) {
         this.products = data.products;
         try { localStorage.setItem('apna_store_products', JSON.stringify(data.products)); } catch (err) {}
         this.renderProductsGrid();
@@ -817,7 +874,7 @@ const ADMIN = {
             <button class="btn ${p.inStock ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="ADMIN.toggleProductStock('${p.id}')" title="Toggle Stock Status">
               ${p.inStock ? 'In Stock ✓' : 'Mark In Stock'}
             </button>
-            <button class="btn btn-danger btn-sm" onclick="ADMIN.deleteProduct('${p.id}')" title="Delete Hamper">
+            <button class="btn btn-danger btn-sm" onclick="ADMIN.promptDeleteProduct('${p.id}')" title="Delete Hamper">
               🗑️
             </button>
           </div>
@@ -869,8 +926,8 @@ const ADMIN = {
     `).join('');
   },
 
-  // Client-side Canvas Image Compression (1200px max, 0.82 quality)
-  compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.82) {
+  // Client-side Canvas Image Standardizer (Strict 1200 × 900 px - 4:3 Aspect Ratio)
+  compressImage(file, targetWidth = 1200, targetHeight = 900, quality = 0.85) {
     return new Promise((resolve, reject) => {
       const isImg = (file && file.type && file.type.startsWith('image/')) ||
                     /\.(jpg|jpeg|png|webp|jfif|avif|gif)$/i.test(file?.name || '');
@@ -883,17 +940,39 @@ const ADMIN = {
         const img = new Image();
         img.onerror = () => reject(new Error('Failed to load image element'));
         img.onload = () => {
-          let { width, height } = img;
-          if (width > maxWidth || height > maxHeight) {
-            const ratio = Math.min(maxWidth / width, maxHeight / height);
-            width = Math.round(width * ratio);
-            height = Math.round(height * ratio);
-          }
           const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
           const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
+
+          // Smooth high-definition rendering
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          // Background fill (crisp clean white for luxury hampers)
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+          // Cover fit calculation to fill exact 1200x900 maintaining aspect ratio
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetWidth / targetHeight; // 1200 / 900 = 1.3333
+
+          let renderW, renderH, offsetX, offsetY;
+          if (imgRatio > targetRatio) {
+            // Source is wider than 4:3
+            renderH = targetHeight;
+            renderW = img.width * (targetHeight / img.height);
+            offsetX = (targetWidth - renderW) / 2;
+            offsetY = 0;
+          } else {
+            // Source is taller than 4:3
+            renderW = targetWidth;
+            renderH = img.height * (targetWidth / img.width);
+            offsetX = 0;
+            offsetY = (targetHeight - renderH) / 2;
+          }
+
+          ctx.drawImage(img, offsetX, offsetY, renderW, renderH);
           const dataUrl = canvas.toDataURL('image/jpeg', quality);
           resolve(dataUrl);
         };
@@ -1012,10 +1091,101 @@ const ADMIN = {
     }
   },
 
+  populateBasketTypeSelect(selectedValue = '') {
+    const select = document.getElementById('prodBasketType');
+    if (!select) return;
+    const baskets = (this.customItems || []).filter(item => item.type === 'basket');
+    if (!baskets.length) {
+      select.innerHTML = `
+        <option value="Handwoven Cane Basket">🧺 Handwoven Cane Basket</option>
+        <option value="Traditional Bamboo Tokri">🎋 Traditional Bamboo Tokri</option>
+        <option value="Luxury Golden Wire Basket">✨ Luxury Golden Wire Basket</option>
+        <option value="Vintage Wooden Crate">📦 Vintage Wooden Crate</option>
+      `;
+      if (selectedValue) select.value = selectedValue;
+      return;
+    }
+    select.innerHTML = baskets.map(b => `
+      <option value="${b.name}" ${selectedValue === b.name ? 'selected' : ''}>
+        ${b.icon || '🧺'} ${b.name} ${b.priceExtra ? `(+₹${b.priceExtra})` : ''}
+      </option>
+    `).join('');
+  },
+
+  onHamperTypeChange(type) {
+    const wrap = document.getElementById('prodBasketOptionsWrap');
+    if (wrap) {
+      wrap.style.display = (type === 'basket') ? 'block' : 'none';
+    }
+    this.updateBasketJarSummary();
+  },
+
+  onJarCountChange(val) {
+    const customWrap = document.getElementById('prodCustomJarCountWrap');
+    if (customWrap) {
+      customWrap.style.display = (val === 'custom') ? 'block' : 'none';
+    }
+    this.updateBasketJarSummary();
+  },
+
+  updateBasketJarSummary() {
+    const summaryNum = document.getElementById('prodBasketJarSummaryNum');
+    if (!summaryNum) return;
+    const jarSelect = document.getElementById('prodJarCount');
+    const val = jarSelect ? jarSelect.value : '4';
+    if (val === '0') {
+      summaryNum.textContent = '0 (Sweets / Goodies only)';
+    } else if (val === 'custom') {
+      const customVal = document.getElementById('prodCustomJarCount')?.value || '';
+      summaryNum.textContent = customVal ? `${customVal}` : 'custom';
+    } else {
+      summaryNum.textContent = val;
+    }
+  },
+
+  applyHamperPreset(type, jarCount) {
+    const hamperSelect = document.getElementById('prodHamperType');
+    const jarSelect = document.getElementById('prodJarCount');
+    const customWrap = document.getElementById('prodCustomJarCountWrap');
+    const customInput = document.getElementById('prodCustomJarCount');
+
+    if (hamperSelect) hamperSelect.value = type;
+    const standardCounts = ['0', '1', '2', '3', '4', '6'];
+    const countStr = String(jarCount);
+
+    if (standardCounts.includes(countStr)) {
+      if (jarSelect) jarSelect.value = countStr;
+      if (customWrap) customWrap.style.display = 'none';
+      if (customInput) customInput.value = '';
+    } else {
+      if (jarSelect) jarSelect.value = 'custom';
+      if (customWrap) customWrap.style.display = 'block';
+      if (customInput) customInput.value = jarCount;
+    }
+
+    this.onHamperTypeChange(type);
+    this.onJarCountChange(jarSelect ? jarSelect.value : countStr);
+
+    const typeName = type === 'basket' ? 'Basket' : type === 'box' ? 'Gift Box' : type.toUpperCase();
+    this.showToast(`Applied preset: ${typeName} with ${jarCount === 0 ? 'No Jars' : jarCount + ' Jars'}!`, 'info');
+  },
+
   openAddProductModal() {
     document.getElementById('productModalTitle').textContent = 'Add New Festive Hamper';
     document.getElementById('productForm').reset();
     document.getElementById('prodEditId').value = '';
+    if (document.getElementById('prodPrice')) document.getElementById('prodPrice').value = '';
+    if (document.getElementById('prodHidePrice')) document.getElementById('prodHidePrice').checked = false;
+
+    // Reset container and jar setup
+    if (document.getElementById('prodHamperType')) document.getElementById('prodHamperType').value = 'box';
+    if (document.getElementById('prodJarCount')) document.getElementById('prodJarCount').value = '4';
+    if (document.getElementById('prodCustomJarCountWrap')) document.getElementById('prodCustomJarCountWrap').style.display = 'none';
+    if (document.getElementById('prodCustomJarCount')) document.getElementById('prodCustomJarCount').value = '';
+    if (document.getElementById('prodBasketOptionsWrap')) document.getElementById('prodBasketOptionsWrap').style.display = 'none';
+    this.populateBasketTypeSelect();
+    this.updateBasketJarSummary();
+
     const insideEl = document.getElementById('prodWhatsInside');
     if (insideEl) {
       insideEl.value = [
@@ -1050,13 +1220,44 @@ const ADMIN = {
     document.getElementById('prodEditId').value = p.id;
     document.getElementById('prodName').value = p.name || '';
     document.getElementById('prodCategory').value = mappedCategory;
-    document.getElementById('prodPrice').value = p.price || '';
-    document.getElementById('prodOrigPrice').value = p.originalPrice || '';
+    document.getElementById('prodPrice').value = (p.price && p.price > 0) ? p.price : '';
+    document.getElementById('prodOrigPrice').value = (p.originalPrice && p.originalPrice > 0) ? p.originalPrice : '';
+    if (document.getElementById('prodHidePrice')) {
+      document.getElementById('prodHidePrice').checked = p.hidePrice !== undefined ? Boolean(p.hidePrice) : (!p.price || p.price <= 0);
+    }
     document.getElementById('prodBadge').value = p.badge || '';
     document.getElementById('prodDispatch').value = p.dispatchTime || 'Ships in 24 Hours';
     document.getElementById('prodShortDesc').value = p.shortDescription || '';
     document.getElementById('prodFullDesc').value = p.fullDescription || '';
     document.getElementById('prodTags').value = (p.tags || []).join(', ');
+
+    // Configure Hamper container & jar capacity
+    const hamperType = p.hamperType || (p.category && p.category.includes('basket') ? 'basket' : 'box');
+    const jarCount = (p.jarCount !== undefined) ? Number(p.jarCount) : 4;
+
+    if (document.getElementById('prodHamperType')) {
+      document.getElementById('prodHamperType').value = hamperType;
+    }
+    this.populateBasketTypeSelect(p.basketType || '');
+
+    const standardCounts = ['0', '1', '2', '3', '4', '6'];
+    if (document.getElementById('prodJarCount')) {
+      if (standardCounts.includes(String(jarCount))) {
+        document.getElementById('prodJarCount').value = String(jarCount);
+        if (document.getElementById('prodCustomJarCountWrap')) document.getElementById('prodCustomJarCountWrap').style.display = 'none';
+        if (document.getElementById('prodCustomJarCount')) document.getElementById('prodCustomJarCount').value = '';
+      } else {
+        document.getElementById('prodJarCount').value = 'custom';
+        if (document.getElementById('prodCustomJarCountWrap')) {
+          document.getElementById('prodCustomJarCountWrap').style.display = 'block';
+        }
+        if (document.getElementById('prodCustomJarCount')) {
+          document.getElementById('prodCustomJarCount').value = jarCount;
+        }
+      }
+    }
+    this.onHamperTypeChange(hamperType);
+    this.updateBasketJarSummary();
 
     const insideEl = document.getElementById('prodWhatsInside');
     if (insideEl) {
@@ -1084,14 +1285,31 @@ const ADMIN = {
     const editId = document.getElementById('prodEditId').value;
     const name = document.getElementById('prodName').value.trim();
     const category = document.getElementById('prodCategory').value;
-    const price = Number(document.getElementById('prodPrice').value);
-    const originalPrice = Number(document.getElementById('prodOrigPrice').value) || price;
+    const priceVal = document.getElementById('prodPrice').value.trim();
+    const price = priceVal === '' ? 0 : (Number(priceVal) || 0);
+    const origPriceVal = document.getElementById('prodOrigPrice').value.trim();
+    const originalPrice = origPriceVal === '' ? price : (Number(origPriceVal) || price);
+    const hidePriceChecked = document.getElementById('prodHidePrice') ? document.getElementById('prodHidePrice').checked : false;
+    const hidePrice = hidePriceChecked || price <= 0;
     const badge = document.getElementById('prodBadge').value.trim();
     const dispatchTime = document.getElementById('prodDispatch').value.trim() || 'Ships in 24 Hours';
     const shortDescription = document.getElementById('prodShortDesc').value.trim();
     const fullDescription = document.getElementById('prodFullDesc').value.trim();
     const tagsStr = document.getElementById('prodTags').value.trim();
     const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+    // Read container & jar capacity
+    const hamperType = document.getElementById('prodHamperType') ? document.getElementById('prodHamperType').value : 'box';
+    const jarCountSelect = document.getElementById('prodJarCount') ? document.getElementById('prodJarCount').value : '4';
+    let jarCount = 4;
+    if (jarCountSelect === 'custom') {
+      const customVal = document.getElementById('prodCustomJarCount') ? document.getElementById('prodCustomJarCount').value.trim() : '';
+      jarCount = customVal !== '' ? (Number(customVal) || 0) : 4;
+    } else {
+      jarCount = Number(jarCountSelect) || 0;
+    }
+    const hasJars = jarCount > 0;
+    const basketType = (hamperType === 'basket' && document.getElementById('prodBasketType')) ? document.getElementById('prodBasketType').value : '';
 
     const insideEl = document.getElementById('prodWhatsInside');
     const whatsInsideRaw = insideEl ? insideEl.value.trim() : '';
@@ -1125,6 +1343,12 @@ const ADMIN = {
       category,
       price,
       originalPrice,
+      hidePrice,
+      hamperType,
+      jarCount,
+      hasJars,
+      basketType,
+      customizable: hasJars,
       badge: badge || (
         category === 'luxury' ? 'Luxury Pick' :
         category === 'budget' ? 'Budget Friendly' :
@@ -1168,6 +1392,7 @@ const ADMIN = {
         this.closeModal('productModal');
         await this.fetchProducts();
         await this.fetchStats();
+        this.notifyStorefrontUpdate();
       } else {
         this.showToast(data?.message || 'Failed to save hamper. Please check inputs.', 'error');
       }
@@ -1178,6 +1403,7 @@ const ADMIN = {
         this.showToast('✨ Hamper saved locally & added to catalog!', 'success');
         this.closeModal('productModal');
         await this.fetchProducts();
+        this.notifyStorefrontUpdate();
       } else {
         this.showToast('Could not save hamper. Please check required fields.', 'error');
       }
@@ -1232,11 +1458,24 @@ const ADMIN = {
       } catch(dbErr) {}
     }
 
+    this.notifyStorefrontUpdate();
     return {
       success: true,
-      message: editId ? 'Hamper updated successfully! ✨' : 'New festive hamper added to catalog! ✨',
+      message: editId ? '⚠️ Hamper saved locally in browser (Server offline! Run "npm start" to sync to MongoDB)' : '⚠️ Hamper added locally in browser (Server offline! Run "npm start" to sync to MongoDB)',
       product: productData
     };
+  },
+
+  notifyStorefrontUpdate() {
+    try {
+      if ('BroadcastChannel' in window) {
+        const channel = new BroadcastChannel('apna_tohfa_updates');
+        channel.postMessage({ type: 'catalog_updated', timestamp: Date.now() });
+      }
+    } catch (e) {}
+    try {
+      localStorage.setItem('apna_last_catalog_update', Date.now().toString());
+    } catch (e) {}
   },
 
   async toggleProductStock(productId) {
@@ -1259,37 +1498,347 @@ const ADMIN = {
       if (data && data.success) {
         this.showToast(data.message, 'success');
         await this.fetchProducts();
+        this.notifyStorefrontUpdate();
       }
     } catch (e) {
       this.showToast('Failed to toggle stock status', 'error');
     }
   },
 
-  async deleteProduct(productId) {
-    if (!confirm('Are you sure you want to delete this hamper from the store?')) return;
+  productPendingDelete: null,
+
+  promptDeleteProduct(productId) {
+    if (!productId) return;
+    const prod = this.products.find(p => p.id === productId || p._id === productId);
+    this.productPendingDelete = productId;
+    const nameEl = document.getElementById('deleteConfirmHamperName');
+    if (nameEl) {
+      nameEl.textContent = prod ? (prod.name || prod.title || productId) : productId;
+    }
+    this.openModal('deleteConfirmModal');
+  },
+
+  async executeDeleteProduct() {
+    const productId = this.productPendingDelete;
+    if (!productId) return;
+    this.closeModal('deleteConfirmModal');
+    this.productPendingDelete = null;
+    await this.deleteProduct(productId, true);
+  },
+
+  async deleteProduct(productId, skipConfirm = false) {
+    if (!productId) return;
+    if (!skipConfirm) {
+      this.promptDeleteProduct(productId);
+      return;
+    }
 
     try {
       let data;
       try {
-        data = await this.fetchWithAuth(`/api/admin/products/${productId}`, {
+        data = await this.fetchWithAuth(`/api/admin/products/${encodeURIComponent(productId)}`, {
           method: 'DELETE'
         });
       } catch (netErr) {
-        // Local delete
-        this.products = this.products.filter(p => p.id !== productId);
-        localStorage.setItem('apna_store_products', JSON.stringify(this.products));
-        if (window.APNA_DATA) window.APNA_DATA.products = this.products;
-        data = { success: true };
+        console.warn('Backend delete product unreachable or network error, applying locally:', netErr.message);
+        data = { success: true, message: 'Hamper removed locally in browser' };
       }
 
+      // Optimistically remove from state & DOM immediately so UI never stutters
+      this.products = this.products.filter(p => p.id !== productId && p._id !== productId);
+      try { localStorage.setItem('apna_store_products', JSON.stringify(this.products)); } catch(e) {}
+      if (window.APNA_DATA && Array.isArray(window.APNA_DATA.products)) {
+        window.APNA_DATA.products = window.APNA_DATA.products.filter(p => p.id !== productId && p._id !== productId);
+      }
+      this.renderProductsGrid();
+
       if (data && data.success) {
-        this.showToast('Hamper removed from catalog', 'success');
+        this.showToast(data.message || 'Hamper removed from catalog', 'success');
         await this.fetchProducts();
         await this.fetchStats();
+        this.notifyStorefrontUpdate();
+      } else {
+        this.showToast(data?.message || 'Could not delete hamper from server', 'error');
+        await this.fetchProducts();
       }
     } catch (e) {
+      console.error('Error deleting product:', e);
       this.showToast('Failed to delete product', 'error');
     }
+  },
+
+  // --- DIGITAL CATALOGS & LOOKBOOK POSTERS ---
+  async fetchCatalogs() {
+    try {
+      const res = await fetch(this.getApiUrl('/api/catalogs'));
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.catalogs)) {
+        this.catalogs = data.catalogs;
+      } else if (window.APNA_DATA && Array.isArray(window.APNA_DATA.catalogs)) {
+        this.catalogs = window.APNA_DATA.catalogs;
+      } else {
+        this.catalogs = [];
+      }
+    } catch (e) {
+      if (window.APNA_DATA && Array.isArray(window.APNA_DATA.catalogs)) {
+        this.catalogs = window.APNA_DATA.catalogs;
+      }
+    }
+
+    const countBadge = document.getElementById('sidebarCatalogCount');
+    if (countBadge) countBadge.textContent = this.catalogs.length;
+
+    this.renderAdminCatalogs();
+  },
+
+  renderAdminCatalogs() {
+    const container = document.getElementById('adminCatalogList');
+    if (!container) return;
+
+    if (!this.catalogs || this.catalogs.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: rgba(255,255,255,0.02); border: 1.5px dashed var(--admin-border); border-radius: 12px;">
+          <div style="font-size: 2.5rem; margin-bottom: 12px;">📄</div>
+          <h4 style="font-family: var(--font-serif); color: var(--gold-400); margin-bottom: 8px;">No Catalog Posters Added Yet</h4>
+          <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px;">Apne marketing hampers ke promotional posters yahan add karein.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="ADMIN.openCatalogModal()">+ Add First Catalog Poster</button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = this.catalogs.map(cat => {
+      const jarsPreview = (Array.isArray(cat.jars) && cat.jars.length > 0)
+        ? cat.jars.slice(0, 3).join(', ') + (cat.jars.length > 3 ? ` (+${cat.jars.length - 3} more)` : '')
+        : '6 Designer Brass Jars';
+
+      return `
+        <div style="background: rgba(255,255,255,0.03); border: 1.5px solid rgba(212,175,55,0.25); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; box-shadow: 0 6px 20px rgba(0,0,0,0.35);">
+          <div style="position: relative; height: 240px; background: #0c0908; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(212,175,55,0.2);">
+            <img src="${cat.posterImage}" alt="${cat.title}" style="max-height: 100%; max-width: 100%; object-fit: contain;" onerror="this.src='assets/images/catalogs/peacock-floral-6jar-catalog.png'">
+            <div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+              <span style="background: rgba(128,0,32,0.85); color: #fff; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
+                ${cat.badge || 'Lookbook'}
+              </span>
+              <span style="background: rgba(212,175,55,0.85); color: #000; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
+                ${cat.category || 'Luxury'}
+              </span>
+            </div>
+          </div>
+
+          <div style="padding: 18px; flex: 1; display: flex; flex-direction: column;">
+            <h4 style="font-size: 1.1rem; font-family: var(--font-serif); color: #fff; margin-bottom: 6px; line-height: 1.3;">
+              ${cat.title}
+            </h4>
+            <p style="font-size: 0.78rem; color: var(--gold-300); margin-bottom: 12px; line-height: 1.4;">
+              ${cat.tagline || ''}
+            </p>
+
+            <div style="background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 6px; border-left: 2px solid var(--gold-400); font-size: 0.78rem; color: rgba(255,255,255,0.8); margin-bottom: 16px; margin-top: auto;">
+              <strong style="color: var(--gold-400);">Inside:</strong> ${jarsPreview}
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: auto;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.openEditCatalogModal('${cat.id}')" style="flex: 1; padding: 6px 10px; font-size: 0.8rem;">
+                ✏️ Edit
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" onclick="ADMIN.deleteCatalog('${cat.id}')" style="padding: 6px 10px; font-size: 0.8rem;">
+                🗑️
+              </button>
+              <a href="/#catalog-section" target="_blank" class="btn btn-primary btn-sm" style="padding: 6px 10px; font-size: 0.8rem; text-decoration: none;">
+                👁️ View
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  openCatalogModal() {
+    document.getElementById('catalogModalTitle').textContent = 'Add New Catalog Poster';
+    document.getElementById('catalogEditId').value = '';
+    document.getElementById('catalogTitle').value = '';
+    document.getElementById('catalogTagline').value = '';
+    document.getElementById('catalogBadge').value = 'Signature Catalog Poster';
+    document.getElementById('catalogCategory').value = 'grand-jars';
+    document.getElementById('catalogImageUrlInput').value = '';
+    document.getElementById('catalogFileInput').value = '';
+    document.getElementById('catalogImagePreviewWrap').style.display = 'none';
+    document.getElementById('catalogImagePreview').src = '';
+    document.getElementById('catalogJars').value = [
+      'Jar 1: Premium Cashews (Kaju)',
+      'Jar 2: Premium Almonds (Badam)',
+      'Jar 3: Raisins (Kishmish)',
+      'Jar 4: Walnuts (Akhrot)',
+      'Jar 5: Pistachios (Pista)',
+      'Jar 6: Makhana'
+    ].join('\n');
+    document.getElementById('catalogFeatures').value = [
+      'Handcrafted Peacock and Floral Artwork',
+      '6 Premium Round Brass Jars with Designer Lids',
+      'Golden Satin Cushion and Reusable Briefcase Box',
+      'Delivery: Pan India'
+    ].join('\n');
+    document.getElementById('catalogCustomisation').value = [
+      'Customise the box as per your choice',
+      'Chocolates, Candies and different Dry Fruits can be added on request',
+      'Perfect for your own brand, logo and personal message'
+    ].join('\n');
+    document.getElementById('catalogWhyChooseUs').value = [
+      'Premium Quality Dry Fruits, Carefully Selected',
+      'Hygienic Packing with Premium Presentation',
+      'Bulk and Corporate Orders Accepted'
+    ].join('\n');
+    document.getElementById('catalogPerfectFor').value = [
+      'Diwali, Wedding, Rakhi and Festive Gifting',
+      'Corporate, Client and Employee Gifts',
+      'Housewarming and Special Occasions'
+    ].join('\n');
+    document.getElementById('catalogInquiryMessage').value = '';
+    this.openModal('catalogModal');
+  },
+
+  openEditCatalogModal(id) {
+    const cat = (this.catalogs || []).find(c => c.id === id);
+    if (!cat) return;
+
+    document.getElementById('catalogModalTitle').textContent = `Edit Catalog Poster: ${cat.title}`;
+    document.getElementById('catalogEditId').value = cat.id;
+    document.getElementById('catalogTitle').value = cat.title || '';
+    document.getElementById('catalogTagline').value = cat.tagline || '';
+    document.getElementById('catalogBadge').value = cat.badge || 'Signature Catalog Poster';
+    document.getElementById('catalogCategory').value = cat.category || 'grand-jars';
+    document.getElementById('catalogImageUrlInput').value = cat.posterImage || '';
+    document.getElementById('catalogFileInput').value = '';
+
+    if (cat.posterImage) {
+      document.getElementById('catalogImagePreview').src = cat.posterImage;
+      document.getElementById('catalogImagePreviewWrap').style.display = 'block';
+    } else {
+      document.getElementById('catalogImagePreviewWrap').style.display = 'none';
+    }
+
+    document.getElementById('catalogJars').value = Array.isArray(cat.jars) ? cat.jars.join('\n') : (cat.jars || '');
+    document.getElementById('catalogFeatures').value = Array.isArray(cat.features) ? cat.features.join('\n') : (cat.features || '');
+    document.getElementById('catalogCustomisation').value = Array.isArray(cat.customisation) ? cat.customisation.join('\n') : (cat.customisation || '');
+    document.getElementById('catalogWhyChooseUs').value = Array.isArray(cat.whyChooseUs) ? cat.whyChooseUs.join('\n') : (cat.whyChooseUs || '');
+    document.getElementById('catalogPerfectFor').value = Array.isArray(cat.perfectFor) ? cat.perfectFor.join('\n') : (cat.perfectFor || '');
+    document.getElementById('catalogInquiryMessage').value = cat.inquiryMessage || '';
+
+    this.openModal('catalogModal');
+  },
+
+  handleCatalogFileUpload(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64Data = e.target.result;
+      document.getElementById('catalogImageUrlInput').value = base64Data;
+      document.getElementById('catalogImagePreview').src = base64Data;
+      document.getElementById('catalogImagePreviewWrap').style.display = 'block';
+      this.showToast('Poster image selected! Click "Save Catalog Poster" to finish.', 'info');
+    };
+    reader.readAsDataURL(file);
+  },
+
+  updateCatalogPreviewFromInput(val) {
+    const previewWrap = document.getElementById('catalogImagePreviewWrap');
+    const previewImg = document.getElementById('catalogImagePreview');
+    if (!previewWrap || !previewImg) return;
+    if (val && val.trim()) {
+      previewImg.src = val.trim();
+      previewWrap.style.display = 'block';
+    } else {
+      previewWrap.style.display = 'none';
+    }
+  },
+
+  async saveCatalog(e) {
+    e.preventDefault();
+    const editId = document.getElementById('catalogEditId').value.trim();
+    const title = document.getElementById('catalogTitle').value.trim();
+    const tagline = document.getElementById('catalogTagline').value.trim();
+    const badge = document.getElementById('catalogBadge').value.trim();
+    const category = document.getElementById('catalogCategory').value;
+    const posterImage = document.getElementById('catalogImageUrlInput').value.trim();
+
+    if (!title || !posterImage) {
+      this.showToast('Please provide a Catalog Title and Poster Image!', 'error');
+      return;
+    }
+
+    const parseLines = (val) => val ? val.split('\n').map(l => l.trim()).filter(Boolean) : [];
+
+    const jars = parseLines(document.getElementById('catalogJars').value);
+    const features = parseLines(document.getElementById('catalogFeatures').value);
+    const customisation = parseLines(document.getElementById('catalogCustomisation').value);
+    const whyChooseUs = parseLines(document.getElementById('catalogWhyChooseUs').value);
+    const perfectFor = parseLines(document.getElementById('catalogPerfectFor').value);
+    const inquiryMessage = document.getElementById('catalogInquiryMessage').value.trim() ||
+      `Hello Apna Tohfa! I saw the ${title} catalog poster on your website and would like to order / enquire about pricing and bulk options.`;
+
+    const payload = {
+      title,
+      tagline,
+      badge: badge || 'Signature Catalog Poster',
+      category: category || 'grand-jars',
+      posterImage,
+      jars,
+      features,
+      customisation,
+      whyChooseUs,
+      perfectFor,
+      inquiryMessage
+    };
+
+    try {
+      const url = editId ? `/api/admin/catalogs/${editId}` : '/api/admin/catalogs';
+      const method = editId ? 'PUT' : 'POST';
+
+      const data = await this.fetchWithAuth(url, { method, body: payload });
+      if (data && data.success) {
+        this.showToast(data.message || 'Catalog poster saved successfully! 🎉', 'success');
+        this.closeModal('catalogModal');
+        await this.fetchCatalogs();
+      } else {
+        this.showToast(data.message || 'Failed to save catalog poster', 'error');
+      }
+    } catch (err) {
+      console.error('Error saving catalog:', err);
+      // Fallback local save if server offline
+      if (editId) {
+        const idx = this.catalogs.findIndex(c => c.id === editId);
+        if (idx !== -1) this.catalogs[idx] = { ...this.catalogs[idx], ...payload };
+      } else {
+        payload.id = 'catalog-' + Date.now();
+        this.catalogs.unshift(payload);
+      }
+      this.renderAdminCatalogs();
+      this.closeModal('catalogModal');
+      this.showToast('Saved catalog in local session', 'info');
+    }
+  },
+
+  async deleteCatalog(id) {
+    if (!confirm('Are you sure you want to delete this catalog poster?')) return;
+
+    try {
+      const data = await this.fetchWithAuth(`/api/admin/catalogs/${id}`, { method: 'DELETE' });
+      if (data && data.success) {
+        this.showToast('Catalog poster removed', 'success');
+      } else {
+        this.showToast('Removed from local list', 'info');
+      }
+    } catch (err) {
+      this.showToast('Removed from local session', 'info');
+    }
+    this.catalogs = this.catalogs.filter(c => c.id !== id);
+    this.renderAdminCatalogs();
+    const countBadge = document.getElementById('sidebarCatalogCount');
+    if (countBadge) countBadge.textContent = this.catalogs.length;
   },
 
   // --- CORPORATE LEADS ---
@@ -1489,6 +2038,286 @@ const ADMIN = {
     }
   },
 
+  // --- CUSTOMIZABLE JARS & BASKETS ITEMS ---
+  async fetchCustomItems() {
+    try {
+      const data = await this.fetchWithAuth('/api/custom-items');
+      if (data && data.success && Array.isArray(data.items)) {
+        this.customItems = data.items;
+        try { localStorage.setItem('apna_store_custom_items', JSON.stringify(data.items)); } catch (err) {}
+      }
+    } catch (e) {
+      console.warn('Backend custom-items unavailable, checking local storage:', e.message);
+      const local = localStorage.getItem('apna_store_custom_items');
+      if (local) {
+        try { this.customItems = JSON.parse(local) || []; } catch(err) {}
+      }
+    }
+
+    this.updateCustomItemCounts();
+    this.renderCustomItems();
+    this.populateBasketTypeSelect();
+  },
+
+  updateCustomItemCounts() {
+    const allCount = document.getElementById('customFilterCountAll');
+    const jarCount = document.getElementById('customFilterCountJars');
+    const basketCount = document.getElementById('customFilterCountBaskets');
+    if (allCount) allCount.textContent = this.customItems.length;
+    if (jarCount) jarCount.textContent = this.customItems.filter(i => i.type === 'jar').length;
+    if (basketCount) basketCount.textContent = this.customItems.filter(i => i.type === 'basket').length;
+  },
+
+  filterCustomItems(filter) {
+    this.customItemFilter = filter;
+    document.querySelectorAll('#customItemFilters .filter-pill').forEach(btn => {
+      btn.classList.remove('active');
+      const oc = btn.getAttribute('onclick') || '';
+      if (oc.includes(`'${filter}'`)) {
+        btn.classList.add('active');
+      }
+    });
+    this.renderCustomItems();
+  },
+
+  searchCustomItems(term) {
+    this.customItemSearch = (term || '').trim().toLowerCase();
+    this.renderCustomItems();
+  },
+
+  renderCustomItems() {
+    const grid = document.getElementById('adminCustomItemsGrid');
+    if (!grid) return;
+
+    let list = [...this.customItems];
+    if (this.customItemFilter !== 'all') {
+      list = list.filter(item => item.type === this.customItemFilter);
+    }
+    if (this.customItemSearch) {
+      list = list.filter(item => 
+        (item.name && item.name.toLowerCase().includes(this.customItemSearch)) ||
+        (item.description && item.description.toLowerCase().includes(this.customItemSearch))
+      );
+    }
+
+    if (list.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-dim); background: rgba(0,0,0,0.2); border-radius: var(--radius-md); border: 1px dashed var(--admin-border);">
+          No customizable items found matching this filter or search. Click <strong>"+ Add New Item"</strong> above to create one.
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = list.map(item => {
+      const isJar = item.type === 'jar';
+      const typeLabel = isJar ? '🫙 Jar Item' : '🧺 Basket Style';
+      const badgeClass = isJar ? 'badge-jar' : 'badge-basket';
+      return `
+        <div class="custom-item-card ${!item.inStock ? 'out-of-stock' : ''}" id="custom-card-${item.id}">
+          <div class="custom-card-header">
+            <span class="custom-type-pill ${badgeClass}">
+              ${typeLabel}
+            </span>
+            <span class="custom-status-tag ${item.inStock ? 'stock-in' : 'stock-out'}">
+              ${item.inStock ? '✓ IN STOCK' : 'SOLD OUT'}
+            </span>
+          </div>
+
+          <div class="custom-card-body">
+            <div class="custom-card-icon">${item.icon || (isJar ? '🫙' : '🧺')}</div>
+            <div class="custom-card-details">
+              <h4 class="custom-card-title">${item.name}</h4>
+              <p class="custom-card-desc">${item.description || (isJar ? 'Customizable Jar Selection' : 'Customizable Basket Style')}</p>
+              <div class="custom-card-price">
+                ${item.priceExtra && item.priceExtra > 0 ? `<span style="color: var(--gold-400); font-weight: 700;">+₹${item.priceExtra}</span> <span style="font-size: 0.72rem; color: var(--text-dim);">(Extra)</span>` : '<span style="color: var(--success); font-weight: 600;">Included (Free)</span>'}
+              </div>
+            </div>
+          </div>
+
+          <div class="custom-card-actions">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="ADMIN.openEditCustomItemModal('${item.id}')">
+              ✏️ Edit
+            </button>
+            <button type="button" class="btn ${item.inStock ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="ADMIN.toggleCustomItemStock('${item.id}')" title="Toggle Stock Status">
+              ${item.inStock ? 'Mark Sold Out' : 'Mark In Stock ✓'}
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="ADMIN.deleteCustomItem('${item.id}')" title="Delete Item">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  onCustomItemTypeChange(type) {
+    const iconInput = document.getElementById('customItemIcon');
+    if (!iconInput) return;
+    if (type === 'jar') {
+      if (['🧺', '🎋', '✨', '👑', '📦'].includes(iconInput.value)) {
+        iconInput.value = '🌰';
+      }
+    } else {
+      if (['🌰', '🥜', '🟢', '🍇', '🍯', '🍫', '🍬'].includes(iconInput.value)) {
+        iconInput.value = '🧺';
+      }
+    }
+  },
+
+  openAddCustomItemModal() {
+    this.editingCustomItemId = null;
+    document.getElementById('customItemModalTitle').textContent = 'Add Customizable Item (Jar or Basket)';
+    document.getElementById('customItemForm').reset();
+    document.getElementById('customItemEditId').value = '';
+    document.getElementById('typeRadioJar').checked = true;
+    document.getElementById('customItemIcon').value = '🌰';
+    document.getElementById('customItemPrice').value = '0';
+    document.getElementById('customItemInStock').checked = true;
+    this.openModal('customItemModal');
+  },
+
+  openEditCustomItemModal(id) {
+    const item = this.customItems.find(i => i.id === id);
+    if (!item) return;
+
+    this.editingCustomItemId = id;
+    document.getElementById('customItemModalTitle').textContent = `Edit Customizable Item: ${item.name}`;
+    document.getElementById('customItemEditId').value = item.id;
+    if (item.type === 'basket') {
+      document.getElementById('typeRadioBasket').checked = true;
+    } else {
+      document.getElementById('typeRadioJar').checked = true;
+    }
+    document.getElementById('customItemName').value = item.name || '';
+    document.getElementById('customItemIcon').value = item.icon || '🌰';
+    document.getElementById('customItemPrice').value = item.priceExtra || 0;
+    document.getElementById('customItemDesc').value = item.description || '';
+    document.getElementById('customItemInStock').checked = (item.inStock !== false);
+
+    this.openModal('customItemModal');
+  },
+
+  async saveCustomItem(e) {
+    e.preventDefault();
+    const editId = document.getElementById('customItemEditId').value;
+    const type = document.getElementById('typeRadioBasket').checked ? 'basket' : 'jar';
+    const name = document.getElementById('customItemName').value.trim();
+    const icon = document.getElementById('customItemIcon').value.trim() || (type === 'jar' ? '🫙' : '🧺');
+    const priceExtra = Number(document.getElementById('customItemPrice').value) || 0;
+    const description = document.getElementById('customItemDesc').value.trim();
+    const inStock = document.getElementById('customItemInStock').checked;
+
+    if (!name) {
+      this.showToast('Please enter an item name', 'error');
+      return;
+    }
+
+    const payload = {
+      type,
+      name,
+      icon,
+      priceExtra,
+      description,
+      inStock
+    };
+
+    try {
+      let data;
+      if (editId) {
+        data = await this.fetchWithAuth(`/api/admin/custom-items/${editId}`, {
+          method: 'PUT',
+          body: payload
+        });
+      } else {
+        data = await this.fetchWithAuth('/api/admin/custom-items', {
+          method: 'POST',
+          body: payload
+        });
+      }
+
+      if (data && data.success) {
+        this.showToast(data.message || 'Customizable item saved successfully! ✨', 'success');
+        this.closeModal('customItemModal');
+        await this.fetchCustomItems();
+        this.notifyStorefrontUpdate();
+      } else {
+        this.showToast(data?.message || 'Could not save item', 'error');
+      }
+    } catch (err) {
+      console.warn('Network error while saving custom item, applying locally:', err.message);
+      // Fallback local update
+      const id = editId || `custom-${Date.now()}`;
+      const itemData = { id, ...payload, createdAt: new Date().toISOString() };
+      let items = [...(this.customItems || [])];
+      if (editId) {
+        const idx = items.findIndex(i => i.id === editId);
+        if (idx !== -1) items[idx] = { ...items[idx], ...itemData };
+      } else {
+        items.unshift(itemData);
+      }
+      this.customItems = items;
+      try { localStorage.setItem('apna_store_custom_items', JSON.stringify(items)); } catch(e) {}
+      this.updateCustomItemCounts();
+      this.renderCustomItems();
+      this.populateBasketTypeSelect();
+      this.notifyStorefrontUpdate();
+      this.showToast('Item saved locally in browser!', 'info');
+      this.closeModal('customItemModal');
+    }
+  },
+
+  async toggleCustomItemStock(id) {
+    const item = this.customItems.find(i => i.id === id);
+    if (!item) return;
+    const newStock = !item.inStock;
+
+    try {
+      const data = await this.fetchWithAuth(`/api/admin/custom-items/${id}`, {
+        method: 'PUT',
+        body: { inStock: newStock }
+      });
+      if (data && data.success) {
+        this.showToast(`"${item.name}" is now ${newStock ? 'In Stock ✓' : 'Sold Out ⚠️'}`, 'success');
+        await this.fetchCustomItems();
+        this.notifyStorefrontUpdate();
+      }
+    } catch (err) {
+      item.inStock = newStock;
+      try { localStorage.setItem('apna_store_custom_items', JSON.stringify(this.customItems)); } catch(e) {}
+      this.renderCustomItems();
+      this.notifyStorefrontUpdate();
+      this.showToast(`Updated stock status locally!`, 'info');
+    }
+  },
+
+  async deleteCustomItem(id) {
+    const item = this.customItems.find(i => i.id === id);
+    const itemName = item ? item.name : 'this item';
+    if (!confirm(`Are you sure you want to delete "${itemName}" from customizable options?`)) return;
+
+    try {
+      const data = await this.fetchWithAuth(`/api/admin/custom-items/${id}`, {
+        method: 'DELETE'
+      });
+      if (data && data.success) {
+        this.showToast(`"${itemName}" deleted successfully!`, 'success');
+        await this.fetchCustomItems();
+        this.notifyStorefrontUpdate();
+      } else {
+        this.showToast(data?.message || 'Could not delete item', 'error');
+      }
+    } catch (err) {
+      this.customItems = this.customItems.filter(i => i.id !== id);
+      try { localStorage.setItem('apna_store_custom_items', JSON.stringify(this.customItems)); } catch(e) {}
+      this.updateCustomItemCounts();
+      this.renderCustomItems();
+      this.populateBasketTypeSelect();
+      this.notifyStorefrontUpdate();
+      this.showToast(`Deleted "${itemName}" locally!`, 'info');
+    }
+  },
+
   // --- SETTINGS ---
   updateLogoPreviewFromInput(val) {
     const preview = document.getElementById('settingLogoPreview');
@@ -1540,6 +2369,7 @@ const ADMIN = {
         if (document.getElementById('settingAnnouncement')) document.getElementById('settingAnnouncement').value = s.announcementText || '🪔 Diwali 2026 Festivel';
         if (document.getElementById('settingCouponPill')) document.getElementById('settingCouponPill').value = s.activeCouponPill || '';
         if (document.getElementById('settingFreeShipping')) document.getElementById('settingFreeShipping').value = s.freeShippingThreshold || 5000;
+        if (document.getElementById('settingHidePrices')) document.getElementById('settingHidePrices').checked = (s.hidePrices !== undefined) ? Boolean(s.hidePrices) : true;
       }
     } catch (e) {
       console.error('Error fetching settings:', e);
@@ -1562,7 +2392,8 @@ const ADMIN = {
       instagramHandle: document.getElementById('settingInstagramHandle') ? document.getElementById('settingInstagramHandle').value.trim() : '@apnatohfa.official',
       announcementText: document.getElementById('settingAnnouncement').value.trim() || '🪔 Diwali 2026 Festivel',
       activeCouponPill: document.getElementById('settingCouponPill').value.trim(),
-      freeShippingThreshold: Number(document.getElementById('settingFreeShipping').value) || 5000
+      freeShippingThreshold: Number(document.getElementById('settingFreeShipping').value) || 5000,
+      hidePrices: document.getElementById('settingHidePrices') ? document.getElementById('settingHidePrices').checked : true
     };
 
     try {
@@ -1574,6 +2405,7 @@ const ADMIN = {
         this.showToast('All brand & store settings updated successfully!', 'success');
         this.settings = { ...this.settings, ...payload };
         try { localStorage.setItem('apna_store_settings', JSON.stringify(this.settings)); } catch (e) {}
+        this.notifyStorefrontUpdate();
         // Update admin sidebar live
         const sbTitle = document.querySelector('.sidebar-brand-title');
         if (sbTitle) sbTitle.textContent = payload.brandName;
