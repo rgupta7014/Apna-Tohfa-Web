@@ -1,0 +1,18 @@
+# Robots.txt for https://apnatohfa.co.in
+User-agent: *
+Allow: /
+Allow: /assets/
+Allow: /css/
+Allow: /js/
+Allow: /index.html
+Allow: /sitemap.xml
+
+# Protect Admin Portal and Internal API from indexing
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /api/admin/
+Disallow: /api/auth/
+Disallow: /data/
+
+# Sitemap location for Googlebot & Bingbot
+Sitemap: https://apnatohfa.co.in/sitemap.xml
